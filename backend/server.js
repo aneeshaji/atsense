@@ -20,6 +20,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/resumes', require('./src/routes/resumeRoutes'));
 app.use('/api/ai', require('./src/routes/aiRoutes'));
+app.use('/api/preview', require('./src/routes/previewRoutes'));
 
 const PORT = process.env.PORT || 5000;
 

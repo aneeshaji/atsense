@@ -1,5 +1,6 @@
 const Resume = require('../models/Resume');
 const { generateResumeContent } = require('../services/aiResumeService');
+const { calculateATSScore } = require('../utils/atsScorer');
 
 exports.generateAIResume = async (req, res) => {
 	const { resumeId, jobTitle, jobDescription } = req.body;
@@ -26,7 +27,9 @@ exports.generateAIResume = async (req, res) => {
 		responsibilities: aiData.experience[idx]?.responsibilities || exp.responsibilities
 	}));
 
-	resume.atsScore = Math.floor(Math.random() * 20) + 75; // placeholder logic
+	// resume.atsScore = Math.floor(Math.random() * 20) + 75;
+
+	resume.atsScore = calculateATSScore(resume, jobDescription);
 
 	await resume.save();
 
