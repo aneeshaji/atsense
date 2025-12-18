@@ -12,12 +12,6 @@ AI-powered ATS resume analyzer and builder that scores resumes against job descr
 atsense
 ```
 
-**Alternatives:**
-
-- atsense-ai
-- atsense-app
-- ats-resume-builder
-
 ---
 
 ## 🧠 What is ATSense?
