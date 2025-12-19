@@ -15,9 +15,16 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "groq-sdk": "^0.3.3",
+    "html-docx-js": "^0.3.1",
     "jsonwebtoken": "^9.0.3",
+    "mammoth": "^1.11.0",
     "mongoose": "^9.0.2",
-    "openai": "^6.14.0"
+    "multer": "^2.0.2",
+    "pdf2json": "^4.0.0",
+    "puppeteer": "^24.33.1",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"

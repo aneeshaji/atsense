@@ -21,6 +21,8 @@ app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/resumes', require('./src/routes/resumeRoutes'));
 app.use('/api/ai', require('./src/routes/aiRoutes'));
 app.use('/api/preview', require('./src/routes/previewRoutes'));
+app.use('/api/export', require('./src/routes/exportRoutes'));
+app.use('/api/cover-letters', require('./src/routes/coverLetterRoutes'));
 
 const PORT = process.env.PORT || 5000;
 

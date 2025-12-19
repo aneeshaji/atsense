@@ -49,3 +49,56 @@ exports.deleteResume = async (req, res) => {
 	});
 	res.json({ message: 'Resume deleted' });
 };
+
+// GET ATS BREAKDOWN
+const { getDetailedScore } = require('../utils/atsScorer');
+
+exports.getATSBreakdown = async (req, res) => {
+	try {
+		const resume = await Resume.findOne({
+			_id: req.params.id,
+			user: req.user
+		});
+
+		if (!resume) {
+			return res.status(404).json({ message: 'Resume not found' });
+		}
+
+		const jobDescription = resume.jobDescription || '';
+		const breakdown = getDetailedScore(resume, jobDescription);
+
+		res.json(breakdown);
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ message: 'Error calculating ATS breakdown' });
+	}
+};
+
+// IMPORT
+const parseService = require('../services/parseService');
+const aiService = require('../services/aiResumeService');
+
+exports.importResume = async (req, res) => {
+	try {
+		if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+		// 1. Extract Text
+		const text = await parseService.extractText(req.file);
+
+		// 2. AI Parse
+		const parsedData = await aiService.parseResumeJSON(text);
+
+		// 3. Create Resume
+		const resume = await Resume.create({
+			user: req.user,
+			title: `Imported Resume - ${new Date().toLocaleDateString()}`,
+			...parsedData
+		});
+
+		res.status(201).json(resume);
+
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ message: 'Error importing resume: ' + err.message });
+	}
+};
