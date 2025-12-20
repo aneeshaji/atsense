@@ -102,15 +102,31 @@ OPENAI_API_KEY=your_openai_api_key
 EOF
 fi
 
-# 8. Permissions
+# 8. Configure Nginx
+echo "🌐 Configuring Nginx..."
+# Prompt for Domain if possible, otherwise use IP
+SERVER_NAME="18.60.186.214" # Default, user can edit atsense.conf manually
+
+# Update the config file to use the current user's home directory
+sed -i "s|/home/ubuntu/atsense/frontend/dist|/home/$USER/atsense/frontend/dist|g" "$PROJECT_DIR/nginx/atsense.conf"
+
+echo "⚠️  Existing App Check: Nginx configs live in /etc/nginx/conf.d/"
+echo "Moving atsense.conf to /etc/nginx/conf.d/atsense.conf"
+sudo cp "$PROJECT_DIR/nginx/atsense.conf" /etc/nginx/conf.d/atsense.conf
+sudo nginx -t && sudo systemctl reload nginx
+
+# 9. Permissions
 sudo chown -R $USER:$USER $PROJECT_DIR
 
-# 9. Final Instructions
+# 10. Final Instructions
 echo "--------------------------------------------------"
-echo "✅ SERVER READY!"
+echo "✅ SERVER READY (COEXISTENCE MODE)!"
 echo "--------------------------------------------------"
-echo "Next Steps:"
-echo "1. Backend: cd $PROJECT_DIR/backend && npm install && pm2 start server.js --name atsense-backend"
-echo "2. Nginx: sudo cp $PROJECT_DIR/nginx/atsense.conf /etc/nginx/conf.d/atsense.conf && sudo systemctl reload nginx"
+echo "Next Steps for Multiple Apps:"
+echo "1. PORTS: If your other app uses 5000, edit $PROJECT_DIR/backend/.env PORT."
+echo "2. DOMAINS: Edit /etc/nginx/conf.d/atsense.conf server_name to your domain."
+echo "   Doing this prevents ATSense from interfering with your other app."
+echo "3. Backend: cd $PROJECT_DIR/backend && npm install && pm2 start server.js --name atsense-backend"
+echo "4. Frontend: cd $PROJECT_DIR/frontend && npm install && npm run build"
 echo ""
-echo "🚀 Your stack is now pure Node.js + Nginx!"
+echo "🚀 ATSense is now living alongside your other app!"
