@@ -1,18 +1,37 @@
 #!/bin/bash
 
-# ATSense EC2 Setup Script (Manual Node.js + PM2 + Nginx)
+# ATSense EC2 Setup Script (Multi-OS Support)
+# Target OS: Amazon Linux 2023 (RPM) or Ubuntu/Debian (DEB)
 # Instance IP: 18.60.186.214
 
-echo "🚀 Starting Manual ATSense Setup (No Docker)..."
+echo "🚀 Starting Manual ATSense Setup..."
 
-# 1. Update System
+# Detect OS
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$ID
+else
+    OS=$(uname -s)
+fi
+
+echo "📋 Detected OS: $OS"
+
+# 1. Update System and Install Base Utilities
 echo "🔄 Updating system packages..."
-sudo dnf update -y || sudo apt-get update -y
+if [[ "$OS" == "ubuntu" || "$OS" == "debian" ]]; then
+    sudo apt-get update -y
+    sudo apt-get install -y curl git gnupg
+    PKGR="apt-get"
+else
+    sudo dnf update -y
+    sudo dnf install -y curl git
+    PKGR="dnf"
+fi
 
 # 2. Add Swap Memory (CRITICAL for t3.micro 1GB RAM)
 echo "💾 Adding 2GB Swap Memory..."
 if [ ! -f /swapfile ]; then
-    sudo fallocate -l 2G /swapfile
+    sudo fallocate -l 2G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
     sudo chmod 600 /swapfile
     sudo mkswap /swapfile
     sudo swapon /swapfile
@@ -24,22 +43,40 @@ fi
 
 # 3. Install Node.js (v20)
 echo "📦 Installing Node.js 20..."
-curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
-sudo dnf install -y nodejs git
+if [[ "$OS" == "ubuntu" || "$OS" == "debian" ]]; then
+    sudo apt-get install -y ca-certificates curl gnupg
+    sudo mkdir -p /etc/apt/keyrings
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+    NODE_MAJOR=20
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+    sudo apt-get update -y
+    sudo apt-get install -y nodejs
+else
+    curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+    sudo dnf install -y nodejs
+fi
 
 # 4. Install PM2 & Nginx
 echo "📦 Installing PM2 and Nginx..."
 sudo npm install -g pm2
-sudo dnf install -y nginx
+if [[ "$OS" == "ubuntu" || "$OS" == "debian" ]]; then
+    sudo apt-get install -y nginx
+else
+    sudo dnf install -y nginx
+fi
 sudo systemctl start nginx
 sudo systemctl enable nginx
 
 # 5. Install OCR Dependencies (Poppler & Tesseract)
 echo "📦 Installing Poppler and Tesseract for OCR..."
-sudo dnf install -y poppler-utils tesseract
+if [[ "$OS" == "ubuntu" || "$OS" == "debian" ]]; then
+    sudo apt-get install -y poppler-utils tesseract-ocr
+else
+    sudo dnf install -y poppler-utils tesseract
+fi
 
 # 6. Clone Repository
-echo "� Cloning repository..."
+echo "📂 Cloning repository..."
 PROJECT_DIR="$HOME/atsense"
 if [ ! -d "$PROJECT_DIR" ]; then
     git clone https://github.com/aneeshaji/atsense $PROJECT_DIR
@@ -49,19 +86,18 @@ fi
 
 # 7. Create Environment Placeholder
 echo "📝 Creating environment template..."
-# Ensure backend directory exists (in case clone was skipped or failed)
 mkdir -p $PROJECT_DIR/backend
-cat <<EOF > $PROJECT_DIR/backend/.env
+if [ ! -f "$PROJECT_DIR/backend/.env" ]; then
+    cat <<EOF > $PROJECT_DIR/backend/.env
 PORT=5000
 NODE_ENV=production
 MONGO_URI=your_mongodb_atlas_uri
 JWT_SECRET=your_random_secret_string
 OPENAI_API_KEY=your_openai_api_key
 EOF
+fi
 
-# 8. Start Services Initial Placeholder
-# (Optional: user will still need to npm install and start)
-# This just sets the stage
+# 8. Permissions
 sudo chown -R $USER:$USER $PROJECT_DIR
 
 # 9. Final Instructions
@@ -70,7 +106,6 @@ echo "✅ SERVER READY!"
 echo "--------------------------------------------------"
 echo "Next Steps:"
 echo "1. Backend: cd $PROJECT_DIR/backend && npm install && pm2 start server.js --name atsense-backend"
-echo "2. Frontend: The GitHub Action will now automatically update your 'dist' folder on push."
-echo "3. Nginx: Copy your config: sudo cp $PROJECT_DIR/nginx/atsense.conf /etc/nginx/conf.d/atsense.conf && sudo systemctl reload nginx"
+echo "2. Nginx: sudo cp $PROJECT_DIR/nginx/atsense.conf /etc/nginx/conf.d/atsense.conf && sudo systemctl reload nginx"
 echo ""
-echo "🚀 Manual setup complete! Your code is now live on the server."
+echo "🚀 Your stack is now pure Node.js + Nginx!"
