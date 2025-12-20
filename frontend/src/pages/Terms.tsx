@@ -1,46 +1,37 @@
+import SEO from '../components/SEO';
+
 const Terms = () => {
     return (
-        <div className="bg-white min-h-screen py-12">
+        <div className="bg-white min-h-screen pt-24 pb-20">
+            <SEO title="Terms of Service - ATSense" />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">Terms of Service</h1>
-                <div className="prose prose-indigo max-w-none text-gray-600">
-                    <p className="mb-4">Last updated: {new Date().toLocaleDateString()}</p>
-
-                    <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">1. Agreement to Terms</h2>
-                    <p>
-                        By accessing our website at ATSense, you agree to be bound by these terms of service, all applicable laws and regulations,
-                        and agree that you are responsible for compliance with any applicable local laws.
+                <h1 className="text-4xl font-extrabold text-gray-900 mb-8">Terms of Service</h1>
+                <div className="prose prose-indigo max-w-none text-gray-600 space-y-6">
+                    <p className="text-lg">
+                        Last updated: December 20, 2025
                     </p>
-
-                    <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">2. Use License</h2>
                     <p>
-                        Permission is granted to temporarily download one copy of the materials (information or software) on ATSense's website for personal,
-                        non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+                        By using ATSense, you agree to the following terms and conditions. Please read them carefully.
                     </p>
-                    <ul className="list-disc pl-5 mt-2 space-y-2">
-                        <li>Modify or copy the materials;</li>
-                        <li>Use the materials for any commercial purpose, or for any public display (commercial or non-commercial);</li>
-                        <li>Attempt to decompile or reverse engineer any software contained on ATSense's website;</li>
-                        <li>Remove any copyright or other proprietary notations from the materials; or</li>
-                        <li>Transfer the materials to another person or "mirror" the materials on any other server.</li>
-                    </ul>
-
-                    <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">3. Disclaimer</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">1. Use of Services</h2>
                     <p>
-                        The materials on ATSense's website are provided on an 'as is' basis. ATSense makes no warranties, expressed or implied,
-                        and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability,
-                        fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+                        ATSense provides AI-powered tools for resume analysis and generation. You are responsible for the accuracy of the information you provide and for ensuring that your use of our services complies with applicable laws.
                     </p>
-
-                    <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">4. Limitations</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">2. Account Responsibility</h2>
                     <p>
-                        In no event shall ATSense or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit,
-                        or due to business interruption) arising out of the use or inability to use the materials on ATSense's website.
+                        You are responsible for maintaining the confidentiality of your account credentials. You must notify us immediately of any unauthorized use of your account.
                     </p>
-
-                    <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">5. Governing Law</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">3. Limitations of AI</h2>
                     <p>
-                        These terms and conditions are governed by and construed in accordance with the laws and you irrevocably submit to the exclusive jurisdiction of the courts in that location.
+                        While our AI provides highly accurate suggestions, we cannot guarantee job placement or interview success. The final quality and accuracy of your resume are your own responsibility.
+                    </p>
+                    <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">4. Intellectual Property</h2>
+                    <p>
+                        The ATSense platform, its branding, and its underlying technology are protected by intellectual property laws. You retain ownership of the content you upload, but grant us a license to process it for the purpose of providing our services.
+                    </p>
+                    <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4">5. Termination</h2>
+                    <p>
+                        We reserve the right to suspend or terminate your access to the service if you violate these terms or engage in fraudulent activity.
                     </p>
                 </div>
             </div>

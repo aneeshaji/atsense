@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 import { Link } from 'react-router-dom';
+import ConfirmModal from '../components/ConfirmModal';
+import { useToast } from '../context/ToastContext';
+import { SkeletonGrid } from '../components/Skeleton';
 
 function CoverLetterList() {
     const [letters, setLetters] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const { showToast } = useToast();
+
+    // Modal state
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [letterToDelete, setLetterToDelete] = useState<string | null>(null);
 
     useEffect(() => {
         api.get('/cover-letters')
@@ -13,20 +21,35 @@ function CoverLetterList() {
             .finally(() => setLoading(false));
     }, []);
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure?')) return;
+    const handleDelete = (id: string) => {
+        setLetterToDelete(id);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!letterToDelete) return;
         try {
-            await api.delete(`/cover-letters/${id}`);
-            setLetters(letters.filter(l => l._id !== id));
+            await api.delete(`/cover-letters/${letterToDelete}`);
+            setLetters(letters.filter(l => l._id !== letterToDelete));
+            showToast('Cover letter deleted successfully', 'success');
+            setShowDeleteModal(false);
+            setLetterToDelete(null);
         } catch (err) {
-            alert('Failed to delete');
+            console.error(err);
+            showToast('Failed to delete cover letter', 'error');
         }
     };
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <div>
+                <div className="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Cover Letters</h1>
+                        <p className="text-gray-500 mt-1">AI-generated personalized letters</p>
+                    </div>
+                </div>
+                <SkeletonGrid count={6} />
             </div>
         );
     }
@@ -89,6 +112,19 @@ function CoverLetterList() {
                     ))}
                 </div>
             )}
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                title="Delete Cover Letter"
+                message="Are you sure you want to delete this cover letter? This action cannot be undone."
+                onConfirm={confirmDelete}
+                onCancel={() => {
+                    setShowDeleteModal(false);
+                    setLetterToDelete(null);
+                }}
+                confirmText="Delete"
+                cancelText="Cancel"
+                type="danger"
+            />
         </div>
     );
 }

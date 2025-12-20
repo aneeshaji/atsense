@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FileText, CheckCircle, Zap, TrendingUp, Users, Star, ArrowRight } from 'lucide-react';
+import { FileText, CheckCircle, Zap, TrendingUp, Star, ArrowRight } from 'lucide-react';
 
 import SEO from '../components/SEO';
 
@@ -141,6 +141,92 @@ const Landing = () => {
                 </div>
             </div>
 
+            {/* Pricing Section */}
+            <div className="py-24 bg-slate-50 relative overflow-hidden">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Flexible plans for every career stage</h2>
+                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">Start for free and upgrade as you grow. No hidden fees.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                        {/* Free Tier */}
+                        <div className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col">
+                            <div className="mb-8">
+                                <h3 className="text-xl font-bold text-gray-900 mb-2">Free</h3>
+                                <div className="flex items-baseline">
+                                    <span className="text-5xl font-black text-gray-900">$0</span>
+                                    <span className="text-gray-500 ml-2 font-medium">/forever</span>
+                                </div>
+                                <p className="mt-4 text-gray-500 font-medium">Perfect for getting started with your job search.</p>
+                            </div>
+
+                            <ul className="space-y-4 mb-10 flex-1">
+                                {[
+                                    'Up to 3 AI Resume Analyses',
+                                    'Standard ATS Optimization',
+                                    'Basic Job Match Scorer',
+                                    'Standard Resume Templates',
+                                    'Community Support'
+                                ].map((feature, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-gray-600 font-medium text-sm">
+                                        <CheckCircle className="text-green-500 shrink-0" size={18} />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <Link to="/register" className="w-full py-4 px-6 text-center font-bold text-indigo-600 bg-indigo-50 rounded-2xl hover:bg-indigo-100 transition-colors">
+                                Get Started Free
+                            </Link>
+                        </div>
+
+                        {/* Pro Tier (Coming Soon) */}
+                        <div className="relative p-10 rounded-3xl bg-white border-2 border-indigo-500 shadow-2xl shadow-indigo-100 flex flex-col transform md:scale-105 z-20">
+                            <div className="absolute top-0 right-10 -translate-y-1/2 bg-indigo-600 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg">
+                                Coming Soon
+                            </div>
+
+                            <div className="mb-8">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="text-xl font-bold text-gray-900">Pro</h3>
+                                    <span className="bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded uppercase">Best Value</span>
+                                </div>
+                                <div className="flex items-baseline">
+                                    <span className="text-5xl font-black text-gray-900">$19</span>
+                                    <span className="text-gray-500 ml-2 font-medium">/month</span>
+                                </div>
+                                <p className="mt-4 text-gray-500 font-medium">Advanced tools for serious job seekers ready to land top roles.</p>
+                            </div>
+
+                            <ul className="space-y-4 mb-10 flex-1">
+                                {[
+                                    'Unlimited GPT-4 Optimizations',
+                                    'Personalized AI Cover Letters',
+                                    'LinkedIn Profile Optimizer',
+                                    'Priority Support (24h)',
+                                    'Exclusive Premium Templates',
+                                    'Custom Career Roadmap'
+                                ].map((feature, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-gray-600 font-medium text-sm">
+                                        <CheckCircle className="text-indigo-500 shrink-0" size={18} />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <button disabled className="w-full py-4 px-6 text-center font-bold text-white bg-indigo-600 rounded-2xl opacity-80 cursor-not-allowed">
+                                Join the Waitlist
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Background Decor */}
+                <div className="absolute top-1/2 left-0 w-64 h-64 bg-indigo-100/50 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 opacity-60"></div>
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100/50 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 opacity-60"></div>
+            </div>
+
             {/* Testimonials */}
             <div className="py-24 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -180,6 +266,47 @@ const Landing = () => {
                                         <p className="text-gray-500 text-xs">{t.role}</p>
                                     </div>
                                 </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* FAQ Section */}
+            <div className="py-24 bg-white">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+                        <p className="text-gray-600">Got questions? We've got answers.</p>
+                    </div>
+
+                    <div className="space-y-6">
+                        {[
+                            {
+                                q: "How does the ATS score work?",
+                                a: "Our AI analyzes your resume against 50+ common ATS algorithms. We check for keyword density, formatting issues, and structural elements that impact how machines read your profile."
+                            },
+                            {
+                                q: "Is my data secure?",
+                                a: "Yes. We use industry-standard encryption and never sell your personal data. Resumes are processed securely and you can delete them at any time."
+                            },
+                            {
+                                q: "Can I use the AI for any industry?",
+                                a: "Absolutely. Our GPT-4 powered engine is trained on millions of job descriptions across tech, marketing, finance, healthcare, and more."
+                            },
+                            {
+                                q: "What's included in the Free plan?",
+                                a: "The Free plan includes 3 full AI analyses, standard templates, and our job match scorer. It's everything you need to start seeing results."
+                            }
+                        ].map((faq, i) => (
+                            <div key={i} className="group p-6 rounded-2xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:shadow-xl transition-all duration-300">
+                                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-3">
+                                    <span className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm">?</span>
+                                    {faq.q}
+                                </h3>
+                                <p className="text-gray-600 leading-relaxed pl-11">
+                                    {faq.a}
+                                </p>
                             </div>
                         ))}
                     </div>

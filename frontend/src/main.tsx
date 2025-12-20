@@ -5,15 +5,18 @@ import App from './App.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
 import { ToastProvider } from './context/ToastContext.tsx'
 import { HelmetProvider } from 'react-helmet-async'
+import ErrorBoundary from './components/ErrorBoundary.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <HelmetProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <App />
-        </ToastProvider>
-      </AuthProvider>
-    </HelmetProvider>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </AuthProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )
