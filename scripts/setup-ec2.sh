@@ -78,10 +78,15 @@ fi
 # 6. Clone Repository
 echo "📂 Cloning repository..."
 PROJECT_DIR="$HOME/atsense"
-if [ ! -d "$PROJECT_DIR" ]; then
-    git clone https://github.com/aneeshaji/atsense $PROJECT_DIR
+if [ ! -d "$PROJECT_DIR/.git" ]; then
+    echo "🚚 Downloading fresh project files..."
+    # If folder exists but isn't a git repo, we need to clone into it
+    # Git won't clone into a non-empty directory, so we handle it:
+    if [ -d "$PROJECT_DIR" ]; then rm -rf "$PROJECT_DIR"; fi
+    git clone https://github.com/aneeshaji/atsense "$PROJECT_DIR"
 else
-    echo "ℹ️ Project directory already exists. Skipping clone."
+    echo "ℹ️ Project already cloned. Pulling latest changes..."
+    cd "$PROJECT_DIR" && git pull
 fi
 
 # 7. Create Environment Placeholder
