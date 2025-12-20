@@ -22,6 +22,7 @@
     "mammoth": "^1.11.0",
     "mongoose": "^9.0.2",
     "multer": "^2.0.2",
+    "pdf-poppler": "^0.2.3",
     "pdf2json": "^4.0.0",
     "node-poppler": "^1.0.1",
     "puppeteer": "^24.33.1",

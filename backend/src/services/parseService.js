@@ -1,7 +1,16 @@
 const PDFParser = require('pdf2json');
 const mammoth = require('mammoth');
 const { createWorker } = require('tesseract.js');
-const { Poppler } = require('node-poppler');
+// Cross-platform PDF to Image libraries
+let poppler;
+if (process.platform === 'win32') {
+    poppler = require('pdf-poppler');
+} else {
+    // node-poppler doesn't bundle binaries, requires system ones (installed in setup-ec2.sh)
+    const { Poppler } = require('node-poppler');
+    poppler = new Poppler();
+}
+
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
@@ -61,17 +70,23 @@ async function extractTextWithOCR(fileBuffer) {
         // Save PDF buffer to temp file
         await fs.writeFile(pdfPath, fileBuffer);
 
-        // Convert PDF to PNG images using node-poppler
-        const poppler = new Poppler();
-        const options = {
-            pngFile: true,
-            // out_dir is not directly in options for pdfToCairo, it takes output prefix as 2nd arg
-        };
-
         const outputPrefix = path.join(tempDir, 'page');
+        console.log(`OCR: Converting PDF to images in ${tempDir} (Platform: ${process.platform})...`);
 
-        console.log(`OCR: Converting PDF to images in ${tempDir}...`);
-        await poppler.pdfToCairo(pdfPath, outputPrefix, options);
+        if (process.platform === 'win32') {
+            const options = {
+                format: 'png',
+                out_dir: tempDir,
+                out_prefix: 'page',
+                page: null
+            };
+            await poppler.convert(pdfPath, options);
+        } else {
+            const options = {
+                pngFile: true,
+            };
+            await poppler.pdfToCairo(pdfPath, outputPrefix, options);
+        }
 
         // Find all generated PNG files
         const files = await fs.readdir(tempDir);
