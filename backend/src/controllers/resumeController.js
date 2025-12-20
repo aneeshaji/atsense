@@ -85,6 +85,13 @@ exports.importResume = async (req, res) => {
 		// 1. Extract Text
 		const text = await parseService.extractText(req.file);
 
+		if (!text || text.trim().length === 0) {
+			return res.status(400).json({
+				message: 'Could not extract any text from this resume.',
+				error: 'The PDF appears to be image-based and OCR failed. Please ensure Poppler is installed on the server.'
+			});
+		}
+
 		// 2. AI Parse
 		const parsedData = await aiService.parseResumeJSON(text);
 

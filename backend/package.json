@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -22,8 +22,10 @@
     "mammoth": "^1.11.0",
     "mongoose": "^9.0.2",
     "multer": "^2.0.2",
+    "pdf-poppler": "^0.2.3",
     "pdf2json": "^4.0.0",
     "puppeteer": "^24.33.1",
+    "tesseract.js": "^7.0.0",
     "winston": "^3.19.0"
   },
   "devDependencies": {

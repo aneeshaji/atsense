@@ -69,6 +69,10 @@ Make every word count. This resume needs to stand out and get past ATS systems A
 };
 
 exports.parseResumeJSON = async (text) => {
+  console.log('AI Services: Received text for parsing (Length:', text.length, ')');
+  console.log('--- RAW TEXT PREVIEW ---');
+  console.log(text.substring(0, 500) + '...');
+  console.log('------------------------');
   const prompt = `
 You are an Expert Resume Parser. Extract ALL data from the following Resume Text into STRICT JSON.
 

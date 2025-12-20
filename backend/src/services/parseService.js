@@ -1,50 +1,150 @@
 const PDFParser = require('pdf2json');
 const mammoth = require('mammoth');
+const { createWorker } = require('tesseract.js');
+const poppler = require('pdf-poppler');
+const fs = require('fs').promises;
+const path = require('path');
+const os = require('os');
 
+/**
+ * Extract text from text-based PDF using pdf2json
+ */
+async function extractTextFromPDF(file) {
+    return new Promise((resolve, reject) => {
+        const pdfParser = new PDFParser();
+
+        pdfParser.on('pdfParser_dataError', (errData) => {
+            reject(new Error(`PDF parsing failed: ${errData.parserError}`));
+        });
+
+        pdfParser.on('pdfParser_dataReady', (pdfData) => {
+            try {
+                let text = '';
+                if (pdfData.Pages) {
+                    pdfData.Pages.forEach(page => {
+                        if (page.Texts) {
+                            page.Texts.forEach(textItem => {
+                                if (textItem.R) {
+                                    textItem.R.forEach(r => {
+                                        if (r.T) {
+                                            try {
+                                                text += decodeURIComponent(r.T) + ' ';
+                                            } catch (e) {
+                                                text += r.T.replace(/%20/g, ' ') + ' ';
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                            text += '\n';
+                        }
+                    });
+                }
+                resolve(text.trim());
+            } catch (err) {
+                reject(new Error(`Text extraction failed: ${err.message}`));
+            }
+        });
+
+        pdfParser.parseBuffer(file.buffer);
+    });
+}
+
+/**
+ * Extract text from image-based PDF using OCR (Tesseract.js)
+ */
+async function extractTextWithOCR(fileBuffer) {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pdf-ocr-'));
+    const pdfPath = path.join(tempDir, 'input.pdf');
+
+    try {
+        // Save PDF buffer to temp file
+        await fs.writeFile(pdfPath, fileBuffer);
+
+        // Convert PDF to PNG images
+        const options = {
+            format: 'png',
+            out_dir: tempDir,
+            out_prefix: 'page',
+            page: null // Convert all pages
+        };
+
+        console.log(`OCR: Converting PDF to images in ${tempDir}...`);
+        await poppler.convert(pdfPath, options);
+
+        // Find all generated PNG files
+        const files = await fs.readdir(tempDir);
+        console.log(`OCR: Files in temp dir: ${files.join(', ')}`);
+        const pngFiles = files.filter(f => f.endsWith('.png')).sort();
+
+        if (pngFiles.length === 0) {
+            throw new Error('No images generated from PDF');
+        }
+
+        console.log(`OCR: Processing ${pngFiles.length} page(s)...`);
+
+        // Initialize Tesseract worker
+        const worker = await createWorker('eng');
+
+        let fullText = '';
+
+        // Process each page
+        for (const pngFile of pngFiles) {
+            const imagePath = path.join(tempDir, pngFile);
+            const { data: { text } } = await worker.recognize(imagePath);
+            fullText += text + '\n\n';
+            console.log(`OCR: Processed ${pngFile}`);
+        }
+
+        await worker.terminate();
+
+        return fullText.trim();
+
+    } catch (error) {
+        console.error('OCR Error Detail:', error);
+        throw new Error(`OCR failed at step: ${error.message}`);
+    } finally {
+        // Cleanup temp files
+        try {
+            const files = await fs.readdir(tempDir);
+            for (const file of files) {
+                await fs.unlink(path.join(tempDir, file));
+            }
+            await fs.rmdir(tempDir);
+        } catch (cleanupError) {
+            console.error('Cleanup error:', cleanupError);
+        }
+    }
+}
+
+/**
+ * Main export: Extract text from PDF or DOCX with OCR fallback
+ */
 exports.extractText = async (file) => {
     try {
         if (file.mimetype === 'application/pdf') {
-            return new Promise((resolve, reject) => {
-                const pdfParser = new PDFParser();
+            // Try text extraction first (fast)
+            console.log(`PDF Parsing: Starting text extraction for ${file.originalname}...`);
+            let text = await extractTextFromPDF(file);
 
-                pdfParser.on('pdfParser_dataError', (errData) => {
-                    reject(new Error(`PDF parsing failed: ${errData.parserError}`));
-                });
+            console.log(`PDF Parsing: Extracted ${text.length} characters of initial text via pdf2json.`);
+            console.log(`PDF Parsing: Preview: "${text.substring(0, 100)}..."`);
 
-                pdfParser.on('pdfParser_dataReady', (pdfData) => {
-                    try {
-                        // Extract text from all pages
-                        let text = '';
-                        if (pdfData.Pages) {
-                            pdfData.Pages.forEach(page => {
-                                if (page.Texts) {
-                                    page.Texts.forEach(textItem => {
-                                        if (textItem.R) {
-                                            textItem.R.forEach(r => {
-                                                if (r.T) {
-                                                    try {
-                                                        // Try to decode, fallback to raw text if it fails
-                                                        text += decodeURIComponent(r.T) + ' ';
-                                                    } catch (e) {
-                                                        // If decoding fails, use the raw text
-                                                        text += r.T.replace(/%20/g, ' ') + ' ';
-                                                    }
-                                                }
-                                            });
-                                        }
-                                    });
-                                    text += '\n';
-                                }
-                            });
-                        }
-                        resolve(text.trim());
-                    } catch (err) {
-                        reject(new Error(`Text extraction failed: ${err.message}`));
-                    }
-                });
+            // If extracted text is too short, likely image-based PDF
+            if (text.length < 500) { // Increased threshold further for safety
+                console.log('⚠️  Minimal text extracted (< 500 chars). Triggering OCR fallback...');
+                try {
+                    const ocrText = await extractTextWithOCR(file.buffer);
+                    console.log(`✅ OCR completed! Extracted ${ocrText.length} characters.`);
+                    // Combine or replace? Usually OCR is much better for these cases
+                    text = ocrText;
+                } catch (ocrErr) {
+                    console.error('❌ OCR Fallback Critical Failure:', ocrErr);
+                }
+            }
 
-                pdfParser.parseBuffer(file.buffer);
-            });
+            return text;
+
         } else if (
             file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
             file.mimetype === 'application/msword'
