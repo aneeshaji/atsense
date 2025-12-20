@@ -31,17 +31,22 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "frontend/dist,docker-compose.yml,nginx/atsense.conf,backend/Dockerfile,backend/package*.json,backend/server.js,backend/src"
+          source: "frontend/dist,nginx/atsense.conf,backend/package*.json,backend/server.js,backend/src"
           target: "~/atsense"
           strip_components: 0
 
-      - name: Deploy on EC2
+      - name: Deploy on EC2 (PM2)
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/atsense
-            docker-compose down
-            docker-compose up -d --build
+            # Update Nginx config
+            sudo cp ~/atsense/nginx/atsense.conf /etc/nginx/conf.d/atsense.conf
+            sudo systemctl reload nginx
+            
+            # Update Backend
+            cd ~/atsense/backend
+            npm install --production
+            pm2 restart atsense-backend || pm2 start server.js --name atsense-backend
