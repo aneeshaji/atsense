@@ -1,7 +1,7 @@
 const PDFParser = require('pdf2json');
 const mammoth = require('mammoth');
 const { createWorker } = require('tesseract.js');
-const poppler = require('pdf-poppler');
+const { Poppler } = require('node-poppler');
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
@@ -61,16 +61,17 @@ async function extractTextWithOCR(fileBuffer) {
         // Save PDF buffer to temp file
         await fs.writeFile(pdfPath, fileBuffer);
 
-        // Convert PDF to PNG images
+        // Convert PDF to PNG images using node-poppler
+        const poppler = new Poppler();
         const options = {
-            format: 'png',
-            out_dir: tempDir,
-            out_prefix: 'page',
-            page: null // Convert all pages
+            pngFile: true,
+            // out_dir is not directly in options for pdfToCairo, it takes output prefix as 2nd arg
         };
 
+        const outputPrefix = path.join(tempDir, 'page');
+
         console.log(`OCR: Converting PDF to images in ${tempDir}...`);
-        await poppler.convert(pdfPath, options);
+        await poppler.pdfToCairo(pdfPath, outputPrefix, options);
 
         // Find all generated PNG files
         const files = await fs.readdir(tempDir);
