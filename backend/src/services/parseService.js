@@ -1,16 +1,6 @@
 const PDFParser = require('pdf2json');
 const mammoth = require('mammoth');
 const { createWorker } = require('tesseract.js');
-// Cross-platform PDF to Image libraries
-let poppler;
-if (process.platform === 'win32') {
-    poppler = require('pdf-poppler');
-} else {
-    // node-poppler doesn't bundle binaries, requires system ones (installed in setup-ec2.sh)
-    const { Poppler } = require('node-poppler');
-    poppler = new Poppler();
-}
-
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
@@ -74,6 +64,7 @@ async function extractTextWithOCR(fileBuffer) {
         console.log(`OCR: Converting PDF to images in ${tempDir} (Platform: ${process.platform})...`);
 
         if (process.platform === 'win32') {
+            const poppler = require('pdf-poppler');
             const options = {
                 format: 'png',
                 out_dir: tempDir,
@@ -82,6 +73,8 @@ async function extractTextWithOCR(fileBuffer) {
             };
             await poppler.convert(pdfPath, options);
         } else {
+            const { Poppler } = require('node-poppler');
+            const poppler = new Poppler();
             const options = {
                 pngFile: true,
             };
