@@ -5,7 +5,17 @@ const aiService = require('../services/aiResumeService');
 // GENERATE NEW
 exports.createCoverLetter = async (req, res) => {
     try {
+        // Limit check
+        const count = await CoverLetter.countDocuments({ user: req.user });
+        if (count >= 3) {
+            return res.status(403).json({
+                message: 'Cover letter limit reached',
+                error: 'You can only generate up to 3 cover letters in the free plan.'
+            });
+        }
+
         const { resumeId, jobTitle, companyName, jobDescription } = req.body;
+
 
         // 1. Get Resume Data
         const resume = await Resume.findOne({ _id: resumeId, user: req.user });

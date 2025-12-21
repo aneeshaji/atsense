@@ -1,8 +1,21 @@
 const Resume = require('../models/Resume');
+const parseService = require('../services/parseService');
+const aiService = require('../services/aiResumeService');
+const { getDetailedScore } = require('../utils/atsScorer');
+
 
 // CREATE
 exports.createResume = async (req, res) => {
 	try {
+		// Limit check
+		const count = await Resume.countDocuments({ user: req.user });
+		if (count >= 3) {
+			return res.status(403).json({
+				message: 'Resume limit reached',
+				error: 'You can only have up to 3 resumes in the free plan.'
+			});
+		}
+
 		const resume = await Resume.create({
 			user: req.user,
 			...req.body
@@ -12,6 +25,7 @@ exports.createResume = async (req, res) => {
 		res.status(500).json({ message: 'Error creating resume' });
 	}
 };
+
 
 // GET ALL
 exports.getResumes = async (req, res) => {
@@ -74,16 +88,22 @@ exports.getATSBreakdown = async (req, res) => {
 	}
 };
 
-// IMPORT
-const parseService = require('../services/parseService');
-const aiService = require('../services/aiResumeService');
-
 exports.importResume = async (req, res) => {
 	try {
 		if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
+		// 0. Limit Check
+		const count = await Resume.countDocuments({ user: req.user });
+		if (count >= 3) {
+			return res.status(403).json({
+				message: 'Resume limit reached',
+				error: 'You can only have up to 3 resumes in the free plan.'
+			});
+		}
+
 		// 1. Extract Text
 		const text = await parseService.extractText(req.file);
+
 
 		if (!text || text.trim().length === 0) {
 			return res.status(400).json({
@@ -101,6 +121,7 @@ exports.importResume = async (req, res) => {
 			title: `Imported Resume - ${new Date().toLocaleDateString()}`,
 			...parsedData
 		});
+
 
 		res.status(201).json(resume);
 
