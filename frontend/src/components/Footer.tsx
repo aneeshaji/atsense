@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Twitter, Linkedin, Send, CheckCircle2 } from 'lucide-react';
+import { Send, CheckCircle2 } from 'lucide-react';
+
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
@@ -80,13 +81,7 @@ const Footer = () => {
                         <p className="text-gray-500 text-lg leading-relaxed max-w-sm mb-8 font-medium">
                             Helping job seekers land their dream jobs with AI-powered resume optimization and intelligent insights.
                         </p>
-                        <div className="flex gap-4">
-                            {[Twitter, Github, Linkedin].map((Icon, i) => (
-                                <a key={i} href="#" className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all border border-gray-100">
-                                    <Icon size={20} />
-                                </a>
-                            ))}
-                        </div>
+
                     </div>
 
                     {/* Product Links */}
