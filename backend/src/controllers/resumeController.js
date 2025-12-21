@@ -65,8 +65,6 @@ exports.deleteResume = async (req, res) => {
 };
 
 // GET ATS BREAKDOWN
-const { getDetailedScore } = require('../utils/atsScorer');
-
 exports.getATSBreakdown = async (req, res) => {
 	try {
 		const resume = await Resume.findOne({
