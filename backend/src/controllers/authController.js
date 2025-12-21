@@ -101,7 +101,7 @@ exports.forgotPassword = async (req, res) => {
 		try {
 			await sendEmail({
 				email: user.email,
-				subject: 'Password Reset Request',
+				subject: 'Reset Your ATSense Password',
 				message,
 				html: getPasswordResetTemplate(resetUrl)
 			});
