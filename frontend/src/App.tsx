@@ -3,6 +3,8 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import ResumeEditor from './pages/ResumeEditor';
 import Preview from './pages/Preview';
@@ -39,9 +41,11 @@ function App() {
 						<Route path="/blog/:id" element={<BlogDetails />} />
 					</Route>
 
-					{/* Public Routes without Layout (Login/Register) */}
+					{/* Public Routes without Layout (Login/Register/Auth) */}
 					<Route path="/login" element={<Login />} />
 					<Route path="/register" element={<Register />} />
+					<Route path="/forgot-password" element={<ForgotPassword />} />
+					<Route path="/reset-password/:token" element={<ResetPassword />} />
 
 					{/* Protected Routes with Layout */}
 					<Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
