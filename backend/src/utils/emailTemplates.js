@@ -45,21 +45,22 @@ const getPasswordResetTemplate = (resetUrl) => {
 <body>
     <div class="container">
         <div class="header">
-            <h1 style="margin: 0;">ATSense</h1>
+            <h1 style="margin: 0;">ATSense Team</h1>
         </div>
         <div class="body">
             <h2>Password Reset Request</h2>
             <p>Hello,</p>
-            <p>We received a request to reset the password for your ATSense account. Click the button below to choose a new one:</p>
+            <p>We received a request to reset the password for your account. Click the button below to choose a new one:</p>
             <div style="text-align: center;">
                 <a href="${resetUrl}" class="button">Reset Password</a>
             </div>
             <p style="margin-top: 24px;">This link will expire in <strong>1 hour</strong>. If the button doesn't work, you can copy and paste the following link into your browser:</p>
             <p style="word-break: break-all; font-size: 12px; color: #718096;">${resetUrl}</p>
             <p>If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+            <p>Regards,<br>The ATSense Team</p>
         </div>
         <div class="footer">
-            &copy; ${new Date().getFullYear()} ATSense. All rights reserved.
+            &copy; ${new Date().getFullYear()} ATSense Team. All rights reserved.
         </div>
     </div>
 </body>
