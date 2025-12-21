@@ -1,17 +1,17 @@
 const nodemailer = require('nodemailer');
 
 const sendEmail = async (options) => {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.warn('EMAIL_USER or EMAIL_PASS is not set in environment variables!');
+    }
+
     // 1. Create a transporter
+    // Using service: 'gmail' is recommended by nodemailer for Gmail accounts
     const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: parseInt(process.env.EMAIL_PORT) || 587,
-        secure: process.env.EMAIL_PORT == 465, // true for 465, false for other ports
+        service: 'gmail',
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
-        },
-        tls: {
-            rejectUnauthorized: false // Helps with some server certificates
         }
     });
 
