@@ -4,10 +4,14 @@ const sendEmail = async (options) => {
     // 1. Create a transporter
     const transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
+        port: parseInt(process.env.EMAIL_PORT) || 587,
+        secure: process.env.EMAIL_PORT == 465, // true for 465, false for other ports
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
+        },
+        tls: {
+            rejectUnauthorized: false // Helps with some server certificates
         }
     });
 
@@ -21,7 +25,12 @@ const sendEmail = async (options) => {
     };
 
     // 3. Send the email
-    await transporter.sendMail(mailOptions);
+    try {
+        await transporter.sendMail(mailOptions);
+    } catch (err) {
+        console.error('NODEMAILER ERROR:', err);
+        throw err;
+    }
 };
 
 module.exports = sendEmail;
