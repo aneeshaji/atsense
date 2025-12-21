@@ -91,7 +91,9 @@ exports.forgotPassword = async (req, res) => {
 		await user.save();
 
 		// Create reset URL
-		const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+		const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+		console.log(`DEBUG: Using FRONTEND_URL: ${frontendUrl}`);
+		const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
 		const message = `You are receiving this email because you (or someone else) have requested the reset of a password. Please make a post request to: \n\n ${resetUrl}`;
 
