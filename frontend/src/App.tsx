@@ -19,12 +19,15 @@ import Blog from './pages/Blog';
 import BlogDetails from './pages/BlogDetails';
 import Landing from './pages/Landing';
 import Layout from './components/Layout';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
 	return (
 		<AuthProvider>
 			<BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+				<ScrollToTop />
 				<Routes>
+
 					{/* Public Routes with Layout */}
 					<Route element={<Layout />}>
 						<Route path="/about" element={<About />} />

@@ -69,11 +69,14 @@ const Footer = () => {
                     {/* Brand Section */}
                     <div className="col-span-2 lg:col-span-2">
                         <Link to="/" className="flex items-center gap-3 mb-6 group">
-                            <div className="w-10 h-10 premium-gradient rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20">
-                                A
+                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
                             </div>
                             <span className="font-bold text-2xl text-gray-900 tracking-tight">ATSense</span>
                         </Link>
+
                         <p className="text-gray-500 text-lg leading-relaxed max-w-sm mb-8 font-medium">
                             Helping job seekers land their dream jobs with AI-powered resume optimization and intelligent insights.
                         </p>

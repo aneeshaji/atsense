@@ -1,8 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /dashboard
-Disallow: /preview
-Disallow: /resume/*
-Disallow: /cover-letters/*
 
-Sitemap: https://atsense.com/sitemap.xml
+Sitemap: https://atsense.online/sitemap.xml

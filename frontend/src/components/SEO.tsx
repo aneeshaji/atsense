@@ -10,10 +10,11 @@ interface SEOProps {
 
 const SEO = ({
     title = "ATSense - AI Resume Optimizer",
-    description = "Boost your resumeats ATS score with AI. Get tailored suggestions to land your dream job faster.",
+    description = "Boost your resume's ATS score with AI. Get tailored suggestions to land your dream job faster.",
     keywords = "resume optimizer, ATS checker, AI resume builder, career tools, job search",
     image = "/og-image.jpg",
-    url = "https://atsense.com"
+    url = "https://atsense.online"
+
 }: SEOProps) => {
     const siteTitle = "ATSense";
     const fullTitle = title === siteTitle ? siteTitle : `${title} | ${siteTitle}`;

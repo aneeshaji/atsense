@@ -27,4 +27,9 @@
   .card {
     @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
   }
+
+  .premium-gradient {
+    @apply bg-gradient-to-br from-indigo-600 to-purple-600;
+  }
 }
+

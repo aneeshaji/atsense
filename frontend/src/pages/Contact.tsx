@@ -47,20 +47,11 @@ const Contact = () => {
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-gray-900">Office</h4>
-                                        <p className="text-gray-600">123 AI Innovation Drive</p>
-                                        <p className="text-gray-600">San Francisco, CA 94103</p>
+                                        <p className="text-gray-600">Trivandrum</p>
+                                        <p className="text-gray-600">Kerala, India</p>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center text-pink-600 shrink-0">
-                                        <Phone size={20} />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-gray-900">Phone</h4>
-                                        <p className="text-gray-600">+1 (555) 123-4567</p>
-                                        <p className="text-gray-500 text-sm">Mon-Fri from 9am to 6pm PST</p>
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
                     </div>

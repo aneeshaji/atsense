@@ -193,7 +193,8 @@ const Landing = () => {
                                     <span className="bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded uppercase">Best Value</span>
                                 </div>
                                 <div className="flex items-baseline">
-                                    <span className="text-5xl font-black text-gray-900">$19</span>
+                                    <span className="text-5xl font-black text-gray-900">$9</span>
+
                                     <span className="text-gray-500 ml-2 font-medium">/month</span>
                                 </div>
                                 <p className="mt-4 text-gray-500 font-medium">Advanced tools for serious job seekers ready to land top roles.</p>
