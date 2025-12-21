@@ -3,6 +3,12 @@ const nodemailer = require('nodemailer');
 const sendEmail = async (options) => {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         console.warn('EMAIL_USER or EMAIL_PASS is not set in environment variables!');
+    } else {
+        // Securely log the variable presence and length for debugging
+        const email = process.env.EMAIL_USER;
+        const pass = process.env.EMAIL_PASS;
+        console.log(`DEBUG: EMAIL_USER is [${email[0]}...${email[email.length - 1]}] (length: ${email.length})`);
+        console.log(`DEBUG: EMAIL_PASS is [${pass[0]}...${pass[pass.length - 1]}] (length: ${pass.length})`);
     }
 
     // 1. Create a transporter
