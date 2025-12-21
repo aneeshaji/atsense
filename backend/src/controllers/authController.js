@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../services/emailService');
+const { getPasswordResetTemplate } = require('../utils/emailTemplates');
 
 
 const generateToken = (userId) => {
@@ -95,20 +96,14 @@ exports.forgotPassword = async (req, res) => {
 		console.log(`DEBUG: Using FRONTEND_URL: ${frontendUrl}`);
 		const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
-		const message = `You are receiving this email because you (or someone else) have requested the reset of a password. Please make a post request to: \n\n ${resetUrl}`;
+		const message = `You are receiving this email because you (or someone else) have requested the reset of a password. Please visit the following link: \n\n ${resetUrl}`;
 
 		try {
 			await sendEmail({
 				email: user.email,
-				subject: 'Password Reset Token',
+				subject: 'Password Reset Request',
 				message,
-				html: `
-          <h1>Password Reset Request</h1>
-          <p>You requested a password reset. Click the link below to set a new password:</p>
-          <a href="${resetUrl}" target="_blank">Reset Password</a>
-          <p>This link will expire in 1 hour.</p>
-          <p>If you did not request this, please ignore this email.</p>
-        `
+				html: getPasswordResetTemplate(resetUrl)
 			});
 
 			res.status(200).json({ message: 'Email sent' });
