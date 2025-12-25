@@ -9,16 +9,16 @@ interface SEOProps {
 }
 
 const SEO = ({
-    title = "ATSense - AI Resume Optimizer",
-    description = "Boost your resume's ATS score with AI. Get tailored suggestions to land your dream job faster.",
-    keywords = "resume optimizer, ATS checker, AI resume builder, career tools, job search",
-    image = "/og-image.jpg",
+    title = "ATSense - AI Resume Optimizer & ATS Checker",
+    description = "Boost your resume's ATS score with AI. Beat Applicant Tracking Systems, optimize your resume with GPT-4, and land 3x more interviews today.",
+    keywords = "resume optimizer, ATS checker, AI resume builder, career tools, job search, resume scanner, ats bypass, resume feedback",
+    image = "https://atsense.online/og-image.jpg",
     url = "https://atsense.online"
 }: SEOProps) => {
     const siteTitle = "ATSense";
-    const fullTitle = title === siteTitle ? siteTitle : `${title} | ${siteTitle}`;
+    const fullTitle = title === siteTitle ? `${siteTitle} - #1 AI Resume Optimizer` : `${title} | ${siteTitle}`;
 
-    // Structured Data (JSON-LD)
+    // SoftwareApplication schema
     const structuredData = {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
@@ -38,6 +38,7 @@ const SEO = ({
         }
     };
 
+    // WebSite schema
     const websiteData = {
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -48,6 +49,20 @@ const SEO = ({
             "target": `${url}/search?q={search_term_string}`,
             "query-input": "required name=search_term_string"
         }
+    };
+
+    // BreadcrumbList schema
+    const breadcrumbData = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://atsense.online"
+            }
+        ]
     };
 
     return (
@@ -79,6 +94,9 @@ const SEO = ({
             </script>
             <script type="application/ld+json">
                 {JSON.stringify(websiteData)}
+            </script>
+            <script type="application/ld+json">
+                {JSON.stringify(breadcrumbData)}
             </script>
         </Helmet>
     );

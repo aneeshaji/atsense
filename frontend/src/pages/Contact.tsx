@@ -1,5 +1,6 @@
 import { Mail, MapPin, Phone } from 'lucide-react';
 import { useState } from 'react';
+import SEO from '../components/SEO';
 
 const Contact = () => {
     const [formData, setFormData] = useState({
@@ -17,6 +18,11 @@ const Contact = () => {
 
     return (
         <div className="bg-white min-h-screen py-24">
+            <SEO
+                title="Contact Us - Support & Business Inquiries"
+                description="Have questions about our AI resume optimizer? Get in touch with the ATSense team for support, feedback, or business inquiries."
+                url="https://atsense.online/contact"
+            />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center max-w-3xl mx-auto mb-16">
                     <h1 className="text-4xl font-extrabold text-gray-900 mb-6">Get in touch</h1>

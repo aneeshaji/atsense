@@ -1,8 +1,14 @@
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 const About = () => {
     return (
         <div className="bg-white min-h-screen">
+            <SEO
+                title="About Us - Our Mission to Fix the Hiring Process"
+                description="Learn how ATSense is bridging the gap between talent and opportunity using AI to help job seekers beat the ATS."
+                url="https://atsense.online/about"
+            />
             {/* Hero Section */}
             <div className="bg-gradient-to-br from-indigo-50 to-purple-50 py-24">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
