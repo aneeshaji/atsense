@@ -5,14 +5,14 @@ import SEO from '../components/SEO';
 
 const Landing = () => {
     return (
-        <div className="bg-white">
+        <main className="bg-white">
             <SEO
-                title="ATSense - #1 AI Resume Optimizer & Builder"
+                title="ATSense - #1 AI Resume Optimizer & ATS Checker"
                 description="Stop getting rejected. ATSense uses GPT-4 to optimize your resume for ATS systems and helps you land 3x more interviews."
-                keywords="resume optimizer, ats checker, ai resume builder, cv optimization, career tools"
+                keywords="resume optimizer, ats checker, ai resume builder, cv optimization, career tools, job search, resume scanner"
             />
             {/* Hero Section */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50 pt-16 pb-32">
+            <section className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50 pt-16 pb-32">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center max-w-4xl mx-auto">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-100 text-indigo-700 font-semibold text-sm mb-8 animate-fade-in-up">
@@ -56,13 +56,13 @@ const Landing = () => {
                     <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-br from-purple-100/40 to-transparent rounded-bl-full blur-3xl transform translate-x-1/3 -translate-y-1/4"></div>
                     <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-tr from-indigo-100/40 to-transparent rounded-tr-full blur-3xl transform -translate-x-1/3 translate-y-1/4"></div>
                 </div>
-            </div>
+            </section>
 
             {/* Features Grid */}
-            <div className="py-24 bg-white">
+            <section className="py-24 bg-white" aria-labelledby="features-title">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Everything you need to land the job</h2>
+                        <h2 id="features-title" className="text-3xl font-bold text-gray-900 mb-4">Everything you need to land the job</h2>
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                             Powerful tools designed to help you stand out in a crowded job market.
                         </p>
@@ -100,13 +100,13 @@ const Landing = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
             {/* How It Works */}
-            <div className="py-24 bg-gray-900 text-white">
+            <section className="py-24 bg-gray-900 text-white" aria-labelledby="how-it-works-title">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold mb-4">How It Works</h2>
+                        <h2 id="how-it-works-title" className="text-3xl font-bold mb-4">How It Works</h2>
                         <p className="text-xl text-gray-400">Three simple steps to your next job.</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
@@ -139,13 +139,13 @@ const Landing = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
             {/* Pricing Section */}
-            <div className="py-24 bg-slate-50 relative overflow-hidden">
+            <section className="py-24 bg-slate-50 relative overflow-hidden" aria-labelledby="pricing-title">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Flexible plans for every career stage</h2>
+                        <h2 id="pricing-title" className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Flexible plans for every career stage</h2>
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto">Start for free and upgrade as you grow. No hidden fees.</p>
                     </div>
 
@@ -226,12 +226,12 @@ const Landing = () => {
                 {/* Background Decor */}
                 <div className="absolute top-1/2 left-0 w-64 h-64 bg-indigo-100/50 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 opacity-60"></div>
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100/50 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 opacity-60"></div>
-            </div>
+            </section>
 
             {/* Testimonials */}
-            <div className="py-24 bg-white">
+            <section className="py-24 bg-white" aria-labelledby="testimonials-title">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-16">Loved by job seekers</h2>
+                    <h2 id="testimonials-title" className="text-3xl font-bold text-center text-gray-900 mb-16">Loved by job seekers</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[
                             {
@@ -271,13 +271,13 @@ const Landing = () => {
                         ))}
                     </div>
                 </div>
-            </div>
+            </section>
 
             {/* FAQ Section */}
-            <div className="py-24 bg-white">
+            <section className="py-24 bg-white" aria-labelledby="faq-title">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+                        <h2 id="faq-title" className="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
                         <p className="text-gray-600">Got questions? We've got answers.</p>
                     </div>
 
@@ -312,13 +312,13 @@ const Landing = () => {
                         ))}
                     </div>
                 </div>
-            </div>
+            </section>
 
             {/* CTA Section */}
-            <div className="bg-indigo-600 py-20 relative overflow-hidden">
+            <section className="bg-indigo-600 py-20 relative overflow-hidden" aria-labelledby="cta-title">
                 <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
                 <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-                    <h2 className="text-4xl font-bold text-white mb-6">Ready to upgrade your career?</h2>
+                    <h2 id="cta-title" className="text-4xl font-bold text-white mb-6">Ready to upgrade your career?</h2>
                     <p className="text-indigo-100 text-xl mb-10 max-w-2xl mx-auto">
                         Join thousands of professionals who improved their resume with ATSense.
                     </p>
@@ -327,8 +327,8 @@ const Landing = () => {
                     </Link>
                     <p className="mt-6 text-indigo-200 text-sm">No credit card required • Cancel anytime</p>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     );
 };
 

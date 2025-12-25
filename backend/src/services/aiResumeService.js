@@ -89,6 +89,7 @@ CRITICAL RULES:
 - For dates, use formats like "Jan 2020" or "2020-2023"
 - For responsibilities, extract ALL bullet points as separate array items
 - If a field is not found, use empty array [] or empty string "", never omit it
+- IMPORTANT: Preserve any regional languages (like Malayalam, Hindi, etc.) found in the text. Do not translate them to English; keep the original script for name, address, or specific role details if written in regional scripts.
 - Return ONLY valid JSON, no markdown formatting
 
 Required Format:

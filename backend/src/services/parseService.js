@@ -92,8 +92,8 @@ async function extractTextWithOCR(fileBuffer) {
 
         console.log(`OCR: Processing ${pngFiles.length} page(s)...`);
 
-        // Initialize Tesseract worker
-        const worker = await createWorker('eng');
+        // Initialize Tesseract worker with English and Malayalam support
+        const worker = await createWorker('eng+mal');
 
         let fullText = '';
 
