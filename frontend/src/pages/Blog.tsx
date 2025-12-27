@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { blogPosts } from '../data/blogPosts';
 import { Search, ArrowRight, Sparkles } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const Blog = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -18,6 +19,11 @@ const Blog = () => {
 
     return (
         <div className="bg-gray-50 min-h-screen">
+            <SEO
+                title="Career Blog - Resume Tips, ATS Guides & Job Advice"
+                description="Expert advice on resume optimization, beating ATS algorithms, LinkedIn profiles, and career growth. Stay updated with the latest job search strategies."
+                url="https://atsense.online/blog"
+            />
             {/* Hero Section */}
             <div className="bg-white border-b border-gray-100 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-indigo-50 to-transparent pointer-events-none"></div>
@@ -60,8 +66,8 @@ const Blog = () => {
                             key={category}
                             onClick={() => setSelectedCategory(category)}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === category
-                                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
-                                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
+                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                                 }`}
                         >
                             {category}
@@ -80,8 +86,8 @@ const Blog = () => {
                             >
                                 <div className="h-52 bg-gray-100 relative overflow-hidden group-hover:opacity-90 transition-opacity">
                                     <div className={`absolute inset-0 bg-gradient-to-br ${post.id % 3 === 0 ? 'from-purple-100 to-indigo-50' :
-                                            post.id % 2 === 0 ? 'from-blue-50 to-cyan-50' :
-                                                'from-indigo-50 to-pink-50'
+                                        post.id % 2 === 0 ? 'from-blue-50 to-cyan-50' :
+                                            'from-indigo-50 to-pink-50'
                                         }`}></div>
 
                                     {/* Abstract Pattern overlay */}

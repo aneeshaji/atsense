@@ -1,6 +1,7 @@
 import { useParams, Link, Navigate } from 'react-router-dom';
-import { ArrowLeft, Clock, User, Calendar, Share2, Linkedin, Twitter, Bookmark } from 'lucide-react';
+import { ArrowLeft, Clock, Calendar, Share2, Linkedin, Twitter, Bookmark } from 'lucide-react';
 import { blogPosts } from '../data/blogPosts';
+import SEO from '../components/SEO';
 
 const BlogDetails = () => {
     const { id } = useParams();
@@ -15,6 +16,11 @@ const BlogDetails = () => {
 
     return (
         <div className="bg-white min-h-screen pb-20">
+            <SEO
+                title={post.title}
+                description={post.excerpt}
+                url={`https://atsense.online/blog/${post.id}`}
+            />
             {/* Header/Hero */}
             <div className="bg-gray-50 border-b border-gray-100 pt-20 pb-16">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -176,7 +176,7 @@ const Landing = () => {
                                 ))}
                             </ul>
 
-                            <Link to="/register" className="w-full py-4 px-6 text-center font-bold text-indigo-600 bg-indigo-50 rounded-2xl hover:bg-indigo-100 transition-colors">
+                            <Link to="/register" className="w-full py-4 px-6 text-center font-bold text-indigo-600 bg-indigo-50 rounded-2xl hover:bg-indigo-100 transition-colors" aria-label="Get Started with Free Plan">
                                 Get Started Free
                             </Link>
                         </div>
@@ -216,16 +216,94 @@ const Landing = () => {
                                 ))}
                             </ul>
 
-                            <button disabled className="w-full py-4 px-6 text-center font-bold text-white bg-indigo-600 rounded-2xl opacity-80 cursor-not-allowed">
+                            <button disabled className="w-full py-4 px-6 text-center font-bold text-white bg-indigo-600 rounded-2xl opacity-80 cursor-not-allowed" aria-label="Join Waitlist for Pro Plan">
                                 Join the Waitlist
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Background Decor */}
                 <div className="absolute top-1/2 left-0 w-64 h-64 bg-indigo-100/50 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 opacity-60"></div>
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100/50 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 opacity-60"></div>
+            </section>
+
+            {/* Keyword Rich Section */}
+            <section className="py-24 bg-white" aria-labelledby="why-title">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                        <div className="order-2 md:order-1">
+                            <h2 id="why-title" className="text-3xl font-bold text-gray-900 mb-6">Why use an AI Resume Optimizer?</h2>
+                            <p className="text-gray-600 mb-6 leading-relaxed text-lg">
+                                75% of resumes are rejected by an <strong>Applicant Tracking System (ATS)</strong> before they even reach a recruiter. Our AI-driven software acts as your personal career coach, helping you navigate the complex world of modern hiring.
+                            </p>
+                            <ul className="space-y-4">
+                                <li className="flex gap-3">
+                                    <CheckCircle className="text-indigo-600 shrink-0" size={24} />
+                                    <span><strong>Standardize Formatting:</strong> We ensure your resume is parsed correctly by systems like Workday, Greenhouse, and Taleo.</span>
+                                </li>
+                                <li className="flex gap-3">
+                                    <CheckCircle className="text-indigo-600 shrink-0" size={24} />
+                                    <span><strong>Keyword Matching:</strong> Our GPT-4 engine identifies the exact skills and keywords missing from your profile based on the job description.</span>
+                                </li>
+                                <li className="flex gap-3">
+                                    <CheckCircle className="text-indigo-600 shrink-0" size={24} />
+                                    <span><strong>ATS Score Breakdown:</strong> Get a detailed report on how your resume performs against industry benchmarks.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div className="order-1 md:order-2 bg-indigo-50 rounded-[2.5rem] p-12 flex items-center justify-center">
+                            <div className="text-center">
+                                <div className="text-6xl font-black text-indigo-600 mb-2">3x</div>
+                                <div className="text-gray-900 font-bold text-xl uppercase tracking-wider">More Interviews</div>
+                                <div className="text-gray-500 mt-2">Guaranteed with optimization</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* New Keyword-Rich Section: Success Stories */}
+            <section className="py-24 bg-gray-50" aria-labelledby="success-stories-title">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 id="success-stories-title" className="text-3xl font-bold text-gray-900 mb-4">Real Results, Real Success</h2>
+                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                            Our users are landing jobs at top companies thanks to our advanced <strong>AI resume optimization</strong> and <strong>ATS checker</strong> technology.
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="p-8 rounded-2xl bg-white border border-gray-100 shadow-sm">
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Increased Interview Rate</h3>
+                            <p className="text-gray-600 leading-relaxed mb-4">
+                                Job seekers using ATSense report a <strong>300% increase in interview invitations</strong>. Our <strong>AI resume builder</strong> ensures your profile stands out.
+                            </p>
+                            <div className="flex items-center gap-2 text-indigo-600 font-semibold">
+                                <TrendingUp size={20} />
+                                Boost your career
+                            </div>
+                        </div>
+                        <div className="p-8 rounded-2xl bg-white border border-gray-100 shadow-sm">
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Top Company Placements</h3>
+                            <p className="text-gray-600 leading-relaxed mb-4">
+                                Our optimized resumes have helped users secure positions at Fortune 500 companies. Leverage our <strong>CV optimization</strong> for elite roles.
+                            </p>
+                            <div className="flex items-center gap-2 text-indigo-600 font-semibold">
+                                <Star size={20} />
+                                Land your dream job
+                            </div>
+                        </div>
+                        <div className="p-8 rounded-2xl bg-white border border-gray-100 shadow-sm">
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Time-Saving Efficiency</h3>
+                            <p className="text-gray-600 leading-relaxed mb-4">
+                                Spend less time tweaking your resume and more time preparing for interviews. Our <strong>resume scanner</strong> does the heavy lifting.
+                            </p>
+                            <div className="flex items-center gap-2 text-indigo-600 font-semibold">
+                                <Zap size={20} />
+                                Apply smarter, not harder
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             {/* Testimonials */}
