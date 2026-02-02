@@ -6,7 +6,7 @@ import ATSScoreBreakdown from '../components/ATSScoreBreakdown';
 import { useToast } from '../context/ToastContext';
 
 interface Resume {
-	_id?: string;
+	id?: string;
 	title: string;
 	atsScore: number;
 	experience: any[];
@@ -91,16 +91,16 @@ function ResumeEditor() {
 		if (!resume) return;
 		setSaving(true);
 		try {
-			const endpoint = resume._id ? `/resumes/${resume._id}` : '/resumes';
-			const method = resume._id ? 'put' : 'post';
+			const endpoint = resume.id ? `/resumes/${resume.id}` : '/resumes';
+			const method = resume.id ? 'put' : 'post';
 
 			// @ts-ignore
 			const res = await api[method](endpoint, resume);
 			setResume(res.data);
-			if (!resume._id) navigate(`/resume/${res.data._id}`);
+			if (!resume.id) navigate(`/resume/${res.data.id}`);
 
 			// Refresh breakdown after save
-			if (res.data._id) fetchBreakdown(res.data._id);
+			if (res.data.id) fetchBreakdown(res.data.id);
 
 			showToast('Resume saved successfully!', 'success');
 		} catch (err) {
@@ -113,21 +113,21 @@ function ResumeEditor() {
 
 	// Generate ATS optimized content
 	const generateAI = async () => {
-		if (!resume?._id) return;
+		if (!resume?.id) return;
 
 		setOptimizing(true);
 		try {
 			await api.post('/ai/generate', {
-				resumeId: resume._id,
+				resumeId: resume.id,
 				jobTitle,
 				jobDescription,
 			});
 
-			const updated = await api.get(`/resumes/${resume._id}`);
+			const updated = await api.get(`/resumes/${resume.id}`);
 			setResume(updated.data);
 
 			// Refresh breakdown after optimization
-			fetchBreakdown(resume._id);
+			fetchBreakdown(resume.id);
 
 			showToast('Resume optimized successfully!', 'success');
 		} catch (err: any) {
@@ -161,9 +161,9 @@ function ResumeEditor() {
 						{saving ? 'Saving...' : 'Save Changes'}
 					</button>
 
-					{resume._id && (
+					{resume.id && (
 						<>
-							<button onClick={() => navigate(`/preview/${resume._id}`)} className="btn-secondary">
+							<button onClick={() => navigate(`/preview/${resume.id}`)} className="btn-secondary">
 								Preview
 							</button>
 						</>
@@ -278,7 +278,7 @@ function ResumeEditor() {
 				{/* RIGHT COLUMN - AI Tools */}
 				<div className="space-y-6">
 					{/* ATS Score Breakdown */}
-					{resume._id && (
+					{resume.id && (
 						<ATSScoreBreakdown breakdown={atsBreakdown} />
 					)}
 
@@ -313,17 +313,17 @@ function ResumeEditor() {
 
 							<button
 								onClick={generateAI}
-								disabled={!resume._id || !jobTitle || optimizing}
+								disabled={!resume.id || !jobTitle || optimizing}
 								className="w-full btn-primary py-3 shadow-indigo-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{optimizing ? 'Optimizing...' : 'Optimize Resume'}
 							</button>
-							{!resume._id && (
+							{!resume.id && (
 								<p className="text-xs text-red-500 text-center mt-2">
 									Please <b>Save Changes</b> above before optimizing.
 								</p>
 							)}
-							{resume._id && !jobTitle && (
+							{resume.id && !jobTitle && (
 								<p className="text-xs text-amber-600 text-center mt-2">
 									Enter a <b>Target Job Title</b> to enable.
 								</p>

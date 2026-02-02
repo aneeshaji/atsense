@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, CheckCircle2 } from 'lucide-react';
+import { Send, CheckCircle2, Sparkles } from 'lucide-react';
 
 
 const Footer = () => {
@@ -20,29 +20,44 @@ const Footer = () => {
     };
 
     return (
-        <footer className="bg-white border-t border-gray-100 mt-auto">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <footer className="relative bg-gradient-to-br from-gray-50 via-purple-50/30 to-gray-50 border-t border-purple-100 mt-auto overflow-hidden">
+            {/* Organic Background Blobs */}
+            <div className="absolute inset-0 overflow-hidden opacity-30">
+                <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-200 rounded-full blur-[100px] animate-float-slow"></div>
+                <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-pink-200 rounded-full blur-[120px] animate-float"></div>
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
                 {/* Newsletter Section */}
-                <div className="mb-16 p-8 rounded-[2rem] bg-indigo-600 relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                <div className="mb-16 p-10 rounded-[3rem] bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 relative overflow-hidden shadow-2xl">
+                    {/* Animated Background Blobs */}
+                    <div className="absolute inset-0 overflow-hidden opacity-20">
+                        <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl animate-float"></div>
+                        <div className="absolute bottom-0 right-0 w-80 h-80 bg-white rounded-full blur-3xl animate-float-slow"></div>
+                    </div>
+
                     <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
                         <div className="text-center lg:text-left">
-                            <h3 className="text-2xl font-bold text-white mb-2">Get Job Search Tips</h3>
-                            <p className="text-indigo-100 font-medium">Join 10,000+ job seekers getting our weekly AI career insights.</p>
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white font-bold text-sm mb-4">
+                                <Sparkles className="w-4 h-4 animate-pulse" />
+                                <span>Weekly AI Insights</span>
+                            </div>
+                            <h3 className="text-3xl font-black text-white mb-2">Get Job Search Tips</h3>
+                            <p className="text-white/90 font-medium">Join 10,000+ job seekers getting our weekly AI career insights.</p>
                         </div>
 
                         {status === 'success' ? (
-                            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/20 animate-fade-in">
-                                <CheckCircle2 className="text-green-400" size={24} />
+                            <div className="flex items-center gap-3 bg-white/20 backdrop-blur-xl px-6 py-4 rounded-full border border-white/30 animate-fade-in shadow-lg">
+                                <CheckCircle2 className="text-green-300" size={24} />
                                 <span className="text-white font-bold">You're on the list! Check your inbox soon.</span>
                             </div>
                         ) : (
-                            <form onSubmit={handleSubscribe} className="flex w-full max-w-md gap-2">
+                            <form onSubmit={handleSubscribe} className="flex w-full max-w-md gap-3">
                                 <input
                                     type="email"
                                     required
                                     placeholder="Enter your email"
-                                    className="flex-1 px-5 py-4 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-indigo-200 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all font-medium"
+                                    className="flex-1 px-6 py-4 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all font-medium shadow-lg"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     disabled={status === 'loading'}
@@ -50,10 +65,10 @@ const Footer = () => {
                                 <button
                                     type="submit"
                                     disabled={status === 'loading'}
-                                    className="px-6 py-4 bg-white text-indigo-600 font-bold rounded-2xl hover:bg-indigo-50 transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                                    className="px-8 py-4 bg-white text-purple-600 font-bold rounded-full hover:bg-gray-50 transition-all shadow-xl hover:shadow-2xl active:scale-95 disabled:opacity-50 flex items-center gap-2 hover:scale-105 duration-300"
                                 >
                                     {status === 'loading' ? (
-                                        <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                                        <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
                                     ) : (
                                         <>
                                             Subscribe
@@ -70,54 +85,54 @@ const Footer = () => {
                     {/* Brand Section */}
                     <div className="col-span-2 lg:col-span-2">
                         <Link to="/" className="flex items-center gap-3 mb-6 group">
-                            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-shadow">
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-12 h-12 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </div>
-                            <span className="font-bold text-2xl text-gray-900 tracking-tight">ATSense</span>
+                            <span className="font-black text-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">ATSense</span>
                         </Link>
 
-                        <p className="text-gray-500 text-lg leading-relaxed max-w-sm mb-8 font-medium">
+                        <p className="text-gray-600 leading-relaxed max-w-sm mb-8 font-medium">
                             Helping job seekers land their dream jobs with AI-powered resume optimization and intelligent insights.
                         </p>
 
                     </div>
 
                     {/* Product Links */}
-                    <div>
-                        <h3 className="font-bold text-gray-900 mb-6 text-sm uppercase tracking-wider">Product</h3>
-                        <ul className="space-y-4 text-sm text-gray-600 font-medium">
-                            <li><Link to="/dashboard" className="hover:text-indigo-600 transition-colors">Resumes</Link></li>
-                            <li><Link to="/cover-letters" className="hover:text-indigo-600 transition-colors">Cover Letters</Link></li>
-                            <li><Link to="/job-matcher" className="hover:text-indigo-600 transition-colors">Job Matcher</Link></li>
+                    <div className="group">
+                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider">Product</h3>
+                        <ul className="space-y-3 text-sm text-gray-600 font-medium">
+                            <li><Link to="/dashboard" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Resumes</Link></li>
+                            <li><Link to="/cover-letters" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Cover Letters</Link></li>
+                            <li><Link to="/job-matcher" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Job Matcher</Link></li>
                         </ul>
                     </div>
 
                     {/* Company Links */}
-                    <div>
-                        <h3 className="font-bold text-gray-900 mb-6 text-sm uppercase tracking-wider">Company</h3>
-                        <ul className="space-y-4 text-sm text-gray-600 font-medium">
-                            <li><Link to="/about" className="hover:text-indigo-600 transition-colors">About Us</Link></li>
-                            <li><Link to="/blog" className="hover:text-indigo-600 transition-colors">Blog</Link></li>
-                            <li><Link to="/contact" className="hover:text-indigo-600 transition-colors">Contact</Link></li>
+                    <div className="group">
+                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider">Company</h3>
+                        <ul className="space-y-3 text-sm text-gray-600 font-medium">
+                            <li><Link to="/about" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">About Us</Link></li>
+                            <li><Link to="/blog" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Blog</Link></li>
+                            <li><Link to="/contact" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Contact</Link></li>
                         </ul>
                     </div>
 
                     {/* Legal Links */}
-                    <div>
-                        <h3 className="font-bold text-gray-900 mb-6 text-sm uppercase tracking-wider">Legal</h3>
-                        <ul className="space-y-4 text-sm text-gray-600 font-medium">
-                            <li><Link to="/privacy" className="hover:text-indigo-600 transition-colors">Privacy</Link></li>
-                            <li><Link to="/terms" className="hover:text-indigo-600 transition-colors">Terms</Link></li>
-                            <li><Link to="/security" className="hover:text-indigo-600 transition-colors">Security</Link></li>
+                    <div className="group">
+                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider">Legal</h3>
+                        <ul className="space-y-3 text-sm text-gray-600 font-medium">
+                            <li><Link to="/privacy" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Privacy</Link></li>
+                            <li><Link to="/terms" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Terms</Link></li>
+                            <li><Link to="/security" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Security</Link></li>
                         </ul>
                     </div>
                 </div>
 
-                <div className="pt-10 border-t border-gray-100">
-                    <p className="text-center text-sm text-gray-400 font-medium">
-                        &copy; {currentYear} ATSense Inc. All rights reserved.
+                <div className="pt-8 border-t border-gradient-to-r from-transparent via-purple-200 to-transparent">
+                    <p className="text-center text-sm text-gray-500 font-medium">
+                        &copy; {currentYear} ATSense Inc. All rights reserved. Made with <span className="text-red-500">❤</span> for job seekers worldwide.
                     </p>
                 </div>
             </div>
