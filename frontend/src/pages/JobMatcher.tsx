@@ -15,7 +15,7 @@ function JobMatcher() {
         api.get('/resumes')
             .then(res => {
                 setResumes(res.data);
-                if (res.data.length > 0) setSelectedResumeId(res.data[0]._id);
+                if (res.data.length > 0) setSelectedResumeId(res.data[0].id);
             })
             .catch(console.error);
     }, []);
@@ -57,7 +57,7 @@ function JobMatcher() {
                             onChange={e => setSelectedResumeId(e.target.value)}
                         >
                             {resumes.map(r => (
-                                <option key={r._id} value={r._id}>{r.title || 'Untitled'}</option>
+                                <option key={r.id} value={r.id}>{r.title || 'Untitled'}</option>
                             ))}
                         </select>
 

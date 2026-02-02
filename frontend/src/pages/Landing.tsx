@@ -1,347 +1,367 @@
 import { Link } from 'react-router-dom';
-import { FileText, CheckCircle, Zap, TrendingUp, Star, ArrowRight } from 'lucide-react';
-
+import { CheckCircle, Zap, Star, ArrowRight, Sparkles, Target, Award, ChevronDown, Rocket, Brain, Shield } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
 
 const Landing = () => {
+    const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+    // Animated counter
+    const AnimatedCounter = ({ end, duration = 2000, suffix = '' }: { end: number; duration?: number; suffix?: string }) => {
+        const [count, setCount] = useState(0);
+        const [hasStarted, setHasStarted] = useState(false);
+        const ref = useRef<HTMLDivElement>(null);
+
+        useEffect(() => {
+            const observer = new IntersectionObserver(
+                ([entry]) => {
+                    if (entry.isIntersecting && !hasStarted) {
+                        setHasStarted(true);
+                        const startTime = Date.now();
+                        const timer = setInterval(() => {
+                            const elapsed = Date.now() - startTime;
+                            const progress = Math.min(elapsed / duration, 1);
+                            setCount(Math.floor(progress * end));
+                            if (progress === 1) clearInterval(timer);
+                        }, 16);
+                        return () => clearInterval(timer);
+                    }
+                },
+                { threshold: 0.5 }
+            );
+
+            if (ref.current) observer.observe(ref.current);
+            return () => observer.disconnect();
+        }, [end, duration, hasStarted]);
+
+        return <div ref={ref}>{count}{suffix}</div>;
+    };
+
     return (
-        <main className="bg-white">
+        <div className="-mx-4 -my-8">
             <SEO
                 title="ATSense - #1 AI Resume Optimizer & ATS Checker"
                 description="Stop getting rejected. ATSense uses GPT-4 to optimize your resume for ATS systems and helps you land 3x more interviews."
                 keywords="resume optimizer, ats checker, ai resume builder, cv optimization, career tools, job search, resume scanner"
             />
-            {/* Hero Section */}
-            <section className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50 pt-16 pb-32">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center max-w-4xl mx-auto">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-100 text-indigo-700 font-semibold text-sm mb-8 animate-fade-in-up">
-                            <span className="relative flex h-3 w-3">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
-                            </span>
-                            Now with GPT-4 Powered Analysis
-                        </div>
-                        <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight mb-8 leading-tight">
-                            Beat the ATS. <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Get Hired Faster.</span>
-                        </h1>
-                        <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-                            Stop getting rejected by robots. Our AI-powered resume optimizer ensures your application passes the Applicant Tracking System and lands in front of human recruiters.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link to="/register" className="inline-flex justify-center items-center px-8 py-4 text-lg font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/30 transform hover:-translate-y-1">
-                                Optimize My Resume Free
-                                <ArrowRight className="ml-2" size={20} />
-                            </Link>
-                            <Link to="/about" className="inline-flex justify-center items-center px-8 py-4 text-lg font-bold rounded-xl text-gray-700 bg-white border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 transition-all">
-                                How It Works
-                            </Link>
-                        </div>
-                        <div className="mt-12 flex items-center justify-center gap-8 text-sm text-gray-500 font-medium">
-                            <div className="flex items-center gap-2">
-                                <CheckCircle className="text-green-500" size={18} />
-                                No credit card required
+
+            {/* Hero Section - Fluid Organic Design with NO gap */}
+            <section className="relative min-h-screen flex items-center bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 overflow-hidden">
+                {/* Animated Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 animate-gradient"></div>
+
+                {/* Organic Flowing Blobs */}
+                <div className="absolute inset-0 overflow-hidden opacity-20">
+                    <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-white rounded-full blur-[100px] animate-float"></div>
+                    <div className="absolute -bottom-40 -right-40 w-[700px] h-[700px] bg-white rounded-full blur-[120px] animate-float-slow"></div>
+                    <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-white rounded-full blur-[80px] animate-wave"></div>
+                </div>
+
+                {/* Floating Particles */}
+                <div className="absolute inset-0 overflow-hidden">
+                    {[...Array(15)].map((_, i) => (
+                        <div
+                            key={i}
+                            className="particle absolute bg-white rounded-full opacity-40"
+                            style={{
+                                width: Math.random() * 8 + 4 + 'px',
+                                height: Math.random() * 8 + 4 + 'px',
+                                left: Math.random() * 100 + '%',
+                                bottom: '-20px',
+                                animation: `particleFloat ${Math.random() * 10 + 10}s linear infinite`,
+                                animationDelay: Math.random() * 5 + 's'
+                            }}
+                        />
+                    ))}
+                </div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        {/* Left Content */}
+                        <div className="text-white space-y-6">
+                            <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white font-bold shadow-2xl">
+                                <Sparkles className="w-5 h-5 text-yellow-300 animate-pulse" />
+                                <span>Powered by GPT-4 AI Technology</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <CheckCircle className="text-green-500" size={18} />
-                                95% Success Rate
+
+                            <h1 className="text-5xl md:text-6xl font-black leading-tight">
+                                Beat the ATS.
+                                <br />
+                                <span className="gradient-text-animated inline-block">
+                                    Get Hired Faster.
+                                </span>
+                            </h1>
+
+                            <p className="text-lg text-white/90 leading-relaxed max-w-xl">
+                                Stop getting rejected by robots. Our AI-powered resume optimizer ensures your application passes the Applicant Tracking System and lands in front of human recruiters.
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                                <Link
+                                    to="/register"
+                                    className="group relative inline-flex justify-center items-center px-8 py-4 text-lg font-bold rounded-full text-purple-600 bg-white hover:bg-gray-50 transition-all shadow-2xl hover:shadow-white/50 transform hover:scale-105 overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 shimmer"></div>
+                                    <Rocket className="mr-2 group-hover:translate-x-1 transition-transform" size={22} />
+                                    Optimize My Resume Free
+                                    <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={22} />
+                                </Link>
+                                <Link
+                                    to="/about"
+                                    className="inline-flex justify-center items-center px-8 py-4 text-lg font-bold rounded-full text-white bg-white/10 backdrop-blur-xl border-2 border-white/30 hover:bg-white/20 transition-all shadow-xl"
+                                >
+                                    How It Works
+                                </Link>
+                            </div>
+
+                            <div className="flex items-center gap-8 text-sm text-white/90 font-semibold pt-2">
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle className="text-green-300" size={18} />
+                                    No credit card required
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle className="text-green-300" size={18} />
+                                    95% Success Rate
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Content - Flowing Organic Stats */}
+                        <div className="relative">
+                            <div className="relative backdrop-blur-3xl bg-white/10 border border-white/20 rounded-[4rem] p-8 shadow-2xl transform hover:scale-105 transition-all duration-700">
+                                {/* Soft ambient glow */}
+                                <div className="absolute -inset-4 rounded-[5rem] bg-gradient-to-r from-cyan-400/30 via-purple-400/30 to-pink-400/30 blur-3xl"></div>
+
+                                <div className="relative space-y-4">
+                                    <h3 className="text-xl font-bold text-white text-center mb-6">Real-Time Success Metrics</h3>
+
+                                    {/* Flowing pill-shaped stats */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between px-6 py-4 rounded-full bg-gradient-to-r from-cyan-400/30 to-blue-500/30 backdrop-blur-sm border border-white/30 hover:scale-105 transition-all">
+                                            <div className="text-3xl font-black text-cyan-200">
+                                                <AnimatedCounter end={3} suffix="x" />
+                                            </div>
+                                            <div className="text-white font-bold text-sm">More Interviews</div>
+                                        </div>
+                                        <div className="flex items-center justify-between px-6 py-4 rounded-full bg-gradient-to-r from-purple-400/30 to-pink-500/30 backdrop-blur-sm border border-white/30 hover:scale-105 transition-all">
+                                            <div className="text-3xl font-black text-purple-200">
+                                                <AnimatedCounter end={95} suffix="%" />
+                                            </div>
+                                            <div className="text-white font-bold text-sm">Success Rate</div>
+                                        </div>
+                                        <div className="flex items-center justify-between px-6 py-4 rounded-full bg-gradient-to-r from-pink-400/30 to-rose-500/30 backdrop-blur-sm border border-white/30 hover:scale-105 transition-all">
+                                            <div className="text-3xl font-black text-pink-200">
+                                                <AnimatedCounter end={10} suffix="k+" />
+                                            </div>
+                                            <div className="text-white font-bold text-sm">Happy Users</div>
+                                        </div>
+                                        <div className="flex items-center justify-between px-6 py-4 rounded-full bg-gradient-to-r from-blue-400/30 to-indigo-500/30 backdrop-blur-sm border border-white/30 hover:scale-105 transition-all">
+                                            <div className="text-3xl font-black text-blue-200">24/7</div>
+                                            <div className="text-white font-bold text-sm">AI Support</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-6 p-5 rounded-[2rem] bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-300/30 backdrop-blur-sm">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Award className="text-yellow-300" size={20} />
+                                            <span className="text-white font-bold text-sm">Trusted by Top Companies</span>
+                                        </div>
+                                        <p className="text-white/90 text-xs leading-relaxed">
+                                            Our users have landed jobs at Google, Microsoft, Amazon, and 500+ Fortune 500 companies.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Background decorative blobs */}
-                <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-0 pointer-events-none">
-                    <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-br from-purple-100/40 to-transparent rounded-bl-full blur-3xl transform translate-x-1/3 -translate-y-1/4"></div>
-                    <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-tr from-indigo-100/40 to-transparent rounded-tr-full blur-3xl transform -translate-x-1/3 translate-y-1/4"></div>
+                {/* Scroll Indicator */}
+                <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+                    <ChevronDown className="text-white/70" size={36} />
                 </div>
             </section>
 
-            {/* Features Grid */}
-            <section className="py-24 bg-white" aria-labelledby="features-title">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Features Grid - Organic Cards */}
+            <section className="py-24 bg-gradient-to-b from-white via-purple-50/30 to-white relative overflow-hidden">
+                {/* Subtle background pattern */}
+                <div className="absolute inset-0 opacity-5">
+                    <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, purple 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
+                </div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-16">
-                        <h2 id="features-title" className="text-3xl font-bold text-gray-900 mb-4">Everything you need to land the job</h2>
-                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                            Powerful tools designed to help you stand out in a crowded job market.
+                        <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-purple-100 text-purple-700 font-bold text-sm mb-6">
+                            <Target size={16} />
+                            Everything You Need
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
+                            Powerful Tools to <span className="gradient-text-animated">Land the Job</span>
+                        </h2>
+                        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                            Designed to help you stand out in a crowded job market with cutting-edge AI technology.
                         </p>
                     </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {/* Feature 1 */}
-                        <div className="p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:shadow-xl transition-shadow group">
-                            <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform">
-                                <FileText size={28} />
+                        {/* Feature 1 - Organic blob card */}
+                        <div className="group relative">
+                            <div className="relative p-8 rounded-[3rem] bg-white border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                                {/* Organic blob background */}
+                                <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-full blur-3xl group-hover:scale-150 transition-all duration-700"></div>
+                                <div className="relative">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center text-white mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg shadow-blue-500/30">
+                                        <Brain size={28} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3">Smart Resume Analysis</h3>
+                                    <p className="text-gray-600 leading-relaxed text-sm">
+                                        Get instant, actionable feedback on your resume. Identify missing keywords and formatting issues that block you from getting interviews.
+                                    </p>
+                                </div>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Smart Resume Analysis</h3>
-                            <p className="text-gray-600 leading-relaxed">
-                                Get instant, actionable feedback on your resume. Identify missing keywords and formatting issues that block you from getting interviews.
-                            </p>
                         </div>
+
                         {/* Feature 2 */}
-                        <div className="p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:shadow-xl transition-shadow group">
-                            <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform">
-                                <Zap size={28} />
+                        <div className="group relative">
+                            <div className="relative p-8 rounded-[3rem] bg-white border border-purple-100 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                                <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl group-hover:scale-150 transition-all duration-700"></div>
+                                <div className="relative">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-3xl flex items-center justify-center text-white mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg shadow-purple-500/30">
+                                        <Zap size={28} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3">AI Cover Letters</h3>
+                                    <p className="text-gray-600 leading-relaxed text-sm">
+                                        Generate personalized cover letters in seconds. Our AI analyzes the job description and your resume to craft the perfect pitch.
+                                    </p>
+                                </div>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">AI Cover Letters</h3>
-                            <p className="text-gray-600 leading-relaxed">
-                                Generate personalized cover letters in seconds. Our AI analyzes the job description and your resume to craft the perfect pitch.
-                            </p>
                         </div>
+
                         {/* Feature 3 */}
-                        <div className="p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:shadow-xl transition-shadow group">
-                            <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-6 group-hover:scale-110 transition-transform">
-                                <TrendingUp size={28} />
+                        <div className="group relative">
+                            <div className="relative p-8 rounded-[3rem] bg-white border border-green-100 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                                <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-full blur-3xl group-hover:scale-150 transition-all duration-700"></div>
+                                <div className="relative">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl flex items-center justify-center text-white mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg shadow-green-500/30">
+                                        <Shield size={28} />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3">Job Match Scorer</h3>
+                                    <p className="text-gray-600 leading-relaxed text-sm">
+                                        See exactly how well you match a job description before applying. Save time by focusing on roles where you're a top candidate.
+                                    </p>
+                                </div>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Job Match Scorer</h3>
-                            <p className="text-gray-600 leading-relaxed">
-                                See exactly how well you match a job description before applying. Save time by focusing on roles where you're a top candidate.
-                            </p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* How It Works */}
-            <section className="py-24 bg-gray-900 text-white" aria-labelledby="how-it-works-title">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 id="how-it-works-title" className="text-3xl font-bold mb-4">How It Works</h2>
-                        <p className="text-xl text-gray-400">Three simple steps to your next job.</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-                        {/* Connecting Line */}
-                        <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gray-700 -z-0"></div>
-
-                        {/* Step 1 */}
-                        <div className="relative z-10 text-center">
-                            <div className="w-24 h-24 bg-gray-800 border-4 border-gray-900 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-xl">
-                                1
-                            </div>
-                            <h3 className="text-xl font-bold mb-3">Upload Resume</h3>
-                            <p className="text-gray-400">Import your existing resume or create one from scratch.</p>
-                        </div>
-                        {/* Step 2 */}
-                        <div className="relative z-10 text-center">
-                            <div className="w-24 h-24 bg-indigo-600 border-4 border-gray-900 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-xl shadow-indigo-900/50">
-                                2
-                            </div>
-                            <h3 className="text-xl font-bold mb-3">Analyze & Optimize</h3>
-                            <p className="text-gray-400">Our AI identifies gaps and adds the right keywords.</p>
-                        </div>
-                        {/* Step 3 */}
-                        <div className="relative z-10 text-center">
-                            <div className="w-24 h-24 bg-gray-800 border-4 border-gray-900 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-xl">
-                                3
-                            </div>
-                            <h3 className="text-xl font-bold mb-3">Get Hired</h3>
-                            <p className="text-gray-400">Apply with confidence and start getting interviews.</p>
-                        </div>
-                    </div>
+            {/* How It Works - Flowing Design */}
+            <section className="py-24 bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white relative overflow-hidden">
+                {/* Animated Waves */}
+                <div className="absolute bottom-0 left-0 right-0 h-64 overflow-hidden opacity-10">
+                    <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                        <path fill="white" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
+                            <animate attributeName="d" dur="10s" repeatCount="indefinite" values="
+                                M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z;
+                                M0,160L48,144C96,128,192,96,288,96C384,96,480,128,576,144C672,160,768,160,864,144C960,128,1056,96,1152,96C1248,96,1344,128,1392,144L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z;
+                                M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" />
+                        </path>
+                    </svg>
                 </div>
-            </section>
 
-            {/* Pricing Section */}
-            <section className="py-24 bg-slate-50 relative overflow-hidden" aria-labelledby="pricing-title">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-16">
-                        <h2 id="pricing-title" className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Flexible plans for every career stage</h2>
-                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">Start for free and upgrade as you grow. No hidden fees.</p>
+                        <h2 className="text-4xl md:text-5xl font-black mb-4">How It Works</h2>
+                        <p className="text-lg text-gray-300">Three simple steps to your next job.</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                        {/* Free Tier */}
-                        <div className="bg-white p-10 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col">
-                            <div className="mb-8">
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">Free</h3>
-                                <div className="flex items-baseline">
-                                    <span className="text-5xl font-black text-gray-900">$0</span>
-                                    <span className="text-gray-500 ml-2 font-medium">/forever</span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {[
+                            { num: 1, title: "Upload Resume", desc: "Import your existing resume or create one from scratch using our intuitive editor.", gradient: "from-cyan-400 to-blue-500" },
+                            { num: 2, title: "Analyze & Optimize", desc: "Our AI identifies gaps and adds the right keywords to beat ATS systems.", gradient: "from-purple-400 to-pink-500" },
+                            { num: 3, title: "Get Hired", desc: "Apply with confidence and start getting 3x more interview invitations.", gradient: "from-green-400 to-emerald-500" }
+                        ].map((step, i) => (
+                            <div key={i} className="group relative">
+                                <div className={`absolute -inset-2 bg-gradient-to-r ${step.gradient} rounded-[3rem] blur-2xl opacity-20 group-hover:opacity-40 transition-all`}></div>
+                                <div className="relative backdrop-blur-2xl bg-white/10 border border-white/20 rounded-[3rem] p-8 hover:bg-white/15 transition-all transform hover:scale-105 duration-500">
+                                    <div className={`w-20 h-20 bg-gradient-to-br ${step.gradient} rounded-full flex items-center justify-center text-3xl font-black mx-auto mb-6 shadow-2xl`}>
+                                        {step.num}
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-3 text-center">{step.title}</h3>
+                                    <p className="text-gray-300 text-center leading-relaxed text-sm">
+                                        {step.desc}
+                                    </p>
                                 </div>
-                                <p className="mt-4 text-gray-500 font-medium">Perfect for getting started with your job search.</p>
                             </div>
-
-                            <ul className="space-y-4 mb-10 flex-1">
-                                {[
-                                    'Up to 3 AI Resume Analyses',
-                                    'Standard ATS Optimization',
-                                    'Basic Job Match Scorer',
-                                    'Standard Resume Templates',
-                                    'Community Support'
-                                ].map((feature, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-gray-600 font-medium text-sm">
-                                        <CheckCircle className="text-green-500 shrink-0" size={18} />
-                                        {feature}
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <Link to="/register" className="w-full py-4 px-6 text-center font-bold text-indigo-600 bg-indigo-50 rounded-2xl hover:bg-indigo-100 transition-colors" aria-label="Get Started with Free Plan">
-                                Get Started Free
-                            </Link>
-                        </div>
-
-                        {/* Pro Tier (Coming Soon) */}
-                        <div className="relative p-10 rounded-3xl bg-white border-2 border-indigo-500 shadow-2xl shadow-indigo-100 flex flex-col transform md:scale-105 z-20">
-                            <div className="absolute top-0 right-10 -translate-y-1/2 bg-indigo-600 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg">
-                                Coming Soon
-                            </div>
-
-                            <div className="mb-8">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <h3 className="text-xl font-bold text-gray-900">Pro</h3>
-                                    <span className="bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded uppercase">Best Value</span>
-                                </div>
-                                <div className="flex items-baseline">
-                                    <span className="text-5xl font-black text-gray-900">$9</span>
-
-                                    <span className="text-gray-500 ml-2 font-medium">/month</span>
-                                </div>
-                                <p className="mt-4 text-gray-500 font-medium">Advanced tools for serious job seekers ready to land top roles.</p>
-                            </div>
-
-                            <ul className="space-y-4 mb-10 flex-1">
-                                {[
-                                    'Unlimited GPT-4 Optimizations',
-                                    'Personalized AI Cover Letters',
-                                    'LinkedIn Profile Optimizer',
-                                    'Priority Support (24h)',
-                                    'Exclusive Premium Templates',
-                                    'Custom Career Roadmap'
-                                ].map((feature, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-gray-600 font-medium text-sm">
-                                        <CheckCircle className="text-indigo-500 shrink-0" size={18} />
-                                        {feature}
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <button disabled className="w-full py-4 px-6 text-center font-bold text-white bg-indigo-600 rounded-2xl opacity-80 cursor-not-allowed" aria-label="Join Waitlist for Pro Plan">
-                                Join the Waitlist
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="absolute top-1/2 left-0 w-64 h-64 bg-indigo-100/50 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 opacity-60"></div>
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100/50 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 opacity-60"></div>
-            </section>
-
-            {/* Keyword Rich Section */}
-            <section className="py-24 bg-white" aria-labelledby="why-title">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-                        <div className="order-2 md:order-1">
-                            <h2 id="why-title" className="text-3xl font-bold text-gray-900 mb-6">Why use an AI Resume Optimizer?</h2>
-                            <p className="text-gray-600 mb-6 leading-relaxed text-lg">
-                                75% of resumes are rejected by an <strong>Applicant Tracking System (ATS)</strong> before they even reach a recruiter. Our AI-driven software acts as your personal career coach, helping you navigate the complex world of modern hiring.
-                            </p>
-                            <ul className="space-y-4">
-                                <li className="flex gap-3">
-                                    <CheckCircle className="text-indigo-600 shrink-0" size={24} />
-                                    <span><strong>Standardize Formatting:</strong> We ensure your resume is parsed correctly by systems like Workday, Greenhouse, and Taleo.</span>
-                                </li>
-                                <li className="flex gap-3">
-                                    <CheckCircle className="text-indigo-600 shrink-0" size={24} />
-                                    <span><strong>Keyword Matching:</strong> Our GPT-4 engine identifies the exact skills and keywords missing from your profile based on the job description.</span>
-                                </li>
-                                <li className="flex gap-3">
-                                    <CheckCircle className="text-indigo-600 shrink-0" size={24} />
-                                    <span><strong>ATS Score Breakdown:</strong> Get a detailed report on how your resume performs against industry benchmarks.</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div className="order-1 md:order-2 bg-indigo-50 rounded-[2.5rem] p-12 flex items-center justify-center">
-                            <div className="text-center">
-                                <div className="text-6xl font-black text-indigo-600 mb-2">3x</div>
-                                <div className="text-gray-900 font-bold text-xl uppercase tracking-wider">More Interviews</div>
-                                <div className="text-gray-500 mt-2">Guaranteed with optimization</div>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* New Keyword-Rich Section: Success Stories */}
-            <section className="py-24 bg-gray-50" aria-labelledby="success-stories-title">
+            {/* Stats Section */}
+            <section className="py-20 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 id="success-stories-title" className="text-3xl font-bold text-gray-900 mb-4">Real Results, Real Success</h2>
-                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                            Our users are landing jobs at top companies thanks to our advanced <strong>AI resume optimization</strong> and <strong>ATS checker</strong> technology.
-                        </p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <div className="p-8 rounded-2xl bg-white border border-gray-100 shadow-sm">
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Increased Interview Rate</h3>
-                            <p className="text-gray-600 leading-relaxed mb-4">
-                                Job seekers using ATSense report a <strong>300% increase in interview invitations</strong>. Our <strong>AI resume builder</strong> ensures your profile stands out.
-                            </p>
-                            <div className="flex items-center gap-2 text-indigo-600 font-semibold">
-                                <TrendingUp size={20} />
-                                Boost your career
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {[
+                            { end: 10000, suffix: '+', label: 'Happy Users', color: 'from-blue-500 to-indigo-600' },
+                            { end: 95, suffix: '%', label: 'Success Rate', color: 'from-purple-500 to-pink-600' },
+                            { end: 500, suffix: '+', label: 'Companies', color: 'from-green-500 to-emerald-600' },
+                            { end: 24, suffix: '/7', label: 'Support', color: 'from-orange-500 to-red-600' }
+                        ].map((stat, i) => (
+                            <div key={i} className="text-center p-6 rounded-[2rem] bg-gradient-to-br from-gray-50 to-purple-50 border border-purple-100 hover:border-purple-200 transition-all hover:scale-105 duration-500 shadow-sm hover:shadow-md">
+                                <div className={`text-4xl font-black bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-2`}>
+                                    <AnimatedCounter end={stat.end} suffix={stat.suffix} />
+                                </div>
+                                <div className="text-gray-600 font-bold text-sm">{stat.label}</div>
                             </div>
-                        </div>
-                        <div className="p-8 rounded-2xl bg-white border border-gray-100 shadow-sm">
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Top Company Placements</h3>
-                            <p className="text-gray-600 leading-relaxed mb-4">
-                                Our optimized resumes have helped users secure positions at Fortune 500 companies. Leverage our <strong>CV optimization</strong> for elite roles.
-                            </p>
-                            <div className="flex items-center gap-2 text-indigo-600 font-semibold">
-                                <Star size={20} />
-                                Land your dream job
-                            </div>
-                        </div>
-                        <div className="p-8 rounded-2xl bg-white border border-gray-100 shadow-sm">
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Time-Saving Efficiency</h3>
-                            <p className="text-gray-600 leading-relaxed mb-4">
-                                Spend less time tweaking your resume and more time preparing for interviews. Our <strong>resume scanner</strong> does the heavy lifting.
-                            </p>
-                            <div className="flex items-center gap-2 text-indigo-600 font-semibold">
-                                <Zap size={20} />
-                                Apply smarter, not harder
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* Testimonials */}
-            <section className="py-24 bg-white" aria-labelledby="testimonials-title">
+            {/* Testimonials - Organic Cards */}
+            <section className="py-24 bg-gradient-to-b from-purple-50/50 to-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 id="testimonials-title" className="text-3xl font-bold text-center text-gray-900 mb-16">Loved by job seekers</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <h2 className="text-4xl md:text-5xl font-black text-center text-gray-900 mb-16">
+                        Loved by <span className="gradient-text-animated">Job Seekers</span>
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {[
                             {
                                 name: "Alex Morgan",
                                 role: "Software Engineer",
                                 text: "I applied to 50 jobs with no response. After using ATSense, I got 3 interviews in a week. The keyword optimization is a game changer.",
-                                image: "AM"
+                                image: "AM",
+                                gradient: "from-blue-500 to-indigo-600"
                             },
                             {
                                 name: "Sarah Jenkins",
                                 role: "Marketing Manager",
                                 text: "The cover letter generator saved me hours. It writes better than I do! Highly recommend for anyone serious about their career.",
-                                image: "SJ"
+                                image: "SJ",
+                                gradient: "from-purple-500 to-pink-600"
                             },
                             {
                                 name: "David Chen",
                                 role: "Product Designer",
                                 text: "Finally, a tool that tells you exactly what's wrong with your resume. Simple, fast, and effective.",
-                                image: "DC"
+                                image: "DC",
+                                gradient: "from-green-500 to-emerald-600"
                             }
                         ].map((t, i) => (
-                            <div key={i} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
-                                <div className="flex text-yellow-400 mb-4">
+                            <div key={i} className="group relative bg-white p-8 rounded-[3rem] border border-gray-100 hover:border-purple-200 shadow-md hover:shadow-xl transition-all hover:-translate-y-2 duration-500 overflow-hidden">
+                                <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-purple-100/50 to-pink-100/50 rounded-full blur-3xl group-hover:scale-150 transition-all duration-700"></div>
+                                <div className="relative flex text-yellow-400 mb-4">
                                     {[...Array(5)].map((_, j) => <Star key={j} size={16} fill="currentColor" />)}
                                 </div>
-                                <p className="text-gray-600 mb-6 flex-1 italic">"{t.text}"</p>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                <p className="relative text-gray-700 mb-6 italic leading-relaxed text-sm">"{t.text}"</p>
+                                <div className="relative flex items-center gap-3">
+                                    <div className={`w-12 h-12 bg-gradient-to-br ${t.gradient} rounded-2xl flex items-center justify-center text-white font-bold text-sm shadow-lg`}>
                                         {t.image}
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-gray-900 text-sm">{t.name}</h4>
+                                        <h4 className="font-bold text-gray-900">{t.name}</h4>
                                         <p className="text-gray-500 text-xs">{t.role}</p>
                                     </div>
                                 </div>
@@ -351,15 +371,17 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* FAQ Section */}
-            <section className="py-24 bg-white" aria-labelledby="faq-title">
+            {/* FAQ - Smooth Accordion */}
+            <section className="py-24 bg-gradient-to-b from-white to-purple-50/50">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h2 id="faq-title" className="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-                        <p className="text-gray-600">Got questions? We've got answers.</p>
+                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
+                            Frequently Asked <span className="gradient-text-animated">Questions</span>
+                        </h2>
+                        <p className="text-gray-600 text-lg">Got questions? We've got answers.</p>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                         {[
                             {
                                 q: "How does the ATS score work?",
@@ -378,35 +400,78 @@ const Landing = () => {
                                 a: "The Free plan includes 3 full AI analyses, standard templates, and our job match scorer. It's everything you need to start seeing results."
                             }
                         ].map((faq, i) => (
-                            <div key={i} className="group p-6 rounded-2xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:shadow-xl transition-all duration-300">
-                                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-3">
-                                    <span className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm">?</span>
-                                    {faq.q}
-                                </h3>
-                                <p className="text-gray-600 leading-relaxed pl-11">
-                                    {faq.a}
-                                </p>
+                            <div key={i} className="group border border-purple-100 rounded-[2rem] overflow-hidden hover:border-purple-200 transition-all hover:shadow-md bg-white">
+                                <button
+                                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                                    className="w-full p-6 flex items-center justify-between hover:bg-purple-50/50 transition-all"
+                                >
+                                    <h3 className="text-base font-bold text-gray-900 text-left flex items-center gap-3">
+                                        <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 text-white flex items-center justify-center text-sm shrink-0 shadow-md">
+                                            ?
+                                        </span>
+                                        {faq.q}
+                                    </h3>
+                                    <ChevronDown
+                                        className={`text-purple-600 transition-transform duration-300 ${openFaq === i ? 'rotate-180' : ''}`}
+                                        size={22}
+                                    />
+                                </button>
+                                <div className={`overflow-hidden transition-all duration-500 ${openFaq === i ? 'max-h-64' : 'max-h-0'}`}>
+                                    <p className="px-6 pb-6 pl-16 text-gray-600 leading-relaxed text-sm">
+                                        {faq.a}
+                                    </p>
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className="bg-indigo-600 py-20 relative overflow-hidden" aria-labelledby="cta-title">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-                    <h2 id="cta-title" className="text-4xl font-bold text-white mb-6">Ready to upgrade your career?</h2>
-                    <p className="text-indigo-100 text-xl mb-10 max-w-2xl mx-auto">
-                        Join thousands of professionals who improved their resume with ATSense.
+            {/* CTA Section - Flowing Design */}
+            <section className="relative py-24 bg-gradient-to-br from-purple-600 via-fuchsia-600 to-pink-600 overflow-hidden">
+                {/* Animated Background */}
+                <div className="absolute inset-0 animate-gradient bg-gradient-to-br from-purple-600 via-fuchsia-600 to-pink-600"></div>
+
+                {/* Floating Organic Shapes */}
+                <div className="absolute inset-0 overflow-hidden opacity-20">
+                    {[...Array(8)].map((_, i) => (
+                        <div
+                            key={i}
+                            className="absolute bg-white rounded-full animate-float-slow blur-2xl"
+                            style={{
+                                width: Math.random() * 150 + 100 + 'px',
+                                height: Math.random() * 150 + 100 + 'px',
+                                left: Math.random() * 100 + '%',
+                                top: Math.random() * 100 + '%',
+                                animationDelay: Math.random() * 5 + 's'
+                            }}
+                        />
+                    ))}
+                </div>
+
+                <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
+                    <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white font-bold mb-8 shadow-2xl">
+                        <Sparkles className="w-5 h-5 animate-pulse" />
+                        <span>Start Your Success Story Today</span>
+                    </div>
+                    <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">
+                        Ready to upgrade your career?
+                    </h2>
+                    <p className="text-white/95 text-lg mb-10 max-w-3xl mx-auto leading-relaxed">
+                        Join thousands of professionals who improved their resume with ATSense and landed their dream jobs.
                     </p>
-                    <Link to="/register" className="inline-block px-10 py-4 bg-white text-indigo-600 font-bold rounded-xl text-lg hover:bg-gray-50 transition-colors shadow-2xl">
+                    <Link
+                        to="/register"
+                        className="group inline-flex items-center gap-3 px-10 py-5 bg-white text-purple-600 font-bold rounded-full text-xl hover:bg-gray-50 transition-all shadow-2xl hover:shadow-white/30 hover:scale-110 transform duration-500"
+                    >
+                        <Rocket className="group-hover:translate-y-[-4px] transition-transform" size={24} />
                         Start For Free
+                        <ArrowRight className="group-hover:translate-x-2 transition-transform" size={24} />
                     </Link>
-                    <p className="mt-6 text-indigo-200 text-sm">No credit card required • Cancel anytime</p>
+                    <p className="mt-6 text-white/90 font-medium text-sm">No credit card required • Cancel anytime</p>
                 </div>
             </section>
-        </main>
+        </div>
     );
 };
 

@@ -28,7 +28,7 @@ function CoverLetterGenerator() {
                 // Fetch resumes for selection dropdown
                 const resumeRes = await api.get('/resumes');
                 setResumes(resumeRes.data);
-                if (resumeRes.data.length > 0) setSelectedResumeId(resumeRes.data[0]._id);
+                if (resumeRes.data.length > 0) setSelectedResumeId(resumeRes.data[0].id);
 
                 // If editing/viewing existing
                 if (!isNew && id) {
@@ -63,7 +63,7 @@ function CoverLetterGenerator() {
                 jobDescription
             });
             // Redirect to view mode of the newly created letter
-            navigate(`/cover-letters/${res.data._id}`);
+            navigate(`/cover-letters/${res.data.id}`);
         } catch (err: any) {
             console.error(err);
             alert('Generation failed: ' + (err.response?.data?.message || err.message));
@@ -96,7 +96,7 @@ function CoverLetterGenerator() {
                                     onChange={e => setSelectedResumeId(e.target.value)}
                                 >
                                     {resumes.map(r => (
-                                        <option key={r._id} value={r._id}>{r.title || 'Untitled Resume'}</option>
+                                        <option key={r.id} value={r.id}>{r.title || 'Untitled Resume'}</option>
                                     ))}
                                 </select>
                             </div>

@@ -29,7 +29,7 @@ const LinkedInOptimizer = () => {
         try {
             const res = await api.get('/resumes');
             setResumes(res.data);
-            if (res.data.length > 0) setSelectedResumeId(res.data[0]._id);
+            if (res.data.length > 0) setSelectedResumeId(res.data[0].id);
         } catch (err) {
             console.error('Error fetching resumes:', err);
         }
@@ -91,7 +91,7 @@ const LinkedInOptimizer = () => {
                                     className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5"
                                 >
                                     {resumes.map(r => (
-                                        <option key={r._id} value={r._id}>
+                                        <option key={r.id} value={r.id}>
                                             {r.personalInfo?.fullName}'s Resume ({new Date(r.updatedAt).toLocaleDateString()})
                                         </option>
                                     ))}

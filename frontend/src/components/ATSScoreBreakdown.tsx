@@ -27,7 +27,14 @@ const ATSScoreBreakdown = ({ breakdown }: Props) => {
         );
     }
 
-    const { overallScore, breakdown: categories, missingKeywords, matchedKeywords, issues, recommendations } = breakdown;
+    const {
+        overallScore = 0,
+        breakdown: categories = {},
+        missingKeywords = [],
+        matchedKeywords = [],
+        issues = [],
+        recommendations = []
+    } = breakdown;
 
     const getScoreColor = (score: number) => {
         if (score >= 80) return 'text-green-600 bg-green-50';

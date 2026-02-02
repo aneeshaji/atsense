@@ -52,7 +52,7 @@ export interface Project {
 }
 
 export interface Resume {
-  _id: string;
+  id: string; // Changed from _id for SQL
   user: string;
   title: string;
   personalInfo: PersonalInfo;
@@ -92,7 +92,7 @@ export interface JobMatchResult {
 }
 
 export interface CoverLetter {
-  _id: string;
+  id: string; // Changed from _id for SQL
   user: string;
   resumeId: string;
   jobTitle: string;
@@ -103,7 +103,7 @@ export interface CoverLetter {
 }
 
 export interface User {
-  _id: string;
+  id: string; // Changed from _id for SQL
   email: string;
   name?: string;
   createdAt: string;
