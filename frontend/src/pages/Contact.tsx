@@ -31,37 +31,7 @@ const Contact = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                    {/* Contact Info */}
-                    <div>
-                        <div className="bg-gray-50 rounded-2xl p-8 mb-8">
-                            <h3 className="text-2xl font-bold text-gray-900 mb-8">Contact Information</h3>
-                            <div className="space-y-6">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 shrink-0">
-                                        <Mail size={20} />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-gray-900">Email Us</h4>
-                                        <p className="text-gray-600">support@atsense.com</p>
-                                        <p className="text-gray-600">business@atsense.com</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 shrink-0">
-                                        <MapPin size={20} />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-gray-900">Office</h4>
-                                        <p className="text-gray-600">Trivandrum</p>
-                                        <p className="text-gray-600">Kerala, India</p>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
+                <div className="max-w-2xl mx-auto">
                     {/* Contact Form */}
                     <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
                         <form onSubmit={handleSubmit} className="space-y-6">
