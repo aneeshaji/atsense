@@ -49,29 +49,50 @@ class AIService
     {
         $prompt = "
 You are an elite Career Coach and Resume Writer.
-MISSION: Generate a one-page ATS-friendly resume showcase for a job interview at {$jobTitle}.
+MISSION: Generate a one-pager ATS-friendly resume that showcases all my experiences, achievements, and skillsets to land a job interview at Google.
+TARGET JOB: {$jobTitle}
+JOB DESCRIPTION: {$jobDescription}
 
-Current Experience Data:
+CANDIDATE EXPERIENCE:
 " . json_encode($experience, JSON_PRETTY_PRINT) . "
 
-Target Job Description:
-{$jobDescription}
+REFERENCE FORMAT (Use this LaTeX structure as a guide for tone and quality):
+\documentclass[10pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{sourcesanspro}
+\renewcommand{\familydefault}{\sfdefault}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+% Custom section formatting
+\titleformat{\section}{\\normalfont\\large\\bfseries}{}{0em}{}[\\titlerule]
+\titlespacing*{\\section}{0pt}{10pt}{5pt}
+% Content content details... 
 
-CRITICAL REQUIREMENTS:
-1. Professional Summary: 2-3 powerful sentences.
-2. Skills: 8-12 highly relevant keywords.
-3. Experience: Rewrite bullets to be result-oriented, quantifiable, and keyword-rich.
+CRITICAL INSTRUCTIONS:
+1. Professional Summary: 2-3 powerful sentences tailored for Google.
+2. Skills: Highly relevant keywords matching the JD.
+3. Experience: Rewrite bullets to be result-oriented, quantifiable (use numbers), and Google-styled (Challenge-Action-Result).
+4. Generate the FULL LaTeX code filled with the candidate's optimized info.
 
 Return STRICT JSON format:
 {
-  'summary': 'Compelling summary',
-  'skills': ['skill1', 'skill2'],
-  'experience': [
+  \"summary\": \"Compelling summary\",
+  \"skills\": [\"skill1\", \"skill2\"],
+  \"experience\": [
     {
-      'jobTitle': 'original title',
-      'responsibilities': ['bullet1', 'bullet2']
+      \"jobTitle\": \"refined title\",
+      \"company\": \"company name\",
+      \"startDate\": \"date\",
+      \"endDate\": \"date\",
+      \"responsibilities\": [\"bullet1\", \"bullet2\"]
     }
-  ]
+  ],
+  \"latex_source\": \"...escaped latex code...\"
 }
 ";
         $response = $this->chat([['role' => 'user', 'content' => $prompt]], 0.7, true);

@@ -27,9 +27,9 @@ const Footer = () => {
                 <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-pink-200 rounded-full blur-[120px] animate-float"></div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
                 {/* Newsletter Section */}
-                <div className="mb-16 p-10 rounded-[3rem] bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 relative overflow-hidden shadow-2xl">
+                <div className="mb-8 p-10 rounded-[3rem] bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 relative overflow-hidden shadow-2xl">
                     {/* Animated Background Blobs */}
                     <div className="absolute inset-0 overflow-hidden opacity-20">
                         <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl animate-float"></div>
@@ -43,7 +43,7 @@ const Footer = () => {
                                 <span>Weekly AI Insights</span>
                             </div>
                             <h3 className="text-3xl font-black text-white mb-2">Get Job Search Tips</h3>
-                            <p className="text-white/90 font-medium">Join 10,000+ job seekers getting our weekly AI career insights.</p>
+                            <p className="text-white/90 font-medium">Join 100+ job seekers getting our weekly AI career insights.</p>
                         </div>
 
                         {status === 'success' ? (
@@ -81,7 +81,7 @@ const Footer = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-12">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-8">
                     {/* Brand Section */}
                     <div className="col-span-2 lg:col-span-2">
                         <Link to="/" className="flex items-center gap-3 mb-6 group">
@@ -130,10 +130,11 @@ const Footer = () => {
                     </div>
                 </div>
 
-                <div className="pt-8 border-t border-gradient-to-r from-transparent via-purple-200 to-transparent">
-                    <p className="text-center text-sm text-gray-500 font-medium">
-                        &copy; {currentYear} ATSense Inc. All rights reserved. Made with <span className="text-red-500">❤</span> for job seekers worldwide.
+                <div className="pt-4 border-t border-gradient-to-r from-transparent via-purple-200 to-transparent text-center">
+                    <p className="text-sm text-gray-500 font-medium mb-1">
+                        &copy; {currentYear} ATSense. All rights reserved.
                     </p>
+
                 </div>
             </div>
         </footer>

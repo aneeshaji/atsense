@@ -64,6 +64,11 @@ class AIController extends Controller
             $resume->job_description = $request->jobDescription;
             $resume->save();
 
+            // Attach LaTeX source to the response if available (ephemeral)
+            if (isset($aiData['latex_source'])) {
+                $resume->latex_source = $aiData['latex_source'];
+            }
+
             return response()->json($resume);
 
         } catch (\Exception $e) {
