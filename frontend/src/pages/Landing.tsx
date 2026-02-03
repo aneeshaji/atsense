@@ -320,56 +320,7 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* Testimonials - Organic Cards */}
-            <section className="py-24 bg-gradient-to-b from-purple-50/50 to-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-4xl md:text-5xl font-black text-center text-gray-900 mb-16">
-                        Loved by <span className="gradient-text-animated">Job Seekers</span>
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {[
-                            {
-                                name: "Alex Morgan",
-                                role: "Software Engineer",
-                                text: "I applied to 50 jobs with no response. After using ATSense, I got 3 interviews in a week. The keyword optimization is a game changer.",
-                                image: "AM",
-                                gradient: "from-blue-500 to-indigo-600"
-                            },
-                            {
-                                name: "Sarah Jenkins",
-                                role: "Marketing Manager",
-                                text: "The cover letter generator saved me hours. It writes better than I do! Highly recommend for anyone serious about their career.",
-                                image: "SJ",
-                                gradient: "from-purple-500 to-pink-600"
-                            },
-                            {
-                                name: "David Chen",
-                                role: "Product Designer",
-                                text: "Finally, a tool that tells you exactly what's wrong with your resume. Simple, fast, and effective.",
-                                image: "DC",
-                                gradient: "from-green-500 to-emerald-600"
-                            }
-                        ].map((t, i) => (
-                            <div key={i} className="group relative bg-white p-8 rounded-[3rem] border border-gray-100 hover:border-purple-200 shadow-md hover:shadow-xl transition-all hover:-translate-y-2 duration-500 overflow-hidden">
-                                <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-purple-100/50 to-pink-100/50 rounded-full blur-3xl group-hover:scale-150 transition-all duration-700"></div>
-                                <div className="relative flex text-yellow-400 mb-4">
-                                    {[...Array(5)].map((_, j) => <Star key={j} size={16} fill="currentColor" />)}
-                                </div>
-                                <p className="relative text-gray-700 mb-6 italic leading-relaxed text-sm">"{t.text}"</p>
-                                <div className="relative flex items-center gap-3">
-                                    <div className={`w-12 h-12 bg-gradient-to-br ${t.gradient} rounded-2xl flex items-center justify-center text-white font-bold text-sm shadow-lg`}>
-                                        {t.image}
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-gray-900">{t.name}</h4>
-                                        <p className="text-gray-500 text-xs">{t.role}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+
 
             {/* FAQ - Smooth Accordion */}
             <section className="py-24 bg-gradient-to-b from-white to-purple-50/50">
@@ -397,7 +348,7 @@ const Landing = () => {
                             },
                             {
                                 q: "What's included in the Free plan?",
-                                a: "The Free plan includes 3 full AI analyses, standard templates, and our job match scorer. It's everything you need to start seeing results."
+                                a: "The Free plan includes 5 generations within 15 mins, standard templates, and our job match scorer. It's everything you need to start seeing results."
                             }
                         ].map((faq, i) => (
                             <div key={i} className="group border border-purple-100 rounded-[2rem] overflow-hidden hover:border-purple-200 transition-all hover:shadow-md bg-white">

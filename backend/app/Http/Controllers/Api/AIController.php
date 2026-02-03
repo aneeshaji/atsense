@@ -20,7 +20,7 @@ class AIController extends Controller
      */
     public function generateResume(Request $request)
     {
-        dd('I AM HERE', $request->all());
+
 
         \Illuminate\Support\Facades\Log::info('Generate Resume Request:', $request->all());
 
