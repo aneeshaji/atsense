@@ -151,7 +151,7 @@ const Landing = () => {
                                         </div>
                                         <div className="flex items-center justify-between px-6 py-4 rounded-full bg-gradient-to-r from-pink-400/30 to-rose-500/30 backdrop-blur-sm border border-white/30 hover:scale-105 transition-all">
                                             <div className="text-3xl font-black text-pink-200">
-                                                <AnimatedCounter end={10} suffix="k+" />
+                                                <AnimatedCounter end={100} suffix="+" />
                                             </div>
                                             <div className="text-white font-bold text-sm">Happy Users</div>
                                         </div>
@@ -304,7 +304,7 @@ const Landing = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         {[
-                            { end: 10000, suffix: '+', label: 'Happy Users', color: 'from-blue-500 to-indigo-600' },
+                            { end: 100, suffix: '+', label: 'Happy Users', color: 'from-blue-500 to-indigo-600' },
                             { end: 95, suffix: '%', label: 'Success Rate', color: 'from-purple-500 to-pink-600' },
                             { end: 500, suffix: '+', label: 'Companies', color: 'from-green-500 to-emerald-600' },
                             { end: 24, suffix: '/7', label: 'Support', color: 'from-orange-500 to-red-600' }

@@ -148,9 +148,7 @@ export default function Register() {
             </div>
 
             {/* Footer Copyright - White on Gradient */}
-            <div className="absolute bottom-6 text-center text-white/60 text-xs font-medium">
-                © {new Date().getFullYear()} ATSense Inc. All rights reserved.
-            </div>
+
         </div>
     );
 }
