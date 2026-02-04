@@ -276,47 +276,54 @@ Required Format:
     }
 
     /**
-     * Extract text from file (PDF/Image) using Gemini Vision/Multimodal
+     * Extract text from file (PDF/Image) using Groq Vision
      */
-    public function extractTextWithGemini($fileContent, $mimeType)
+    public function extractTextWithGroqVision($base64Data, $mimeType)
     {
-        $geminiKey = env('GEMINI_API_KEY');
-        if (!$geminiKey) {
-            throw new \Exception('GEMINI_API_KEY not configured for OCR fallback');
+        if (!$this->apiKey) {
+            throw new \Exception('GROQ_API_KEY not configured for OCR fallback');
         }
 
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$geminiKey}";
+        $url = "https://api.groq.com/openai/v1/chat/completions";
 
         $payload = [
-            'contents' => [
+            'model' => 'meta-llama/llama-4-scout-17b-16e-instruct',
+            'messages' => [
                 [
-                    'parts' => [
-                        ['text' => "Extract all text from this document verbatim. Return ONLY the text, preserving layout where possible."],
+                    'role' => 'user',
+                    'content' => [
                         [
-                            'inline_data' => [
-                                'mime_type' => $mimeType,
-                                'data' => base64_encode($fileContent)
+                            'type' => 'text',
+                            'text' => "Extract all text from this document verbatim. Return ONLY the text, preserving layout where possible."
+                        ],
+                        [
+                            'type' => 'image_url',
+                            'image_url' => [
+                                'url' => "data:{$mimeType};base64,{$base64Data}"
                             ]
                         ]
                     ]
                 ]
-            ]
+            ],
+            'temperature' => 0.1
         ];
 
         try {
-            $response = Http::withHeaders(['Content-Type' => 'application/json'])
-                ->post($url, $payload);
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json'
+            ])->post($url, $payload);
 
             if ($response->failed()) {
-                Log::error('Gemini OCR Error: ' . $response->body());
-                throw new \Exception('Gemini OCR failed: ' . $response->status());
+                Log::error('Groq Vision OCR Error: ' . $response->body());
+                throw new \Exception('Groq Vision OCR failed: ' . $response->status());
             }
 
             $data = $response->json();
-            return $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            return $data['choices'][0]['message']['content'] ?? '';
 
         } catch (\Exception $e) {
-            Log::error('Gemini OCR Exception: ' . $e->getMessage());
+            Log::error('Groq Vision OCR Exception: ' . $e->getMessage());
             throw $e;
         }
     }
