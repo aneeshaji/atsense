@@ -67,20 +67,22 @@ const ATSScoreBreakdown = ({ breakdown }: Props) => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="flex flex-col gap-4">
             {/* Overall Score Card */}
-            <div className="card bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-100">
+            <div className="card bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-100 shrink-0 p-5">
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Overall ATS Score</h3>
                         <p className="text-xs text-gray-500 mt-1">Based on 6 key factors</p>
                     </div>
-                    <div className={`text-5xl font-black ${getScoreColor(overallScore)} px-6 py-3 rounded-xl`}>
+                    <div className={`text-4xl font-black ${getScoreColor(overallScore)} px-4 py-2 rounded-xl`}>
                         {overallScore}%
                     </div>
                 </div>
             </div>
 
+            {/* Scrollable details container */}
+            <div className="max-h-[320px] overflow-y-auto pr-2 pb-2 space-y-4 scrollbar-thin border-b border-t border-transparent hover:border-gray-100">
             {/* Category Breakdown */}
             <div className="card">
                 <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -179,6 +181,7 @@ const ATSScoreBreakdown = ({ breakdown }: Props) => {
                     </ul>
                 </div>
             )}
+            </div>
         </div>
     );
 };

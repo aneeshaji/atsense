@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import api from '../services/api';
+
 import { Link } from 'react-router-dom';
+import { Sparkles, FileText, Trash2 } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import { useToast } from '../context/ToastContext';
 import { SkeletonGrid } from '../components/Skeleton';
@@ -15,10 +16,16 @@ function CoverLetterList() {
     const [letterToDelete, setLetterToDelete] = useState<string | null>(null);
 
     useEffect(() => {
-        api.get('/cover-letters')
-            .then((res) => setLetters(res.data))
-            .catch(err => console.error(err))
-            .finally(() => setLoading(false));
+        try {
+            const stored = localStorage.getItem('atsense_cover_letters_list');
+            if (stored) {
+                setLetters(JSON.parse(stored));
+            }
+        } catch (err) {
+            console.error("Failed to load cover letters from local storage", err);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
     const handleDelete = (id: string) => {
@@ -29,8 +36,9 @@ function CoverLetterList() {
     const confirmDelete = async () => {
         if (!letterToDelete) return;
         try {
-            await api.delete(`/cover-letters/${letterToDelete}`);
-            setLetters(letters.filter(l => l.id !== letterToDelete));
+            const updatedLetters = letters.filter(l => l.id !== letterToDelete);
+            setLetters(updatedLetters);
+            localStorage.setItem('atsense_cover_letters_list', JSON.stringify(updatedLetters));
             showToast('Cover letter deleted successfully', 'success');
             setShowDeleteModal(false);
             setLetterToDelete(null);
@@ -56,27 +64,36 @@ function CoverLetterList() {
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Cover Letters</h1>
-                    <p className="text-gray-500 mt-1">AI-generated personalized letters</p>
-                </div>
-                <Link to="/cover-letters/new" className="btn-primary flex items-center gap-2">
-                    <span className="text-xl">+</span> New Letter
-                </Link>
+            <div className="mb-10 text-center md:text-left">
+                <h1 className="text-4xl font-black text-gray-900 tracking-tight">Cover Letters</h1>
+                <p className="text-gray-500 mt-2 text-lg">AI-powered letters tailored to your target roles.</p>
             </div>
 
             {letters.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
-                    <div className="text-6xl mb-4">✍️</div>
-                    <h3 className="text-xl font-medium text-gray-900">No cover letters yet</h3>
-                    <p className="text-gray-500 mt-2 mb-6">Create a tailored cover letter for your dream job instantly.</p>
-                    <Link to="/cover-letters/new" className="btn-primary">
-                        Create Cover Letter
+                <div className="text-center py-24 bg-white rounded-[3rem] border-2 border-dashed border-gray-100 shadow-sm flex flex-col items-center">
+                    <div className="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-[2rem] flex items-center justify-center mb-8">
+                        <FileText size={40} />
+                    </div>
+                    <h3 className="text-2xl font-black text-gray-900">No cover letters yet</h3>
+                    <p className="text-gray-500 mt-3 mb-10 max-w-sm mx-auto font-medium">Create a tailored cover letter for your dream job instantly using our AI engine.</p>
+                    <Link to="/cover-letters/new" className="btn-premium">
+                        Create Your First Letter
                     </Link>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {/* New Letter Card */}
+                    <Link 
+                        to="/cover-letters/new" 
+                        className="group relative flex flex-col items-center justify-center p-8 bg-white border-2 border-dashed border-gray-200 rounded-[2rem] hover:border-indigo-400 hover:bg-indigo-50/30 transition-all duration-300 min-h-[250px]"
+                    >
+                        <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <Sparkles size={32} />
+                        </div>
+                        <h3 className="text-xl font-black text-gray-900">New Letter</h3>
+                        <p className="text-gray-500 text-sm mt-1 text-center">Start a new AI-powered draft</p>
+                    </Link>
+
                     {letters.map((letter) => (
                         <div key={letter.id} className="card hover:shadow-md transition-shadow group relative flex flex-col">
                             <div className="flex-1">
@@ -102,10 +119,10 @@ function CoverLetterList() {
                                 </Link>
                                 <button
                                     onClick={() => handleDelete(letter.id)}
-                                    className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    className="px-3 py-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                                     title="Delete"
                                 >
-                                    🗑️
+                                    <Trash2 size={18} />
                                 </button>
                             </div>
                         </div>

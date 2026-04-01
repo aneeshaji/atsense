@@ -1,428 +1,483 @@
-import { Link } from 'react-router-dom';
-import { CheckCircle, Zap, Star, ArrowRight, Sparkles, Target, Award, ChevronDown, Rocket, Brain, Shield } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { CheckCircle, Zap, Star, Brain, Search, FileText, Upload, Plus, Briefcase, Activity, Target, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
+import api from '../services/api';
+import { useToast } from '../context/ToastContext';
+
+// Scroll reveal component
+const FadeInSection = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => {
+    const [isVisible, setVisible] = useState(false);
+    const domRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    setVisible(true);
+                    if (domRef.current) observer.unobserve(domRef.current);
+                }
+            },
+            { threshold: 0.15 }
+        );
+
+        if (domRef.current) observer.observe(domRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    return (
+        <div
+            ref={domRef}
+            className={`transition-all duration-[1200ms] ease-out transform ${
+                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-16"
+            } ${className}`}
+            style={{ transitionDelay: `${delay}ms` }}
+        >
+            {children}
+        </div>
+    );
+};
+
+// Animated Progress Bar component
+const AnimatedBar = () => {
+    const [isVisible, setVisible] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) setVisible(true);
+        }, { threshold: 0.5 });
+        if (ref.current) observer.observe(ref.current);
+        return () => observer.disconnect();
+    }, []);
+
+    return (
+        <div ref={ref} className="h-4 bg-gray-100 rounded-full overflow-hidden relative">
+            <div 
+                className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-green-400 to-green-500 transition-all duration-[2000ms] ease-out rounded-full shadow-[0_0_15px_rgba(34,197,94,0.4)]" 
+                style={{ width: isVisible ? '98%' : '0%' }}
+            >
+                {/* Internal Shimmer */}
+                <div className="absolute inset-0 bg-white/20 w-1/2 -skew-x-12 translate-x-[-200%] animate-[shimmer_2s_infinite]"></div>
+            </div>
+        </div>
+    );
+};
+
+// Animated counter component
+const AnimatedCounter = ({ end, duration = 2000, suffix = '' }: { end: number; duration?: number; suffix?: string }) => {
+    const [count, setCount] = useState(0);
+    const [hasStarted, setHasStarted] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && !hasStarted) {
+                    setHasStarted(true);
+                    const startTime = Date.now();
+                    const timer = setInterval(() => {
+                        const elapsed = Date.now() - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        setCount(Math.floor(progress * end));
+                        if (progress >= 1) clearInterval(timer);
+                    }, 16);
+                    return () => clearInterval(timer);
+                }
+            },
+            { threshold: 0.5 }
+        );
+
+        if (ref.current) observer.observe(ref.current);
+        return () => observer.disconnect();
+    }, [end, duration, hasStarted]);
+
+    return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+};
+
 
 const Landing = () => {
-    const [openFaq, setOpenFaq] = useState<number | null>(null);
+    const navigate = useNavigate();
+    const { showToast } = useToast();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [importing, setImporting] = useState(false);
 
-    // Animated counter
-    const AnimatedCounter = ({ end, duration = 2000, suffix = '' }: { end: number; duration?: number; suffix?: string }) => {
-        const [count, setCount] = useState(0);
-        const [hasStarted, setHasStarted] = useState(false);
-        const ref = useRef<HTMLDivElement>(null);
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-        useEffect(() => {
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    if (entry.isIntersecting && !hasStarted) {
-                        setHasStarted(true);
-                        const startTime = Date.now();
-                        const timer = setInterval(() => {
-                            const elapsed = Date.now() - startTime;
-                            const progress = Math.min(elapsed / duration, 1);
-                            setCount(Math.floor(progress * end));
-                            if (progress === 1) clearInterval(timer);
-                        }, 16);
-                        return () => clearInterval(timer);
-                    }
-                },
-                { threshold: 0.5 }
-            );
+        const formData = new FormData();
+        formData.append('resume', file);
+        setImporting(true);
+        try {
+            const res = await api.post('/import', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            localStorage.setItem('atsense_current_resume', JSON.stringify(res.data));
+            showToast('Resume imported successfully!', 'success');
+            navigate('/builder');
+        } catch (err: any) {
+            console.error(err);
+            showToast(err.response?.data?.message || 'Failed to import resume', 'error');
+        } finally {
+            setImporting(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
 
-            if (ref.current) observer.observe(ref.current);
-            return () => observer.disconnect();
-        }, [end, duration, hasStarted]);
-
-        return <div ref={ref}>{count}{suffix}</div>;
+    const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Is this resume builder really free to start?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, ATSense is a guest-first platform. You can access our professional resume builder and ATS workspace immediately without any registration or credit card."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What exactly is an ATS-friendly resume?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "An ATS (Applicant Tracking System) friendly resume is a document specifically optimized for the algorithms used by Fortune 500 companies."
+                }
+            }
+        ]
     };
 
     return (
-        <div className="-mx-4 -my-8">
+        <main className="-mx-4 -my-8 font-sans bg-gray-50 overflow-hidden">
             <SEO
-                title="ATSense - #1 AI Resume Optimizer & ATS Checker"
-                description="Stop getting rejected. ATSense uses GPT-4 to optimize your resume for ATS systems and helps you land 3x more interviews."
-                keywords="resume optimizer, ats checker, ai resume builder, cv optimization, career tools, job search, resume scanner"
+                title="ATSense - Professional Resume Builder & ATS Checker"
+                description="Build a professional resume in minutes. Use our expert-approved templates and ATS optimization tools to land interviews faster."
+                keywords="resume builder, professional resume, ats checker, ai resume, cv templates"
+                schemas={[faqSchema]}
             />
+            
+            {/* Custom Animations injected directly to avoid tailwind config changes */}
+            <style>
+                {`
+                @keyframes float {
+                    0% { transform: translateY(0px) rotate(2deg); }
+                    50% { transform: translateY(-15px) rotate(-1deg); }
+                    100% { transform: translateY(0px) rotate(2deg); }
+                }
+                .animate-float {
+                    animation: float 6s ease-in-out infinite;
+                }
+                @keyframes shimmer {
+                    100% { transform: translateX(200%); }
+                }
+                .glass-flare {
+                    background: radial-gradient(circle at center, rgba(96, 239, 255, 0.15) 0%, transparent 70%);
+                }
+                `}
+            </style>
 
-            {/* Hero Section - Fluid Organic Design with NO gap */}
-            <section className="relative min-h-screen flex items-center bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 overflow-hidden">
-                {/* Animated Gradient Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 animate-gradient"></div>
-
-                {/* Organic Flowing Blobs */}
-                <div className="absolute inset-0 overflow-hidden opacity-20">
-                    <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-white rounded-full blur-[100px] animate-float"></div>
-                    <div className="absolute -bottom-40 -right-40 w-[700px] h-[700px] bg-white rounded-full blur-[120px] animate-float-slow"></div>
-                    <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-white rounded-full blur-[80px] animate-wave"></div>
-                </div>
-
-                {/* Floating Particles */}
-                <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(15)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="particle absolute bg-white rounded-full opacity-40"
-                            style={{
-                                width: Math.random() * 8 + 4 + 'px',
-                                height: Math.random() * 8 + 4 + 'px',
-                                left: Math.random() * 100 + '%',
-                                bottom: '-20px',
-                                animation: `particleFloat ${Math.random() * 10 + 10}s linear infinite`,
-                                animationDelay: Math.random() * 5 + 's'
-                            }}
-                        />
-                    ))}
-                </div>
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                        {/* Left Content */}
-                        <div className="text-white space-y-6">
-                            <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white font-bold shadow-2xl">
-                                <Sparkles className="w-5 h-5 text-yellow-300 animate-pulse" />
-                                <span>Powered by GPT-4 AI Technology</span>
-                            </div>
-
-                            <h1 className="text-5xl md:text-6xl font-black leading-tight">
-                                Beat the ATS.
-                                <br />
-                                <span className="gradient-text-animated inline-block">
-                                    Get Hired Faster.
-                                </span>
-                            </h1>
-
-                            <p className="text-lg text-white/90 leading-relaxed max-w-xl">
-                                Stop getting rejected by robots. Our AI-powered resume optimizer ensures your application passes the Applicant Tracking System and lands in front of human recruiters.
-                            </p>
-
-                            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                                <Link
-                                    to="/register"
-                                    className="group relative inline-flex justify-center items-center px-8 py-4 text-lg font-bold rounded-full text-purple-600 bg-white hover:bg-gray-50 transition-all shadow-2xl hover:shadow-white/50 transform hover:scale-105 overflow-hidden"
-                                >
-                                    <div className="absolute inset-0 shimmer"></div>
-                                    <Rocket className="mr-2 group-hover:translate-x-1 transition-transform" size={22} />
-                                    Optimize My Resume Free
-                                    <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={22} />
-                                </Link>
-                                <Link
-                                    to="/about"
-                                    className="inline-flex justify-center items-center px-8 py-4 text-lg font-bold rounded-full text-white bg-white/10 backdrop-blur-xl border-2 border-white/30 hover:bg-white/20 transition-all shadow-xl"
-                                >
-                                    How It Works
-                                </Link>
-                            </div>
-
-                            <div className="flex items-center gap-8 text-sm text-white/90 font-semibold pt-2">
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle className="text-green-300" size={18} />
-                                    No credit card required
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle className="text-green-300" size={18} />
-                                    95% Success Rate
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Right Content - Flowing Organic Stats */}
-                        <div className="relative">
-                            <div className="relative backdrop-blur-3xl bg-white/10 border border-white/20 rounded-[4rem] p-8 shadow-2xl transform hover:scale-105 transition-all duration-700">
-                                {/* Soft ambient glow */}
-                                <div className="absolute -inset-4 rounded-[5rem] bg-gradient-to-r from-cyan-400/30 via-purple-400/30 to-pink-400/30 blur-3xl"></div>
-
-                                <div className="relative space-y-4">
-                                    <h3 className="text-xl font-bold text-white text-center mb-6">Real-Time Success Metrics</h3>
-
-                                    {/* Flowing pill-shaped stats */}
-                                    <div className="space-y-3">
-                                        <div className="flex items-center justify-between px-6 py-4 rounded-full bg-gradient-to-r from-cyan-400/30 to-blue-500/30 backdrop-blur-sm border border-white/30 hover:scale-105 transition-all">
-                                            <div className="text-3xl font-black text-cyan-200">
-                                                <AnimatedCounter end={3} suffix="x" />
-                                            </div>
-                                            <div className="text-white font-bold text-sm">More Interviews</div>
-                                        </div>
-                                        <div className="flex items-center justify-between px-6 py-4 rounded-full bg-gradient-to-r from-purple-400/30 to-pink-500/30 backdrop-blur-sm border border-white/30 hover:scale-105 transition-all">
-                                            <div className="text-3xl font-black text-purple-200">
-                                                <AnimatedCounter end={95} suffix="%" />
-                                            </div>
-                                            <div className="text-white font-bold text-sm">Success Rate</div>
-                                        </div>
-                                        <div className="flex items-center justify-between px-6 py-4 rounded-full bg-gradient-to-r from-pink-400/30 to-rose-500/30 backdrop-blur-sm border border-white/30 hover:scale-105 transition-all">
-                                            <div className="text-3xl font-black text-pink-200">
-                                                <AnimatedCounter end={100} suffix="+" />
-                                            </div>
-                                            <div className="text-white font-bold text-sm">Happy Users</div>
-                                        </div>
-                                        <div className="flex items-center justify-between px-6 py-4 rounded-full bg-gradient-to-r from-blue-400/30 to-indigo-500/30 backdrop-blur-sm border border-white/30 hover:scale-105 transition-all">
-                                            <div className="text-3xl font-black text-blue-200">24/7</div>
-                                            <div className="text-white font-bold text-sm">AI Support</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-6 p-5 rounded-[2rem] bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-300/30 backdrop-blur-sm">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Award className="text-yellow-300" size={20} />
-                                            <span className="text-white font-bold text-sm">Trusted by Top Companies</span>
-                                        </div>
-                                        <p className="text-white/90 text-xs leading-relaxed">
-                                            Our users have landed jobs at Google, Microsoft, Amazon, and 500+ Fortune 500 companies.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Scroll Indicator */}
-                <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-                    <ChevronDown className="text-white/70" size={36} />
-                </div>
-            </section>
-
-            {/* Features Grid - Organic Cards */}
-            <section className="py-24 bg-gradient-to-b from-white via-purple-50/30 to-white relative overflow-hidden">
-                {/* Subtle background pattern */}
-                <div className="absolute inset-0 opacity-5">
-                    <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, purple 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
-                </div>
+            {/* HERO SECTION - Deep Navy Blue with Glowing Orbs */}
+            <section className="relative bg-[#0b1f3b] pt-16 pb-32 overflow-hidden text-white">
+                {/* Glowing Background Elements */}
+                <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[80%] glass-flare rounded-full mix-blend-screen opacity-50 pointer-events-none animate-pulse duration-[5000ms]"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[60%] bg-indigo-600/20 blur-[100px] rounded-full mix-blend-screen opacity-60 pointer-events-none"></div>
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center mb-16">
-                        <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-purple-100 text-purple-700 font-bold text-sm mb-6">
-                            <Target size={16} />
-                            Everything You Need
-                        </div>
-                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
-                            Powerful Tools to <span className="gradient-text-animated">Land the Job</span>
-                        </h2>
-                        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                            Designed to help you stand out in a crowded job market with cutting-edge AI technology.
-                        </p>
-                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <FadeInSection className="space-y-8 text-center lg:text-left">
+                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight">
+                                The #1 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#60efff] to-blue-400">AI Resume</span> Builder & Optimizer
+                            </h1>
+                            <p className="text-lg md:text-xl text-blue-100 max-w-xl mx-auto lg:mx-0 opacity-90 leading-relaxed">
+                                Create an ATS-friendly resume that highlights your best achievements and gets you hired faster, completely frictionless.
+                            </p>
+                            
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
+                                <Link
+                                    to="/builder"
+                                    onClick={() => localStorage.removeItem('atsense_current_resume')}
+                                    className="group relative px-8 py-4 bg-white text-[#0b1f3b] font-bold rounded-full text-lg hover:bg-blue-50 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] hover:-translate-y-1 flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap"
+                                >
+                                    <div className="absolute inset-0 bg-white/40 w-1/2 -skew-x-12 translate-x-[-250%] group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                                    <Plus size={22} className="shrink-0 group-hover:rotate-90 transition-transform duration-300" />
+                                    <span className="relative z-10">Create a New Resume</span>
+                                </Link>
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={importing}
+                                    className="group px-8 py-4 bg-transparent border-2 border-[#60efff] text-[#60efff] font-bold rounded-full text-lg hover:bg-[#60efff]/10 transition-all shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2 whitespace-nowrap"
+                                >
+                                    <Upload size={22} className="shrink-0 group-hover:-translate-y-1 transition-transform" />
+                                    {importing ? 'Importing...' : 'Upload Existing Resume'}
+                                </button>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept=".pdf,.docx"
+                                    onChange={handleFileChange}
+                                />
+                            </div>
+                            <div className="flex items-center justify-center lg:justify-start gap-2 pt-2 animate-in fade-in duration-1000 delay-500">
+                                <span className="flex h-3 w-3 relative">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#60efff] opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[#60efff]"></span>
+                                </span>
+                                <p className="text-sm text-blue-200 font-medium">No registration required to start</p>
+                            </div>
+                            {/* Free Grader secondary CTA */}
+                            <div className="flex justify-center lg:justify-start pt-1">
+                                <Link
+                                    to="/resume-grader"
+                                    className="inline-flex items-center gap-2 text-[#60efff] font-bold text-sm hover:underline underline-offset-4 transition-all"
+                                >
+                                    <Target size={15} />
+                                    Already have a resume? Check your ATS Score for free →
+                                </Link>
+                            </div>
+                        </FadeInSection>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {/* Feature 1 - Organic blob card */}
-                        <div className="group relative">
-                            <div className="relative p-8 rounded-[3rem] bg-white border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden">
-                                {/* Organic blob background */}
-                                <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-full blur-3xl group-hover:scale-150 transition-all duration-700"></div>
-                                <div className="relative">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center text-white mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg shadow-blue-500/30">
-                                        <Brain size={28} />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3">Smart Resume Analysis</h3>
-                                    <p className="text-gray-600 leading-relaxed text-sm">
-                                        Get instant, actionable feedback on your resume. Identify missing keywords and formatting issues that block you from getting interviews.
-                                    </p>
+                        {/* Hero Image Mockup */}
+                        <FadeInSection delay={200} className="relative mx-auto w-full max-w-lg perspective-1000">
+                            <img 
+                                src="/hero-mockup.png" 
+                                alt="ATSense AI Resume Builder Interface" 
+                                className="w-full h-auto rounded-xl shadow-2xl animate-float border-[6px] border-white/10 ring-1 ring-black/10"
+                            />
+                            {/* Decorative badge */}
+                            <div className="absolute -bottom-6 -right-6 bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 rounded-2xl shadow-2xl animate-bounce duration-[3000ms]">
+                                <div className="flex items-center gap-2">
+                                    <Star className="fill-current text-yellow-300" size={20} />
+                                    <span className="font-bold">#1 Rated Tool</span>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Feature 2 */}
-                        <div className="group relative">
-                            <div className="relative p-8 rounded-[3rem] bg-white border border-purple-100 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden">
-                                <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl group-hover:scale-150 transition-all duration-700"></div>
-                                <div className="relative">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-3xl flex items-center justify-center text-white mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg shadow-purple-500/30">
-                                        <Zap size={28} />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3">AI Cover Letters</h3>
-                                    <p className="text-gray-600 leading-relaxed text-sm">
-                                        Generate personalized cover letters in seconds. Our AI analyzes the job description and your resume to craft the perfect pitch.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Feature 3 */}
-                        <div className="group relative">
-                            <div className="relative p-8 rounded-[3rem] bg-white border border-green-100 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden">
-                                <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-full blur-3xl group-hover:scale-150 transition-all duration-700"></div>
-                                <div className="relative">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl flex items-center justify-center text-white mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-lg shadow-green-500/30">
-                                        <Shield size={28} />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3">Job Match Scorer</h3>
-                                    <p className="text-gray-600 leading-relaxed text-sm">
-                                        See exactly how well you match a job description before applying. Save time by focusing on roles where you're a top candidate.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                        </FadeInSection>
                     </div>
                 </div>
-            </section>
 
-            {/* How It Works - Flowing Design */}
-            <section className="py-24 bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white relative overflow-hidden">
-                {/* Animated Waves */}
-                <div className="absolute bottom-0 left-0 right-0 h-64 overflow-hidden opacity-10">
-                    <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
-                        <path fill="white" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
-                            <animate attributeName="d" dur="10s" repeatCount="indefinite" values="
-                                M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z;
-                                M0,160L48,144C96,128,192,96,288,96C384,96,480,128,576,144C672,160,768,160,864,144C960,128,1056,96,1152,96C1248,96,1344,128,1392,144L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z;
-                                M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" />
-                        </path>
+                {/* Bottom Wave Divider */}
+                <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+                    <svg className="relative block w-full h-16 md:h-24 fill-white" preserveAspectRatio="none" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,218.7C672,213,768,139,864,128C960,117,1056,171,1152,197.3C1248,224,1344,224,1392,224L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
                     </svg>
                 </div>
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-black mb-4">How It Works</h2>
-                        <p className="text-lg text-gray-300">Three simple steps to your next job.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {[
-                            { num: 1, title: "Upload Resume", desc: "Import your existing resume or create one from scratch using our intuitive editor.", gradient: "from-cyan-400 to-blue-500" },
-                            { num: 2, title: "Analyze & Optimize", desc: "Our AI identifies gaps and adds the right keywords to beat ATS systems.", gradient: "from-purple-400 to-pink-500" },
-                            { num: 3, title: "Get Hired", desc: "Apply with confidence and start getting 3x more interview invitations.", gradient: "from-green-400 to-emerald-500" }
-                        ].map((step, i) => (
-                            <div key={i} className="group relative">
-                                <div className={`absolute -inset-2 bg-gradient-to-r ${step.gradient} rounded-[3rem] blur-2xl opacity-20 group-hover:opacity-40 transition-all`}></div>
-                                <div className="relative backdrop-blur-2xl bg-white/10 border border-white/20 rounded-[3rem] p-8 hover:bg-white/15 transition-all transform hover:scale-105 duration-500">
-                                    <div className={`w-20 h-20 bg-gradient-to-br ${step.gradient} rounded-full flex items-center justify-center text-3xl font-black mx-auto mb-6 shadow-2xl`}>
-                                        {step.num}
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-3 text-center">{step.title}</h3>
-                                    <p className="text-gray-300 text-center leading-relaxed text-sm">
-                                        {step.desc}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
             </section>
 
-            {/* Stats Section */}
-            <section className="py-20 bg-white">
+            {/* Features Ribbon */}
+            <section className="py-12 bg-white relative z-20 -mt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {[
-                            { end: 100, suffix: '+', label: 'Happy Users', color: 'from-blue-500 to-indigo-600' },
-                            { end: 95, suffix: '%', label: 'Success Rate', color: 'from-purple-500 to-pink-600' },
-                            { end: 500, suffix: '+', label: 'Companies', color: 'from-green-500 to-emerald-600' },
-                            { end: 24, suffix: '/7', label: 'Support', color: 'from-orange-500 to-red-600' }
-                        ].map((stat, i) => (
-                            <div key={i} className="text-center p-6 rounded-[2rem] bg-gradient-to-br from-gray-50 to-purple-50 border border-purple-100 hover:border-purple-200 transition-all hover:scale-105 duration-500 shadow-sm hover:shadow-md">
-                                <div className={`text-4xl font-black bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-2`}>
-                                    <AnimatedCounter end={stat.end} suffix={stat.suffix} />
-                                </div>
-                                <div className="text-gray-600 font-bold text-sm">{stat.label}</div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                        <FadeInSection delay={100} className="px-6 py-4 group cursor-default">
+                            <div className="w-16 h-16 bg-yellow-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                                <Zap className="text-yellow-500" size={32} />
                             </div>
-                        ))}
+                            <h3 className="text-xl font-black text-gray-900 mb-2">Fast & Easy to Use</h3>
+                            <p className="text-gray-600 text-sm">Intuitive interface that walks you through creation from start to finish. Built to save you time.</p>
+                        </FadeInSection>
+                        <FadeInSection delay={200} className="px-6 py-4 group cursor-default">
+                            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
+                                <Brain className="text-blue-500" size={32} />
+                            </div>
+                            <h3 className="text-xl font-black text-gray-900 mb-2">Step-by-Step Guidance</h3>
+                            <p className="text-gray-600 text-sm">AI assistance and expert-approved bullet points customized for your industry.</p>
+                        </FadeInSection>
+                        <FadeInSection delay={300} className="px-6 py-4 group cursor-default">
+                            <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                                <FileText className="text-pink-500" size={32} />
+                            </div>
+                            <h3 className="text-xl font-black text-gray-900 mb-2">ATS-Friendly Templates</h3>
+                            <p className="text-gray-600 text-sm">Optimized formatting and templates that bypass ATS software and catch recruiter attention.</p>
+                        </FadeInSection>
                     </div>
                 </div>
             </section>
 
 
+            {/* Free Grader Feature Banner */}
+            <section className="py-14 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '28px 28px' }} />
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div>
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white font-bold text-xs uppercase tracking-widest mb-3">
+                                <Target size={12} /> Free Tool
+                            </div>
+                            <h2 className="text-2xl md:text-3xl font-black text-white mb-2">Is Your Resume Actually Passing ATS Filters?</h2>
+                            <p className="text-indigo-200 font-medium max-w-xl">
+                                Upload your existing resume and get an instant ATS compatibility score with personalized fixes — completely free, no account needed.
+                            </p>
+                        </div>
+                        <Link
+                            to="/resume-grader"
+                            className="shrink-0 inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo-700 font-black rounded-2xl hover:bg-indigo-50 transition-all shadow-xl hover:-translate-y-1 text-sm uppercase tracking-wider whitespace-nowrap"
+                        >
+                            <Target size={16} />
+                            Check My ATS Score <ChevronRight size={16} />
+                        </Link>
+                    </div>
+                </div>
+            </section>
 
-            {/* FAQ - Smooth Accordion */}
-            <section className="py-24 bg-gradient-to-b from-white to-purple-50/50">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
-                            Frequently Asked <span className="gradient-text-animated">Questions</span>
+            <section className="py-32 bg-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-[80px] -z-10"></div>
+                <div className="max-w-6xl mx-auto px-4 text-center relative z-10">
+                    <FadeInSection>
+                        <h2 className="text-3xl md:text-5xl font-black text-[#0b1f3b] mb-20 tracking-tight">Build your perfect resume in 3 simple steps</h2>
+                    </FadeInSection>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-16 relative">
+                        {/* Connecting line for desktop */}
+                        <div className="hidden md:block absolute top-[3.5rem] left-[16.66%] right-[16.66%] h-[3px] bg-gradient-to-r from-blue-100 via-indigo-200 to-purple-100 -z-10"></div>
+                        
+                        {[
+                            { num: "1", title: "Choose a template", desc: "Select from expertly designed ATS-friendly templates that grab recruiters' attention instantly." },
+                            { num: "2", title: "Let AI write your bullets", desc: "Just provide a brief summary of what you did, and our AI perfectly translates it to professional achievements." },
+                            { num: "3", title: "Download & apply", desc: "Export to flawless PDF instantly, bypassing the bots to land your next big job interview." }
+                        ].map((step, i) => (
+                            <FadeInSection key={i} delay={i * 200} className="flex flex-col items-center group cursor-default">
+                                <div className="w-24 h-24 bg-white border-[6px] border-[#0b1f3b] text-[#0b1f3b] rounded-full flex items-center justify-center text-4xl font-black mb-6 shadow-xl group-hover:bg-[#0b1f3b] group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                                    {step.num}
+                                </div>
+                                <h3 className="text-xl md:text-2xl font-black text-gray-900 mb-3">{step.title}</h3>
+                                <p className="text-gray-500 leading-relaxed text-base max-w-[280px] font-medium">{step.desc}</p>
+                            </FadeInSection>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* NEW SEO SECTION: How to Beat the ATS */}
+            <section className="py-32 bg-slate-50 border-y border-gray-100 relative">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+                        <div className="flex-1 space-y-8">
+                            <FadeInSection>
+                                <div className="inline-block px-4 py-1.5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-sm mb-4 tracking-wide">THE PROBLEM</div>
+                                <h2 className="text-4xl md:text-5xl font-black text-[#0b1f3b] leading-tight tracking-tight">
+                                    How to Beat the <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Applicant Tracking System</span>
+                                </h2>
+                                <p className="text-gray-600 text-xl leading-relaxed mt-6">
+                                    Did you know that <strong>75% of resumes are never seen by a human recruiter?</strong> They are filtered out by robotic measuring systems before they even reach a hiring manager.
+                                </p>
+                            </FadeInSection>
+                            
+                            <div className="space-y-6 mt-8">
+                                {[
+                                    { title: "Smart Keyword Alignment", desc: "Our AI identifies the exact keywords from the job description and weaves them naturally into your resume." },
+                                    { title: "Standardized Formatting", desc: "We use machine-readable layouts that ensure your data is parsed correctly by systems like Workday, Greenhouse, and Lever." },
+                                    { title: "Real-time ATS Scoring", desc: "Get an instant score based on how well your resume matches the job requirements." }
+                                ].map((item, i) => (
+                                    <FadeInSection key={i} delay={200 + (i * 150)} className="flex gap-5 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                                        <div className="mt-1 bg-indigo-50 p-2 rounded-xl text-indigo-600 h-fit shrink-0">
+                                            <CheckCircle size={24} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900 text-lg">{item.title}</h4>
+                                            <p className="text-gray-500 leading-relaxed mt-1">{item.desc}</p>
+                                        </div>
+                                    </FadeInSection>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex-1 w-full lg:w-auto">
+                            <FadeInSection delay={400}>
+                                <div className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl border border-gray-100 relative group hover:-translate-y-2 transition-transform duration-500">
+                                    <div className="absolute -top-6 -right-6 bg-gradient-to-r from-green-400 to-emerald-500 text-white px-6 py-3 rounded-full font-black shadow-xl text-lg flex items-center gap-2">
+                                        <Zap size={20} className="fill-current" />
+                                        <span><AnimatedCounter end={98} />% Match</span>
+                                    </div>
+                                    <h3 className="font-black text-2xl mb-8 text-gray-900">Live ATS Readiness Report</h3>
+                                    <div className="space-y-8">
+                                        <div>
+                                            <div className="flex justify-between mb-2 font-bold text-sm">
+                                                <span className="text-gray-600 uppercase tracking-widest">Match Score</span>
+                                                <span className="text-green-600">Excellent</span>
+                                            </div>
+                                            <AnimatedBar />
+                                        </div>
+                                        
+                                        <div className="h-px bg-gray-100"></div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="p-5 bg-green-50/50 rounded-2xl border border-green-100">
+                                                <p className="text-xs text-green-600/80 uppercase font-black tracking-widest mb-1">Keywords</p>
+                                                <p className="text-xl font-bold text-green-700">Optimal</p>
+                                            </div>
+                                            <div className="p-5 bg-green-50/50 rounded-2xl border border-green-100">
+                                                <p className="text-xs text-green-600/80 uppercase font-black tracking-widest mb-1">Formatting</p>
+                                                <p className="text-xl font-bold text-green-700">Verified</p>
+                                            </div>
+                                            <div className="p-5 bg-red-50/50 rounded-2xl border border-red-100">
+                                                <p className="text-xs text-red-600/80 uppercase font-black tracking-widest mb-1">Typos</p>
+                                                <p className="text-xl font-bold text-red-700">0 Found</p>
+                                            </div>
+                                            <div className="p-5 bg-green-50/50 rounded-2xl border border-green-100">
+                                                <p className="text-xs text-green-600/80 uppercase font-black tracking-widest mb-1">Length</p>
+                                                <p className="text-xl font-bold text-green-700">Perfect</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </FadeInSection>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* NEW SEO SECTION: AI Career Intelligence */}
+            <section className="py-32 bg-white relative">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <FadeInSection>
+                        <h2 className="text-4xl md:text-5xl font-black text-[#0b1f3b] mb-6 tracking-tight">
+                            AI-Powered <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Career Intelligence</span>
                         </h2>
-                        <p className="text-gray-600 text-lg">Got questions? We've got answers.</p>
-                    </div>
-
-                    <div className="space-y-4">
+                        <p className="text-gray-500 text-xl max-w-2xl mx-auto mb-20 leading-relaxed font-medium">
+                            More than just a resume builder. ATSense uses advanced GPT-4 models to act as your personal career coach around the clock.
+                        </p>
+                    </FadeInSection>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-left">
                         {[
-                            {
-                                q: "How does the ATS score work?",
-                                a: "Our AI analyzes your resume against 50+ common ATS algorithms. We check for keyword density, formatting issues, and structural elements that impact how machines read your profile."
-                            },
-                            {
-                                q: "Is my data secure?",
-                                a: "Yes. We use industry-standard encryption and never sell your personal data. Resumes are processed securely and you can delete them at any time."
-                            },
-                            {
-                                q: "Can I use the AI for any industry?",
-                                a: "Absolutely. Our GPT-4 powered engine is trained on millions of job descriptions across tech, marketing, finance, healthcare, and more."
-                            },
-                            {
-                                q: "What's included in the Free plan?",
-                                a: "The Free plan includes 5 generations within 15 mins, standard templates, and our job match scorer. It's everything you need to start seeing results."
-                            }
-                        ].map((faq, i) => (
-                            <div key={i} className="group border border-purple-100 rounded-[2rem] overflow-hidden hover:border-purple-200 transition-all hover:shadow-md bg-white">
-                                <button
-                                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                                    className="w-full p-6 flex items-center justify-between hover:bg-purple-50/50 transition-all"
-                                >
-                                    <h3 className="text-base font-bold text-gray-900 text-left flex items-center gap-3">
-                                        <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 text-white flex items-center justify-center text-sm shrink-0 shadow-md">
-                                            ?
-                                        </span>
-                                        {faq.q}
-                                    </h3>
-                                    <ChevronDown
-                                        className={`text-purple-600 transition-transform duration-300 ${openFaq === i ? 'rotate-180' : ''}`}
-                                        size={22}
-                                    />
-                                </button>
-                                <div className={`overflow-hidden transition-all duration-500 ${openFaq === i ? 'max-h-64' : 'max-h-0'}`}>
-                                    <p className="px-6 pb-6 pl-16 text-gray-600 leading-relaxed text-sm">
-                                        {faq.a}
-                                    </p>
+                            { icon: <Zap size={28} className="text-amber-500" />, title: "AI Bullet Points", desc: "Generate professional achievement statements in seconds based on your role." },
+                            { icon: <Briefcase size={28} className="text-blue-500" />, title: "Job Description Analysis", desc: "Upload any job post and instantly get an actionable gap analysis." },
+                            { icon: <Search size={28} className="text-purple-500" />, title: "Keyword Extraction", desc: "Never miss the crucial soft and hard skills recruiters are intensely searching for." },
+                            { icon: <Activity size={28} className="text-emerald-500" />, title: "ATS Optimization", desc: "Automatically format and structure your resume to definitively pass the bots." }
+                        ].map((feat, i) => (
+                            <FadeInSection key={i} delay={i * 150} className="p-8 rounded-[2rem] bg-gray-50/80 border border-gray-100 hover:border-indigo-200 hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-default">
+                                <div className="mb-6 bg-white w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-300 ring-1 ring-gray-100">
+                                    {feat.icon}
                                 </div>
-                            </div>
+                                <h3 className="font-black text-gray-900 text-xl mb-3">{feat.title}</h3>
+                                <p className="text-gray-500 text-base leading-relaxed font-medium">{feat.desc}</p>
+                            </FadeInSection>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* CTA Section - Flowing Design */}
-            <section className="relative py-24 bg-gradient-to-br from-purple-600 via-fuchsia-600 to-pink-600 overflow-hidden">
-                {/* Animated Background */}
-                <div className="absolute inset-0 animate-gradient bg-gradient-to-br from-purple-600 via-fuchsia-600 to-pink-600"></div>
-
-                {/* Floating Organic Shapes */}
-                <div className="absolute inset-0 overflow-hidden opacity-20">
-                    {[...Array(8)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="absolute bg-white rounded-full animate-float-slow blur-2xl"
-                            style={{
-                                width: Math.random() * 150 + 100 + 'px',
-                                height: Math.random() * 150 + 100 + 'px',
-                                left: Math.random() * 100 + '%',
-                                top: Math.random() * 100 + '%',
-                                animationDelay: Math.random() * 5 + 's'
-                            }}
-                        />
-                    ))}
-                </div>
-
-                <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
-                    <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white font-bold mb-8 shadow-2xl">
-                        <Sparkles className="w-5 h-5 animate-pulse" />
-                        <span>Start Your Success Story Today</span>
-                    </div>
-                    <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">
-                        Ready to upgrade your career?
-                    </h2>
-                    <p className="text-white/95 text-lg mb-10 max-w-3xl mx-auto leading-relaxed">
-                        Join thousands of professionals who improved their resume with ATSense and landed their dream jobs.
+            {/* Bottom CTA Banner */}
+            <section className="py-32 bg-gradient-to-br from-[#0b1f3b] to-indigo-950 text-center text-white relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
+                <div className="absolute inset-0 bg-blue-500 mix-blend-overlay opacity-20 blur-[100px] pointer-events-none"></div>
+                
+                <FadeInSection className="max-w-4xl mx-auto px-4 relative z-10">
+                    <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tight">Stop letting your resume hold you back.</h2>
+                    <p className="text-2xl text-blue-200 mb-12 w-full mx-auto font-medium">
+                        Create an impressive, highly-optimized resume in under 15 minutes today. Completely free to start.
                     </p>
                     <Link
-                        to="/register"
-                        className="group inline-flex items-center gap-3 px-10 py-5 bg-white text-purple-600 font-bold rounded-full text-xl hover:bg-gray-50 transition-all shadow-2xl hover:shadow-white/30 hover:scale-110 transform duration-500"
+                        to="/builder"
+                        onClick={() => localStorage.removeItem('atsense_current_resume')}
+                        className="group inline-flex items-center gap-3 px-12 py-6 bg-[#60efff] text-[#0b1f3b] font-black rounded-full text-2xl hover:bg-white transition-all shadow-[0_0_40px_rgba(96,239,255,0.4)] hover:shadow-[0_0_60px_rgba(255,255,255,0.6)] hover:-translate-y-2"
                     >
-                        <Rocket className="group-hover:translate-y-[-4px] transition-transform" size={24} />
-                        Start For Free
-                        <ArrowRight className="group-hover:translate-x-2 transition-transform" size={24} />
+                        <span>Create Your Resume</span>
+                        <Zap size={24} className="group-hover:translate-x-1 group-hover:rotate-12 transition-all fill-current" />
                     </Link>
-                    <p className="mt-6 text-white/90 font-medium text-sm">No credit card required • Cancel anytime</p>
-                </div>
+                </FadeInSection>
             </section>
-        </div>
+        </main>
     );
 };
 

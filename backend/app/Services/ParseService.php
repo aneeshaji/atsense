@@ -26,22 +26,56 @@ class ParseService
     protected function extractTextFromPDF(UploadedFile $file)
     {
         $text = '';
+        $pdfPath = $file->getPathname();
+
+        // 1. Try pdftotext (Poppler) for best spacing/layout preservation
         try {
-            $parser = new Parser();
-            $pdf = $parser->parseFile($file->getPathname());
-            $text = $pdf->getText();
-            $text = preg_replace('/\s+/', ' ', $text);
-            $text = trim($text);
+            $popplerBin = 'pdftotext';
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                $winBin = base_path('../backend-node/node_modules/pdf-poppler/lib/win/poppler-0.51/bin/pdftotext.exe');
+                if (file_exists($winBin)) {
+                    $popplerBin = $winBin;
+                }
+            }
+
+            $tempDir = storage_path('app/temp');
+            if (!is_dir($tempDir)) {
+                mkdir($tempDir, 0777, true);
+            }
+
+            $tempTxt = $tempDir . '/' . uniqid() . '.txt';
+            $cmd = "\"{$popplerBin}\" -layout " . escapeshellarg($pdfPath) . " " . escapeshellarg($tempTxt);
+            exec($cmd, $output, $returnVar);
+
+            if ($returnVar === 0 && file_exists($tempTxt)) {
+                $text = file_get_contents($tempTxt);
+                unlink($tempTxt);
+            }
         } catch (\Exception $e) {
-            // Parser failed
+            // pdftotext failed
         }
 
-        // If extraction failed or yielded too little text, use OCR fallback
+        // 2. Fallback to Smalot PdfParser if pdftotext produced nothing
+        if (empty(trim($text))) {
+            try {
+                $parser = new Parser();
+                $pdf = $parser->parseFile($pdfPath);
+                $text = $pdf->getText();
+            } catch (\Exception $e) {
+                // Parser failed
+            }
+        }
+
+        // 3. Clean up whitespace but preserve layout-aware spacing
+        $text = preg_replace('/\s+/', ' ', $text);
+        $text = trim($text);
+
+        // 4. Final Fallback to OCR if still too little text
         if (strlen($text) < 50) {
             try {
                 $text = $this->extractTextViaOCR($file);
             } catch (\Exception $e) {
-                throw new \Exception('Failed to parse PDF via Standard Parser and OCR Fallback: ' . $e->getMessage());
+                throw new \Exception('Failed to parse PDF via all methods: ' . $e->getMessage());
             }
         }
         

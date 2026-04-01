@@ -4,202 +4,135 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Services\ParseService;
+use App\Services\AIService;
+use Illuminate\Support\Facades\Log;
 
 class ResumeController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Stateless offline import from file (PDF/DOCX)
      */
-    public function index(Request $request)
+    public function importOffline(Request $request)
     {
-        return response()->json($request->user()->resumes);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        // Limit check
-        $count = $request->user()->resumes()->count();
-        if ($count >= 3) {
-            return response()->json([
-                'message' => 'Resume limit reached',
-                'error' => 'You can only have up to 3 resumes in the free plan.'
-            ], 403);
-        }
-
-        $resume = $request->user()->resumes()->create($request->all());
-
-        return response()->json($resume, 201);
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Request $request, string $id)
-    {
-        $resume = $request->user()->resumes()->find($id);
-
-        if (!$resume) {
-            return response()->json(['message' => 'Resume not found'], 404);
-        }
-
-        return response()->json($resume);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $resume = $request->user()->resumes()->find($id);
-
-        if (!$resume) {
-            return response()->json(['message' => 'Resume not found'], 404);
-        }
-
-        $resume->update($request->all());
-
-        return response()->json($resume);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Request $request, string $id)
-    {
-        $resume = $request->user()->resumes()->find($id);
-
-        if (!$resume) {
-            return response()->json(['message' => 'Resume not found'], 404);
-        }
-
-        $resume->delete();
-
-        return response()->json(['message' => 'Resume deleted']);
-    }
-
-    /**
-     * Import resume from file (PDF/DOCX)
-     */
-    public function importResume(Request $request)
-    {
-        // Limit check
-        $count = $request->user()->resumes()->count();
-        if ($count >= 3) {
-            return response()->json([
-                'message' => 'Resume limit reached',
-                'error' => 'You can only have up to 3 resumes in the free plan.'
-            ], 403);
-        }
-
         if (!$request->hasFile('resume')) {
+            Log::warning('Import attempt without file');
             return response()->json(['message' => 'No file uploaded'], 400);
         }
 
         try {
             $file = $request->file('resume');
+            Log::info('Importing file: ' . $file->getClientOriginalName() . ' (' . $file->getMimeType() . ')');
             
             // 1. Extract Text
-            $parseService = new \App\Services\ParseService();
+            $parseService = new ParseService();
             $text = $parseService->extractText($file);
+            Log::info('Text extraction complete. Length: ' . strlen($text));
 
-            if (empty($text) || strlen($text) < 50) {
+            // Sanitize text
+            if (!empty($text)) {
+                $text = iconv('UTF-8', 'UTF-8//IGNORE', $text);
+            }
+
+            if (empty($text) || strlen($text) < 20) {
+                 Log::error('Extraction produced too little text');
                  return response()->json([
-                    'message' => 'Could not extract text',
-                    'error' => 'The PDF might be image-based. OCR is not yet supported.'
+                    'message' => 'Could not read resume content',
+                    'error' => 'The file might be empty, password-protected, or unsupported.'
                 ], 422);
             }
 
             // 2. Parse with AI
-            $aiService = app(\App\Services\AIService::class);
+            $aiService = app(AIService::class);
+            Log::info('Connecting to AI for parsing...');
             $parsedData = $aiService->parseResumeJSON($text);
-
+            
             if (!$parsedData) {
-                throw new \Exception('AI failed to parse resume data');
+                Log::error('AI Parsing returned null');
+                throw new \Exception('AI failed to interpret the resume data structure.');
             }
 
-            // 3. Create Resume
-            $resume = $request->user()->resumes()->create([
-                'title' => 'Imported Resume - ' . date('Y-m-d H:i'),
-                'personal_info' => $parsedData['personalInfo'] ?? [],
+            // 3. Map to dynamic Resume object
+            $resume = [
+                'title' => 'Imported Resume',
+                'personalInfo' => $userProvidedInfo = [
+                    'fullName' => $parsedData['personalInfo']['fullName'] ?? '',
+                    'email' => $parsedData['personalInfo']['email'] ?? '',
+                    'phone' => $parsedData['personalInfo']['phone'] ?? '',
+                    'location' => $parsedData['personalInfo']['location'] ?? '',
+                    'linkedin' => $parsedData['personalInfo']['linkedin'] ?? '',
+                    'github' => $parsedData['personalInfo']['github'] ?? '',
+                    'portfolio' => $parsedData['personalInfo']['portfolio'] ?? '',
+                ],
                 'summary' => $parsedData['summary'] ?? '',
                 'skills' => $parsedData['skills'] ?? [],
                 'experience' => $parsedData['experience'] ?? [],
                 'education' => $parsedData['education'] ?? [],
-                'ats_score' => 0,
-                'job_description' => ''
-            ]);
+                'certifications' => $parsedData['certifications'] ?? [],
+                'projects' => $parsedData['projects'] ?? [],
+                'languages' => $parsedData['languages'] ?? [],
+                'atsScore' => 0,
+            ];
 
-            return response()->json($resume, 201);
+            Log::info('Import successful for: ' . ($resume['personalInfo']['fullName'] ?: 'Unknown User'));
+            return response()->json($resume, 200);
 
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Import failed', 'error' => $e->getMessage()], 500);
+            Log::error('IMPORT CRASH: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            return response()->json([
+                'message' => 'Critical Import Error',
+                'error' => $e->getMessage(),
+                'file' => $file->getClientOriginalName() ?? 'unknown'
+            ], 500);
         }
     }
 
     /**
-     * Get ATS Breakdown
+     * Stateless ATS Breakdown
      */
-    public function getATSBreakdown(Request $request, string $id)
+    public function analyzeBreakdownOffline(Request $request)
     {
-        $resume = $request->user()->resumes()->find($id);
+        // Handle both 'resume' and 'resume_text' from frontend
+        $resumeDataRaw = $request->input('resume_text') ?? $request->input('resume');
+        
+        // Handle JSON string if provided
+        $resume = is_string($resumeDataRaw) ? json_decode($resumeDataRaw, true) : $resumeDataRaw;
 
         if (!$resume) {
-            return response()->json(['message' => 'Resume not found'], 404);
+            return response()->json(['message' => 'No resume data provided'], 400);
         }
 
-        // Use AI Service to calculate real score
         try {
-            $aiService = app(\App\Services\AIService::class);
+            $aiService = app(AIService::class);
             
             // Prepare resume data for analysis
-            $resumeData = [
-                'role' => $resume->title,
-                'skills' => $resume->skills,
-                'experience' => $resume->experience,
-                'education' => $resume->education,
+            $analysisData = [
+                'role' => $resume['title'] ?? '',
+                'skills' => $resume['skills'] ?? [],
+                'experience' => $resume['experience'] ?? [],
+                'education' => $resume['education'] ?? [],
             ];
 
-            $analysis = $aiService->analyzeATSBreakdown($resumeData);
+            $analysis = $aiService->analyzeATSBreakdown($analysisData);
 
-            // Update local score
+            // Add 'score' alias for frontend compatibility
             if (isset($analysis['overallScore'])) {
-                $resume->ats_score = $analysis['overallScore'];
-                $resume->save();
+                $analysis['score'] = $analysis['overallScore'];
             }
 
             return response()->json($analysis);
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('ATS Analysis Failed: ' . $e->getMessage());
+            Log::error('ATS Analysis Failed: ' . $e->getMessage());
             // Fallback if AI fails
             return response()->json([
-                'overallScore' => $resume->ats_score,
+                'overallScore' => $resume['atsScore'] ?? 0,
                 'breakdown' => [], 
                 'missingKeywords' => [],
                 'matchedKeywords' => [],
-                'issues' => ['AI Analysis failed Temporarily'],
+                'issues' => ['AI Analysis failed Temporarily: ' . $e->getMessage()],
                 'recommendations' => ['Try again later']
             ]);
         }
-    }
-
-    /**
-     * Preview Resume HTML
-     */
-    public function preview(Request $request, string $id)
-    {
-        $resume = $request->user()->resumes()->find($id);
-
-        if (!$resume) {
-            return response()->json(['message' => 'Resume not found'], 404);
-        }
-
-        $html = view('pdf.resume', ['resume' => $resume])->render();
-        
-        return response($html, 200)
-                  ->header('Content-Type', 'text/html');
     }
 }

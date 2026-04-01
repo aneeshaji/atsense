@@ -12,10 +12,10 @@ const About = () => {
             {/* Hero Section */}
             <div className="bg-gradient-to-br from-indigo-50 to-purple-50 py-24">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">
+                    <h1 className="text-4xl md:text-6xl font-black text-gray-900 mb-6 tracking-tight">
                         Empowering Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Career Journey</span>
                     </h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-lg md:text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed font-medium">
                         ATSense uses advanced AI to optimize your resume and cover letters, ensuring you get noticed by recruiters and Applicant Tracking Systems.
                     </p>
                 </div>
@@ -25,12 +25,12 @@ const About = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                     <div>
-                        <div className="inline-block px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm font-semibold mb-6">Our Mission</div>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-6">Bridging the gap between talent and opportunity</h2>
-                        <p className="text-gray-600 text-lg leading-relaxed mb-6">
+                        <div className="inline-block px-4 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-xs font-black uppercase tracking-widest mb-6">Our Mission</div>
+                        <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-6 tracking-tight">Bridging the gap between talent and opportunity</h2>
+                        <p className="text-gray-500 text-lg leading-relaxed mb-6 font-medium">
                             We believe that every qualified candidate deserves a fair chance. Modern hiring processes rely heavily on automated systems, often filtering out great candidates due to formatting issues or keyword mismatches.
                         </p>
-                        <p className="text-gray-600 text-lg leading-relaxed">
+                        <p className="text-gray-500 text-lg leading-relaxed font-medium">
                             ATSense creates a level playing field by providing you with the same powerful insights that recruiters use, helping you tell your professional story effectively.
                         </p>
                     </div>
@@ -78,14 +78,15 @@ const About = () => {
             {/* Team/Features/Numbers Section could go here */}
 
             {/* CTA Section */}
-            <div className="bg-gray-900 py-20">
-                <div className="max-w-4xl mx-auto px-4 text-center">
-                    <h2 className="text-3xl font-bold text-white mb-6">Ready to land your dream job?</h2>
-                    <p className="text-gray-400 text-lg mb-8">
-                        Join thousands of job seekers who are using ATSense to optimize their job search.
+            <div className="bg-gray-950 py-32 relative overflow-hidden">
+                <div className="absolute inset-0 bg-indigo-500/10 mix-blend-overlay opacity-30 blur-3xl pointer-events-none"></div>
+                <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+                    <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">Ready to land your dream job?</h2>
+                    <p className="text-gray-400 text-xl mb-12 font-medium max-w-2xl mx-auto">
+                        Join thousands of job seekers who are using ATSense to optimize their job search. Completely frictionless to start.
                     </p>
-                    <Link to="/register" className="inline-block px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-indigo-900/50">
-                        Get Started for Free
+                    <Link to="/builder" className="inline-block px-10 py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-1 transform">
+                        Start Building Now
                     </Link>
                 </div>
             </div>

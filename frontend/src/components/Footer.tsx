@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Send, CheckCircle2, Sparkles } from 'lucide-react';
+import Logo from './Logo';
 
 
 const Footer = () => {
@@ -85,12 +86,15 @@ const Footer = () => {
                     {/* Brand Section */}
                     <div className="col-span-2 lg:col-span-2">
                         <Link to="/" className="flex items-center gap-3 mb-6 group">
-                            <div className="w-12 h-12 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
+                            <Logo />
+                            <div className="flex flex-col">
+                                <span className="font-black text-xl text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-indigo-900 to-gray-900 tracking-tighter leading-none group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-500">
+                                    ATSense
+                                </span>
+                                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-0.5 opacity-80">
+                                    Resume Intelligence
+                                </span>
                             </div>
-                            <span className="font-black text-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent">ATSense</span>
                         </Link>
 
                         <p className="text-gray-600 leading-relaxed max-w-sm mb-8 font-medium">
@@ -101,11 +105,12 @@ const Footer = () => {
 
                     {/* Product Links */}
                     <div className="group">
-                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider">Product</h3>
+                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider underline decoration-indigo-200 decoration-2 underline-offset-4">Solutions</h3>
                         <ul className="space-y-3 text-sm text-gray-600 font-medium">
-                            <li><Link to="/dashboard" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Resumes</Link></li>
-                            <li><Link to="/cover-letters" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Cover Letters</Link></li>
-                            <li><Link to="/job-matcher" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Job Matcher</Link></li>
+                            <li><Link to="/builder" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">AI Resume Builder</Link></li>
+                            <li><Link to="/builder" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">ATS Resume Checker</Link></li>
+                            <li><Link to="/builder" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Resume Optimization</Link></li>
+                            <li><Link to="/builder" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">CV Templates</Link></li>
                         </ul>
                     </div>
 
@@ -119,13 +124,15 @@ const Footer = () => {
                         </ul>
                     </div>
 
+
+
                     {/* Legal Links */}
                     <div className="group">
-                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider">Legal</h3>
+                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider underline decoration-indigo-200 decoration-2 underline-offset-4">Legal</h3>
                         <ul className="space-y-3 text-sm text-gray-600 font-medium">
-                            <li><Link to="/privacy" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Privacy</Link></li>
-                            <li><Link to="/terms" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Terms</Link></li>
-                            <li><Link to="/security" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Security</Link></li>
+                            <li><Link to="/privacy" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Privacy Policy</Link></li>
+                            <li><Link to="/terms" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Terms of Service</Link></li>
+                            <li><Link to="/security" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Data Security</Link></li>
                         </ul>
                     </div>
                 </div>

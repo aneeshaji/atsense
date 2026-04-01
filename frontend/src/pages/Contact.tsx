@@ -1,8 +1,10 @@
-import { Mail, MapPin, Phone } from 'lucide-react';
 import { useState } from 'react';
 import SEO from '../components/SEO';
 
+import { useModal } from '../context/ModalContext';
+
 const Contact = () => {
+    const { showAlert } = useModal();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -11,8 +13,7 @@ const Contact = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, this would send an email
-        alert('Thanks for contacting us! We will get back to you shortly.');
+        showAlert('Success', 'Thanks for contacting us! Our team will review your message and get back to you shortly.', 'success');
         setFormData({ name: '', email: '', message: '' });
     };
 

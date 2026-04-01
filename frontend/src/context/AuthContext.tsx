@@ -17,29 +17,17 @@ interface AuthContextType {
 const AuthContext = createContext < AuthContextType | undefined > (undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-	const [token, setToken] = useState < string | null > (
-		localStorage.getItem('token')
-	);
-	const [user, setUser] = useState < User | null > (() => {
-		const savedUser = localStorage.getItem('user');
-		return savedUser ? JSON.parse(savedUser) : null;
-	});
-
-	const login = (jwt: string, userData: User) => {
-		localStorage.setItem('token', jwt);
-		localStorage.setItem('user', JSON.stringify(userData));
-		setToken(jwt);
-		setUser(userData);
+	const user = {
+		id: 'guest',
+		name: 'Guest User',
+		email: 'guest@atsense.local'
 	};
+	const token = 'dummy-token';
 
-	const logout = () => {
-		localStorage.removeItem('token');
-		localStorage.removeItem('user');
-		setToken(null);
-		setUser(null);
-	};
+	const login = () => {};
+	const logout = () => {};
 
-	const isAuthenticated = !!token;
+	const isAuthenticated = true;
 
 	return (
 		<AuthContext.Provider value={{ token, user, login, logout, isAuthenticated }}>

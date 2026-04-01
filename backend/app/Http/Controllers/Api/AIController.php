@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\AIService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AIController extends Controller
 {
@@ -16,60 +17,126 @@ class AIController extends Controller
     }
 
     /**
-     * Generate AI Resume Content
+     * Stateless Optimize Resume
      */
-    public function generateResume(Request $request)
+    public function optimizeResumeOffline(Request $request)
     {
+        // Support both snake_case and camelCase from frontend
+        $jobTitle = $request->input('job_title') ?? $request->input('jobTitle');
+        $jobDescription = $request->input('job_description') ?? $request->input('jobDescription');
 
-
-        \Illuminate\Support\Facades\Log::info('Generate Resume Request:', $request->all());
-
-        // Support both camelCase (frontend) and snake_case (fallback)
-        $data = $request->validate([
-            'resumeId' => 'required_without:resume_id|exists:resumes,id',
-            'resume_id' => 'required_without:resumeId|exists:resumes,id',
-            'jobTitle' => 'required_without:job_title|string',
-            'job_title' => 'required_without:jobTitle|string',
-            'jobDescription' => 'required_without:job_description|string',
-            'job_description' => 'required_without:jobDescription|string',
+        $request->validate([
+            'resume' => 'required', // can be string or array
         ]);
 
-        // Normalize data
-        $resumeId = $request->resumeId ?? $request->resume_id;
-        $jobTitle = $request->jobTitle ?? $request->job_title;
-        $jobDesc = $request->jobDescription ?? $request->job_description;
-
-        $resume = $request->user()->resumes()->find($resumeId);
-
-        if (!$resume) {
-            return response()->json(['message' => 'Resume not found'], 404);
+        if (!$jobTitle || !$jobDescription) {
+            return response()->json([
+                'message' => 'The job title and description fields are required.',
+                'errors' => [
+                    'job_title' => ['The job title field is required.'],
+                    'job_description' => ['The job description field is required.']
+                ]
+            ], 422);
         }
+
+        $resumeRaw = $request->input('resume');
+        $resume = is_string($resumeRaw) ? json_decode($resumeRaw, true) : $resumeRaw;
 
         try {
             $aiData = $this->aiService->generateResumeContent(
-                $request->jobTitle,
-                $request->jobDescription,
-                $resume->experience
+                $jobTitle,
+                $jobDescription,
+                $resume['experience'] ?? []
             );
 
             // Update resume with AI content
-            $resume->summary = $aiData['summary'] ?? $resume->summary;
-            $resume->skills = $aiData['skills'] ?? $resume->skills;
+            $resume['summary'] = $aiData['summary'] ?? ($resume['summary'] ?? '');
+            $resume['skills'] = $aiData['skills'] ?? ($resume['skills'] ?? []);
 
-            // Merge experience logic could be complex, for now simple implementation:
             if (isset($aiData['experience']) && is_array($aiData['experience'])) {
-                 $resume->experience = $this->mergeExperience($resume->experience, $aiData['experience']);
+                 $resume['experience'] = $aiData['experience'];
             }
             
-            $resume->job_description = $request->jobDescription;
-            $resume->save();
-
-            // Attach LaTeX source to the response if available (ephemeral)
             if (isset($aiData['latex_source'])) {
-                $resume->latex_source = $aiData['latex_source'];
+                $resume['latex_source'] = $aiData['latex_source'];
             }
 
-            return response()->json($resume);
+            return response()->json(['optimized_resume' => $resume]);
+
+        } catch (\Exception $e) {
+            Log::error('AI Optimization Failed: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'AI Service failed',
+                'error' => $e->getMessage()
+            ], 503);
+        }
+    }
+
+    /**
+     * Stateless Generate Professional Summary
+     */
+    public function generateSummaryOffline(Request $request)
+    {
+        $request->validate([
+            'job_title' => 'required|string',
+            'resume_context' => 'required', // can be string or array
+        ]);
+
+        $resumeRaw = $request->input('resume_context');
+        $resume = is_string($resumeRaw) ? json_decode($resumeRaw, true) : $resumeRaw;
+
+        try {
+            $summary = $this->aiService->generateProfessionalSummary(
+                $request->input('job_title'),
+                json_encode($resume)
+            );
+
+            return response()->json(['summary' => $summary]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'AI Service failed',
+                'error' => $e->getMessage()
+            ], 503);
+        }
+    }
+
+    /**
+     * Stateless Generate Cover Letter
+     */
+    public function generateCoverLetterOffline(Request $request)
+    {
+        // Support both snake_case and camelCase
+        $jobTitle = $request->input('job_title') ?? $request->input('jobTitle');
+        $jobDescription = $request->input('job_description') ?? $request->input('jobDescription');
+        $companyName = $request->input('company_name') ?? $request->input('companyName');
+
+        $request->validate([
+            'resume' => 'required', // string or array
+        ]);
+
+        if (!$jobTitle || !$jobDescription) {
+            return response()->json([
+                'message' => 'The job title and description fields are required.',
+                'errors' => [
+                    'job_title' => ['The job title field is required.'],
+                    'job_description' => ['The job description field is required.']
+                ]
+            ], 422);
+        }
+
+        $resumeRaw = $request->input('resume');
+        $resume = is_string($resumeRaw) ? json_decode($resumeRaw, true) : $resumeRaw;
+
+        try {
+            $content = $this->aiService->generateCoverLetter(
+                (object)$resume, 
+                $jobTitle, 
+                $companyName ?? '', 
+                $jobDescription
+            );
+
+            return response()->json(['content' => $content]);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -80,61 +147,73 @@ class AIController extends Controller
     }
 
     /**
-     * Analyze Job Match (ATS Score)
+     * Stateless LinkedIn Optimization
      */
-    public function analyzeJobMatch(Request $request)
+    public function optimizeLinkedInOffline(Request $request)
     {
+        // Support both snake_case and camelCase
+        $targetRole = $request->input('target_role') ?? $request->input('targetRole');
+
         $request->validate([
-            'resumeId' => 'required|exists:resumes,id',
-            'jobDescription' => 'required|string',
+            'resume' => 'nullable', // string or array
         ]);
 
-        $resume = $request->user()->resumes()->find($request->resumeId);
-
         try {
-            $analysis = $this->aiService->analyzeJobMatch($resume, $request->jobDescription);
+            $resumeRaw = $request->input('resume');
+            $resume = is_string($resumeRaw) ? json_decode($resumeRaw, true) : $resumeRaw;
             
-            // Update score
-            if (isset($analysis['score'])) {
-                $resume->ats_score = $analysis['score'];
-                $resume->save();
+            if (!$resume) {
+                return response()->json(['message' => 'No resume data provided'], 400);
             }
 
-            return response()->json($analysis);
+            $result = $this->aiService->optimizeLinkedInProfile(
+                $resume,
+                $targetRole
+            );
+
+            return response()->json($result);
 
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'AI Service connection failed', 
+                'message' => 'LinkedIn AI Service failed',
                 'error' => $e->getMessage()
             ], 503);
         }
     }
 
-    private function mergeExperience($original, $generated)
-    {
-        // Simple merge: replace responsibilities if titles match vaguely
-        // In reality, might want more robust matching
-        return $generated; 
-    }
-
     /**
-     * Optimize LinkedIn Profile
+     * Stateless Job Matcher
      */
-    public function optimizeLinkedIn(Request $request)
+    public function matchResumeOffline(Request $request)
     {
+        // Support both snake_case and camelCase
+        $jobDescription = $request->input('job_description') ?? $request->input('jobDescription');
+
         $request->validate([
-            'resumeId' => 'required|exists:resumes,id',
-            'targetRole' => 'nullable|string',
+            'resume' => 'required', // string or array
         ]);
 
-        $resume = $request->user()->resumes()->find($request->resumeId);
+        if (!$jobDescription) {
+            return response()->json([
+                'message' => 'The job description field is required.',
+                'errors' => ['job_description' => ['The job description field is required.']]
+            ], 422);
+        }
 
         try {
-            $analysis = $this->aiService->optimizeLinkedInProfile($resume, $request->targetRole);
-            return response()->json($analysis);
+            $resumeRaw = $request->input('resume');
+            $resume = is_string($resumeRaw) ? json_decode($resumeRaw, true) : $resumeRaw;
+
+            $result = $this->aiService->analyzeJobMatch(
+                (object)$resume, 
+                $jobDescription
+            );
+
+            return response()->json($result);
+
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'AI Service failed',
+                'message' => 'Match Analysis failed',
                 'error' => $e->getMessage()
             ], 503);
         }

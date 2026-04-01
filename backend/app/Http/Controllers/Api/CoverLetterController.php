@@ -21,15 +21,6 @@ class CoverLetterController extends Controller
      */
     public function store(Request $request)
     {
-        // Limit check
-        $count = $request->user()->coverLetters()->count();
-        if ($count >= 3) {
-            return response()->json([
-                'message' => 'Cover letter limit reached',
-                'error' => 'You can only generate up to 3 cover letters in the free plan.'
-            ], 403);
-        }
-
         // Support both camelCase (frontend) and snake_case (fallback)
         $request->validate([
             'resumeId' => 'required_without:resume_id|exists:resumes,id',

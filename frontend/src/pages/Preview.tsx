@@ -1,11 +1,13 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { useModal } from '../context/ModalContext';
 
 function Preview() {
     const { id } = useParams();
     const [previewHtml, setPreviewHtml] = useState<string>('');
     const [loading, setLoading] = useState(true);
+    const { showAlert } = useModal();
 
     useEffect(() => {
         const fetchPreview = async () => {
@@ -40,7 +42,7 @@ function Preview() {
             link.parentNode?.removeChild(link);
         } catch (error) {
             console.error(`Failed to download ${format}`, error);
-            alert(`Failed to download ${format.toUpperCase()}`);
+            showAlert('Download Error', `We encountered an issue preparing your ${format.toUpperCase()}. Please try refreshing the page or contact support if the issue persists.`, 'danger');
         }
     };
 
