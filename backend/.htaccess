@@ -1,8 +1,14 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    
+    # Do not rewrite if the file or directory exists physically
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
 
-    # Redirect all traffic into the Laravel public folder AND re-append /api prefix
-    # so Laravel's router (which sees the base /api) finds the routes in api.php
-    RewriteCond %{REQUEST_URI} !^/api/public/
-    RewriteRule ^(.*)$ public/api/$1 [L]
+    # If the request matches the root of the folder, just call index.php
+    RewriteRule ^$ public/index.php [L]
+
+    # For all sub-paths, re-append /api/ and pass it as PATH_INFO to index.php
+    # This solves the subfolder mapping issue for Laravel's api.php routes
+    RewriteRule ^(.*)$ public/index.php/api/$1 [L]
 </IfModule>
