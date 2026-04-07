@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { 
@@ -248,9 +248,13 @@ const InterviewSimulator: React.FC = () => {
                         <button 
                             onClick={handleQuickStart}
                             disabled={!setupJD.trim()}
-                            className={`w-full h-16 ${!setupJD.trim() ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'btn-premium'} mt-4`}
+                            className={`w-full h-16 flex items-center justify-center gap-3 rounded-2xl font-bold text-lg transition-all mt-4 ${
+                                !setupJD.trim() 
+                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
+                                    : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-200 hover:-translate-y-0.5'
+                            }`}
                         >
-                            <Play size={20} fill="currentColor" />
+                            <Play size={20} fill="currentColor" className={!setupJD.trim() ? 'text-gray-300' : 'text-indigo-400'} />
                             Start Simulation
                         </button>
                         

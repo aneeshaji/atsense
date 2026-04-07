@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import Joyride, { type Step } from 'react-joyride';
 import ATSScoreBreakdown from '../components/ATSScoreBreakdown';
 import AdvancedScorecard from '../components/AdvancedScorecard';
 import { useToast } from '../context/ToastContext';
@@ -9,28 +8,25 @@ import { useModal } from '../context/ModalContext';
 import { useReactToPrint } from 'react-to-print';
 import HarvardTemplate from '../templates/HarvardTemplate';
 import ExecutiveTemplate from '../templates/ExecutiveTemplate';
-import TechTemplate from '../templates/TechTemplate';
-import CreativeTemplate from '../templates/CreativeTemplate';
-import { 
-    Download, 
-    Trash2, 
-    Plus, 
-    Sparkles, 
-    FileText, 
-    Briefcase, 
-    User, 
-    GraduationCap, 
-    Activity, 
-    CheckCircle2, 
-    LayoutTemplate, 
-    ChevronDown, 
-    ChevronUp, 
+import {
+    Download,
+    Trash2,
+    Plus,
+    Sparkles,
+    FileText,
+    Briefcase,
+    User,
+    GraduationCap,
+    Activity,
+    ChevronDown,
     X,
     Eye,
+    EyeOff,
     Code,
-    Award,
+    Upload,
+    Zap,
     Globe,
-    Upload
+    BrainCircuit,
 } from 'lucide-react';
 
 interface Resume {
@@ -52,8 +48,6 @@ interface Resume {
         github?: string;
         portfolio?: string;
     };
-    jobTitle?: string;
-    job_description?: string;
 }
 
 const emptyResume: Resume = {
@@ -71,49 +65,34 @@ const emptyResume: Resume = {
     },
 };
 
+const inputCls = 'w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:bg-white transition-all placeholder-gray-300';
+const smallInputCls = 'w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all placeholder-gray-300';
+const labelCls = 'block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5';
+
 export default function Builder() {
-    const navigate = useNavigate();
     const { showToast } = useToast();
+    const { showConfirm } = useModal();
 
     const [resume, setResume] = useState<Resume | null>(null);
-    const [jobDescription, setJobDescription] = useState('');
-    const [jobTitle, setJobTitle] = useState('');
-    const [optimizing, setOptimizing] = useState(false);
-    const [generatingSummary, setGeneratingSummary] = useState(false);
-    const [showPreview, setShowPreview] = useState(false);
+    const [showPreview, setShowPreview] = useState(true);
     const [importing, setImporting] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    
-    // Tour State
-    const [runTour, setRunTour] = useState(false);
-    const [tourSteps] = useState<Step[]>([
-        {
-            target: '.tour-job-fields',
-            content: 'Start by pasting your target Job Title and Description. Our AI will use this to instantly tailor your resume.',
-            disableBeacon: true,
-        },
-        {
-            target: '.tour-ats-score',
-            content: 'Watch your ATS Score update in real-time. Aim for 80%+ to ensure you pass automated recruiter filters.',
-        },
-        {
-            target: '.tour-editor',
-            content: 'Fill out your professional experience here. Use the AI button to generate optimized bullet points automatically.',
-        },
-        {
-            target: '.tour-export',
-            content: 'All done? Export to a perfectly formatted, ATS-compliant PDF instantly.',
-        },
-    ]);
-
-    const [activeSection, setActiveSection] = useState('personal');
+    const [optimizing, setOptimizing] = useState(false);
     const [analyzing, setAnalyzing] = useState(false);
     const [atsBreakdown, setAtsBreakdown] = useState<any>(null);
     const [showAdvancedScore, setShowAdvancedScore] = useState(false);
+    const [showTailorModal, setShowTailorModal] = useState(false);
+    const [atsScore, setAtsScore] = useState<number>(0);
+    const [jobDescription, setJobDescription] = useState('');
+    const [jobTitle, setJobTitle] = useState('');
+    const [openSections, setOpenSections] = useState<Set<string>>(new Set(['personal']));
     const [templateId, setTemplateId] = useState('harvard');
-
-    const [searchParams] = useSearchParams();
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const componentRef = useRef<any>(null);
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+
+    const isResumePopulated = resume && (resume.personalInfo?.fullName !== '' || (resume.experience && resume.experience.length > 0));
+
     const handleDownload = useReactToPrint({
         contentRef: componentRef,
         documentTitle: `Resume-${resume?.personalInfo?.fullName || 'Untitled'}`,
@@ -121,48 +100,93 @@ export default function Builder() {
 
     useEffect(() => {
         const saved = localStorage.getItem('atsense_current_resume');
+        const savedJD = localStorage.getItem('atsense_current_jd');
+        const savedTitle = localStorage.getItem('atsense_current_title');
         if (saved) {
             const parsed = JSON.parse(saved);
             setResume(parsed);
-            // PERSISTENCE REMOVED: Job Description and Title are now transient and will not be loaded from storage
+            setAtsScore(Number(parsed.atsScore || 0));
         } else {
             setResume(emptyResume);
-            const templateParam = searchParams.get('template');
-            if (templateParam) setTemplateId(templateParam);
         }
-        // Ensure inputs are always empty on fresh load
-        setJobDescription('');
-        setJobTitle('');
+        if (savedJD) setJobDescription(savedJD);
+        if (savedTitle) setJobTitle(savedTitle);
+        const templateParam = searchParams.get('template');
+        if (templateParam) setTemplateId(templateParam);
     }, [searchParams]);
 
     useEffect(() => {
         if (resume) {
-            localStorage.setItem('atsense_current_resume', JSON.stringify(resume));
+            localStorage.setItem('atsense_current_resume', JSON.stringify({ ...resume, atsScore }));
+            localStorage.setItem('atsense_current_jd', jobDescription);
+            localStorage.setItem('atsense_current_title', jobTitle);
         }
-    }, [resume]);
+    }, [resume, jobDescription, jobTitle, atsScore]);
 
-    const fetchBreakdown = async (currentResume?: Resume) => {
+    const toggleSection = (id: string) => {
+        setOpenSections(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
+
+    const fetchBreakdown = async (currentResume?: Resume, autoShowModal = false) => {
         const targetResume = currentResume || resume;
-        if (!targetResume) return;
+        if (!targetResume || !isResumePopulated) return;
+        if (!jobDescription && !autoShowModal) {
+            showToast('Add a Job Description first for analysis.', 'info');
+            setShowTailorModal(true);
+            return;
+        }
         setAnalyzing(true);
         try {
             const response = await api.post('/analyze-ats', {
                 resume_text: JSON.stringify(targetResume),
                 job_description: jobDescription
             });
-            setResume({ ...targetResume, atsScore: response.data.score });
-            setAtsBreakdown(response.data);
-            showToast('ATS Analysis Complete!', 'success');
-        } catch (error) {
-            showToast('Analysis failed. Try again.', 'error');
+            const freshData = response.data;
+            const numericScore = Number(freshData.overallScore || freshData.total_score || freshData.score || 0);
+            const updatedResume = { ...targetResume, atsScore: numericScore };
+            setResume(updatedResume);
+            setAtsScore(numericScore);
+            localStorage.setItem('atsense_current_resume', JSON.stringify(updatedResume));
+            setAtsBreakdown(freshData);
+            showToast('ATS analysis complete!', 'success');
+            if (autoShowModal) setShowAdvancedScore(true);
+        } catch {
+            showToast('Analysis failed.', 'error');
         } finally {
             setAnalyzing(false);
         }
     };
 
-    const generateAI = async () => {
+    const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('resume', file);
+        setImporting(true);
+        try {
+            const res = await api.post('/import', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            const importedResume = { ...res.data, atsScore: 0 };
+            setResume(importedResume);
+            setAtsScore(0);
+            setOpenSections(new Set(['personal']));
+            showToast('Resume imported successfully!', 'success');
+            if (jobDescription) setTimeout(() => fetchBreakdown(importedResume), 800);
+        } catch {
+            showToast('Failed to import resume.', 'error');
+        } finally {
+            setImporting(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    const performOptimization = async () => {
         if (!jobDescription || !jobTitle) {
-            showToast('Please provide job title and description first.', 'info');
+            showToast('Please fill in both Job Title and Description.', 'info');
             return;
         }
         setOptimizing(true);
@@ -173,80 +197,36 @@ export default function Builder() {
                 job_title: jobTitle
             });
             const optimized = response.data.optimized_resume;
+            const numericScore = Number(optimized.overallScore || response.data.overallScore || response.data.total_score || 0);
             setResume(optimized);
-            showToast('Resume ATS Optimized!', 'success');
-            
-            // Re-analyze score automatically after optimization
-            setTimeout(() => {
-                fetchBreakdown(optimized);
-            }, 500);
-
-            // Silent snapshot for storage
-            api.post('/leads/snapshot', { resume: JSON.stringify(optimized) }).catch(() => {});
-            
-        } catch (error) {
+            setAtsScore(numericScore);
+            setShowTailorModal(false);
+            showToast('AI Tailoring Complete!', 'success');
+            setTimeout(() => fetchBreakdown(optimized, true), 800);
+        } catch {
             showToast('AI tailoring failed.', 'error');
         } finally {
             setOptimizing(false);
         }
     };
 
-    const generateMagicSummary = async () => {
-        if (!jobTitle) return;
-        setGeneratingSummary(true);
-        try {
-            const response = await api.post('/generate-summary', {
-                job_title: jobTitle,
-                resume_context: JSON.stringify(resume)
-            });
-            setResume({ ...resume!, summary: response.data.summary });
-            showToast('Professional summary generated!', 'success');
-        } catch (error) {
-            showToast('Summary generation failed.', 'error');
-        } finally {
-            setGeneratingSummary(false);
-        }
-    };
-
-    const { showConfirm } = useModal();
-
     const clearResume = () => {
         showConfirm({
             title: 'Reset Workspace',
-            message: 'Are you sure you want to clear your current progress? This action will reset your resume, job data, and ATS analysis.',
-            confirmText: 'Reset Everything',
-            cancelText: 'Keep Editing',
-            type: 'danger',
+            message: 'All current progress will be permanently cleared. Are you sure?',
+            confirmText: 'Reset All',
             onConfirm: () => {
                 localStorage.removeItem('atsense_current_resume');
+                localStorage.removeItem('atsense_current_jd');
+                localStorage.removeItem('atsense_current_title');
                 setResume(emptyResume);
-                setAtsBreakdown(null);
-                setJobTitle('');
+                setAtsScore(0);
                 setJobDescription('');
-                showToast('Workspace cleared.', 'info');
+                setJobTitle('');
+                setAtsBreakdown(null);
+                showToast('Workspace reset.', 'info');
             }
         });
-    };
-
-    const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append('resume', file);
-        setImporting(true);
-        try {
-            const res = await api.post('/import', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-            setResume(res.data);
-            showToast('Resume imported successfully!', 'success');
-        } catch (err: any) {
-            showToast(err.response?.data?.message || 'Failed to import resume', 'error');
-        } finally {
-            setImporting(false);
-            if (fileInputRef.current) fileInputRef.current.value = '';
-        }
     };
 
     const updateExperience = (index: number, field: string, value: any) => {
@@ -271,362 +251,517 @@ export default function Builder() {
         });
     };
 
-    const updateEducation = (index: number, field: string, value: any) => {
-        setResume(prev => {
-            if (!prev) return prev;
-            const newEdu = [...prev.education];
-            newEdu[index] = { ...newEdu[index], [field]: value };
-            return { ...prev, education: newEdu };
-        });
-    };
+    const scoreColor = atsScore >= 80 ? '#10b981' : atsScore >= 60 ? '#f59e0b' : '#ef4444';
+    const scoreStatusLabel = atsScore >= 80 ? 'OPTIMIZED' : atsScore >= 60 ? 'GOOD' : atsScore > 0 ? 'NEEDS WORK' : isResumePopulated ? 'NEEDS TAILOR' : 'NEED ANALYSIS';
+    const scoreStatusColor = atsScore >= 80 ? '#10b981' : atsScore >= 60 ? '#f59e0b' : atsScore > 0 ? '#ef4444' : '#9ca3af';
 
-    const addEducation = () => {
-        setResume(prev => prev ? { ...prev, education: [...prev.education, { institution: '', degree: '', endDate: '' }] } : prev);
-    };
-
-    const removeEducation = (index: number) => {
-        setResume(prev => {
-            if (!prev) return prev;
-            const newEdu = [...prev.education];
-            newEdu.splice(index, 1);
-            return { ...prev, education: newEdu };
-        });
-    };
-
-    const AccordionHeader = ({ id, title, icon: Icon }: any) => (
-        <button
-            onClick={() => setActiveSection(activeSection === id ? '' : id)}
-            className={`w-full flex items-center justify-between p-5 transition-all ${activeSection === id ? 'bg-gradient-to-r from-indigo-50/80 to-purple-50/80 border-b border-indigo-100' : 'hover:bg-gray-50'}`}
-        >
-            <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-xl transition-colors ${activeSection === id ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-100 text-gray-500'}`}>
-                    <Icon size={20} />
-                </div>
-                <h3 className={`font-bold text-lg ${activeSection === id ? 'text-indigo-900' : 'text-gray-700'}`}>
-                    {title}
-                </h3>
-            </div>
-            {activeSection === id ? <ChevronUp className="text-indigo-500" /> : <ChevronDown className="text-gray-400" />}
-        </button>
-    );
+    const accordionSections = [
+        { id: 'personal', label: 'Basic Information', icon: User, number: '01' },
+        { id: 'summary', label: 'Professional Summary', icon: FileText, number: '02' },
+        { id: 'experience', label: 'Work Experience', icon: Briefcase, number: '03' },
+        { id: 'education', label: 'Academic History', icon: GraduationCap, number: '04' },
+        { id: 'skills', label: 'Skills & Competencies', icon: Code, number: '05' },
+        { id: 'languages', label: 'Languages', icon: Globe, number: '06' },
+    ];
 
     if (!resume) return null;
 
-    const handleSimulate = () => {
-        if (resume) {
-            const updatedResume = { ...resume, job_description: jobDescription, jobTitle: jobTitle };
-            localStorage.setItem('atsense_current_resume', JSON.stringify(updatedResume));
-        }
-        navigate('/interview-prep');
-    };
-
     return (
-        <div className="min-h-screen bg-gray-50/50 text-gray-900 selection:bg-indigo-100 font-sans tracking-tight">
-            <Joyride
-                steps={tourSteps}
-                run={runTour}
-                continuous
-                showProgress
-                showSkipButton
-                styles={{
-                    options: { primaryColor: '#4f46e5', zIndex: 10000 },
-                    tooltip: { borderRadius: '1rem', border: '1px solid #e5e7eb', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' },
-                    buttonNext: { borderRadius: '0.5rem', fontWeight: 600 },
-                }}
-            />
-            {/* ── WORKSPACE HEADER ── */}
-            <div className="sticky top-20 z-40 bg-gray-50/80 border-b border-gray-200/40 py-5 transition-all">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/40 p-3 rounded-2xl border border-white/60 shadow-sm ring-1 ring-black/5">
-                        <div className="flex items-center justify-between md:justify-start w-full md:w-auto gap-6 sm:gap-10 px-2 lg:px-4 tour-ats-score">
-                            <div className="flex flex-col">
-                                <h1 className="text-2xl font-black bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent tracking-tight leading-none mb-1.5 flex items-center gap-2">
-                                    Workspace
-                                </h1>
-                                <div className="flex items-center gap-2">
-                                    <div className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                    </div>
-                                    <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Auto-saving</span>
-                                </div>
+        <div className="min-h-screen bg-[#f4f5f7] flex flex-col">
+
+            {/* ── PREMIUM HEADER BAR ── */}
+            <header className="sticky top-16 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200/60 shadow-[0_1px_12px_rgba(0,0,0,0.06)]">
+                <div className="max-w-screen-2xl mx-auto px-6 py-4 flex flex-col gap-4">
+                    
+                    {/* ── ROW 1: App Header ── */}
+                    <div className="flex items-center justify-between pl-1">
+                        {/* Brand (Left) */}
+                        <div className="flex items-center gap-3 shrink-0">
+                            <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center shadow-md">
+                                <FileText size={18} className="text-white" strokeWidth={2.5} />
                             </div>
-                            <div className="w-px h-10 bg-gradient-to-b from-transparent via-gray-200 to-transparent hidden sm:block"></div>
-                            <div className="flex items-center gap-4 cursor-pointer group" onClick={() => fetchBreakdown()}>
-                                <div className="relative w-12 h-12 shrink-0 flex items-center justify-center bg-white rounded-full shadow-sm border border-indigo-50 group-hover:shadow-md group-hover:scale-105 transition-all duration-300">
-                                    <svg className="w-10 h-10 -rotate-90 absolute" viewBox="0 0 56 56">
-                                        <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-gray-100" />
-                                        <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="transparent"
-                                            strokeDasharray={2 * Math.PI * 24}
-                                            strokeDashoffset={2 * Math.PI * 24 * (1 - (resume?.atsScore || 0) / 100)}
-                                            strokeLinecap="round"
-                                            className="text-indigo-600 drop-shadow-[0_0_8px_rgba(79,70,229,0.3)] transition-all duration-1000 ease-out"
-                                        />
-                                    </svg>
-                                    <span className={`relative z-10 text-[12px] font-black text-indigo-950 ${analyzing ? 'animate-pulse' : ''}`}>
-                                        {analyzing ? <Activity size={14} className="animate-spin text-indigo-600" /> : `${resume?.atsScore || 0}%`}
-                                    </span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest leading-none mb-1">ATS Score</span>
-                                    <span className="text-sm font-bold text-gray-800 leading-none group-hover:text-indigo-600 transition-colors">
-                                        {analyzing ? 'Analyzing...' : resume.atsScore > 0 ? 'Click to refresh' : 'Click to analyze'}
-                                    </span>
-                                    {!analyzing && resume.atsScore > 0 && (
-                                        <button onClick={(e) => { e.stopPropagation(); setShowAdvancedScore(true); }} className="text-[10px] mt-1 font-bold text-indigo-600 hover:text-indigo-800 underline underline-offset-2 text-left opacity-0 group-hover:opacity-100 transition-opacity">
-                                            View Report &rarr;
-                                        </button>
-                                    )}
-                                </div>
+                            <div className="flex items-center gap-2 ml-0.5">
+                                <h1 className="text-xl font-black text-gray-900 leading-none tracking-tight">Career Studio</h1>
+                                <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-[9px] font-bold rounded tracking-widest uppercase shadow-sm">AI</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2.5 shrink-0 px-2 lg:px-4 w-full md:w-auto justify-between md:justify-end overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
-                            {resume.atsScore > 40 && (
-                                <button onClick={handleSimulate} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200/60 rounded-xl text-xs sm:text-sm font-bold hover:bg-emerald-100 hover:border-emerald-300 transition-all shadow-sm shrink-0">
-                                    <Sparkles size={16} className="text-emerald-500" />
-                                    <span>Interview Prep</span>
-                                </button>
-                            )}
-                            <input 
-                                type="file" 
-                                ref={fileInputRef} 
-                                onChange={handleFileImport} 
-                                className="hidden" 
-                                accept=".pdf,.doc,.docx"
-                            />
-                            <button 
-                                onClick={() => fileInputRef.current?.click()} 
-                                disabled={importing}
-                                className={`flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200/80 rounded-xl text-xs sm:text-sm font-bold hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900 transition-all shadow-sm shrink-0 ${importing ? 'opacity-50 cursor-wait' : ''}`}
+
+                        {/* Global Actions (Right) */}
+                        <div className="flex items-center gap-3 shrink-0">
+                            <button
+                                onClick={clearResume}
+                                className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg text-gray-400 text-xs font-semibold hover:bg-red-50 hover:text-red-500 transition-all border border-transparent hover:border-red-100"
                             >
-                                {importing ? <Activity size={16} className="animate-spin text-indigo-500" /> : <Upload size={16} className="text-gray-400" />}
-                                <span>{importing ? 'Importing...' : 'Import'}</span>
+                                <Trash2 size={13} strokeWidth={2} />
+                                Reset
                             </button>
-                            <button 
-                                onClick={() => setShowPreview(true)} 
-                                disabled={!resume.personalInfo?.fullName}
-                                className={`flex items-center gap-2 px-4 py-2 border rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm shrink-0 ${!resume.personalInfo?.fullName ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed' : 'bg-white text-gray-700 border-gray-200/80 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900'}`}
+
+                            <button
+                                disabled={!isResumePopulated}
+                                onClick={() => setShowPreview(p => !p)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 border shadow-sm ${
+                                    !isResumePopulated
+                                        ? 'opacity-40 cursor-not-allowed bg-gray-50 border-gray-100 text-gray-400'
+                                        : showPreview
+                                            ? 'bg-gray-900 border-gray-900 text-white'
+                                            : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
+                                }`}
                             >
-                                <Eye size={16} className={!resume.personalInfo?.fullName ? 'text-gray-200' : 'text-gray-400'} />
-                                <span>Preview</span>
-                            </button>
-                            <button 
-                                onClick={handleDownload} 
-                                disabled={!resume.personalInfo?.fullName}
-                                className={`group relative flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-all overflow-hidden shrink-0 tour-export ${!resume.personalInfo?.fullName ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed' : 'bg-gray-900 text-white hover:bg-black hover:shadow-lg hover:-translate-y-[1px]'}`}
-                            >
-                                <Download size={16} className={!resume.personalInfo?.fullName ? 'text-gray-300' : 'group-hover:-translate-y-[2px] transition-transform'} />
-                                <span>Export PDF</span>
-                            </button>
-                            <div className="w-px h-6 bg-gray-200 mx-1 shrink-0"></div>
-                            <button 
-                                onClick={clearResume} 
-                                disabled={!resume.personalInfo?.fullName}
-                                className={`p-2 rounded-xl transition-all shrink-0 ${!resume.personalInfo?.fullName ? 'text-gray-200 cursor-not-allowed' : 'text-gray-400 hover:text-red-500 hover:bg-red-50'}`} 
-                                title="Reset resume"
-                            >
-                                <Trash2 size={16} />
+                                {showPreview ? <EyeOff size={13} /> : <Eye size={13} />}
+                                <span className="hidden sm:inline">{showPreview ? 'Hide Layout' : 'Preview Layout'}</span>
                             </button>
                         </div>
                     </div>
-                    <div className="flex flex-col lg:flex-row items-stretch gap-4 relative z-0 tour-job-fields">
-                        <div className="group flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3 flex-1 shadow-sm transition-all duration-200 hover:border-gray-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 min-w-0 cursor-text">
-                            <div className="p-2 bg-gray-50 border border-gray-100 rounded-lg shrink-0 text-gray-400 group-focus-within:bg-indigo-50 group-focus-within:text-indigo-600 group-focus-within:border-indigo-100 transition-colors">
-                                <Briefcase size={16} />
-                            </div>
-                            <div className="flex-grow min-w-0">
-                                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-0.5 group-focus-within:text-indigo-600 transition-colors">Target Job Title</label>
-                                <input type="text" value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} placeholder="e.g. Senior Software Engineer" className="bg-transparent border-none focus:outline-none text-[14px] font-bold text-gray-900 w-full placeholder:text-gray-300 p-0 truncate outline-none ring-0" />
-                            </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row flex-[2] gap-4 items-start sm:items-center">
-                            <div className="group flex items-start gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3 flex-grow shadow-sm transition-all duration-200 hover:border-gray-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-100 min-w-0 cursor-text w-full">
-                                <div className="mt-0.5 p-2 bg-gray-50 border border-gray-100 rounded-lg shrink-0 text-gray-400 group-focus-within:bg-indigo-50 group-focus-within:text-indigo-600 group-focus-within:border-indigo-100 transition-colors">
-                                    <FileText size={16} />
-                                </div>
-                                <div className="flex-grow w-full min-w-0">
-                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-0.5 group-focus-within:text-indigo-600 transition-colors">Job Description</label>
-                                    <textarea rows={1} value={jobDescription} onChange={(e) => { setJobDescription(e.target.value); e.target.style.height = 'auto'; e.target.style.height = (e.target.scrollHeight) + 'px'; }} placeholder="Paste the job description here..." className="bg-transparent border-none focus:outline-none text-[14px] font-medium leading-relaxed text-gray-700 w-full placeholder:text-gray-300 p-0 resize-none min-h-[20px] max-h-[120px] scrollbar-hide outline-none ring-0" />
-                                </div>
-                            </div>
-                            <button 
-                                onClick={generateAI} 
-                                disabled={!jobTitle || !jobDescription || optimizing}
-                                className={`group flex items-center justify-center gap-2.5 px-8 py-3.5 bg-gradient-to-br from-indigo-600 to-violet-700 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200/50 hover:shadow-xl hover:shadow-indigo-300/60 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex-1 md:flex-none ${optimizing ? 'animate-pulse' : ''}`}
+
+                    {/* ── ROW 2: The Cockpit Action Workflow ── */}
+                    <div className="flex items-center w-full bg-slate-50/80 border border-slate-200/80 rounded-2xl px-3 py-2.5 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] overflow-x-auto scrollbar-hide mt-1">
+                        
+                        {/* Pipeline Container */}
+                        <div className="flex items-center w-full min-w-[850px] justify-between">
+                            
+                            {/* Step 1: IMPORT ROOT ACTION */}
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-[13px] font-black hover:bg-indigo-700 transition-all duration-200 shadow-[0_4px_12px_rgba(79,70,229,0.25)] hover:shadow-[0_4px_16px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 shrink-0"
                             >
-                                {optimizing ? (
-                                    <Activity size={18} className="animate-spin" />
-                                ) : (
-                                    <Sparkles size={18} className="group-hover:scale-110 transition-transform" />
-                                )}
-                                <span>{optimizing ? 'Optimizing...' : 'ATS Optimize'}</span>
+                                <Upload size={15} strokeWidth={3} />
+                                {importing ? 'Scanning CV...' : 'Import Target CV'}
+                            </button>
+
+                            {/* Connector */}
+                            <div className="flex-1 mx-2 sm:mx-4 h-[1.5px] bg-[repeating-linear-gradient(90deg,#cbd5e1_0px,#cbd5e1_4px,transparent_4px,transparent_8px)] opacity-60 min-w-[20px]" />
+
+                            {/* Step 2: ATS Score */}
+                            <div
+                                className={`flex items-center gap-3 px-3 py-1.5 rounded-xl transition-all select-none shrink-0 border border-transparent ${
+                                    !isResumePopulated
+                                        ? 'opacity-40 cursor-not-allowed'
+                                        : 'cursor-pointer hover:bg-white hover:border-slate-200 hover:shadow-sm'
+                                }`}
+                                onClick={() => isResumePopulated && fetchBreakdown(undefined, true)}
+                            >
+                                <div className="relative w-9 h-9 flex items-center justify-center">
+                                    <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#e2e8f0" strokeWidth="4" />
+                                        <circle cx="18" cy="18" r="14" fill="none" stroke={atsScore > 0 ? scoreColor : '#cbd5e1'} strokeWidth="4" strokeDasharray={`${(atsScore / 100) * 87.96} 87.96`} strokeLinecap="round" className="transition-all duration-1000" />
+                                    </svg>
+                                    {analyzing ? (
+                                        <Activity size={12} className="animate-spin text-slate-500" />
+                                    ) : (
+                                        <span className="text-[10px] font-black text-slate-800 tabular-nums">{atsScore > 0 ? `${atsScore}%` : '--'}</span>
+                                    )}
+                                </div>
+                                <div className="hidden lg:block">
+                                    <p className="text-[10px] font-bold text-slate-800 leading-none mb-0.5">{atsScore > 0 ? 'ATS Score' : 'Analyzer'}</p>
+                                    <div className="flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: scoreStatusColor }} />
+                                        <p className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">{scoreStatusLabel}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Connector */}
+                            <div className="flex-1 mx-2 sm:mx-4 h-[1.5px] bg-[repeating-linear-gradient(90deg,#cbd5e1_0px,#cbd5e1_4px,transparent_4px,transparent_8px)] opacity-60 min-w-[20px]" />
+
+                            {/* Step 3: DEEP TAILOR (PROMINENT MAIN FUNCTIONALITY) */}
+                            <button
+                                disabled={!isResumePopulated}
+                                onClick={() => setShowTailorModal(true)}
+                                className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl text-[13px] sm:text-[14px] font-black tracking-wide transition-all duration-300 border relative overflow-hidden group shrink-0 ${
+                                    !isResumePopulated
+                                        ? 'opacity-40 cursor-not-allowed bg-slate-200 border-slate-300 text-slate-500'
+                                        : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-[0_4px_16px_rgba(139,92,246,0.35)] border-violet-500 hover:shadow-[0_6px_24px_rgba(139,92,246,0.5)] hover:-translate-y-0.5 hover:rotate-[0.5deg]'
+                                }`}
+                            >
+                                <Sparkles size={16} className={isResumePopulated ? "absolute opacity-20 group-hover:animate-ping" : "hidden"} />
+                                <Sparkles size={16} className="relative z-10" />
+                                <span className="relative z-10">Deep Tailor</span>
+                            </button>
+
+                            {/* Connector */}
+                            <div className="flex-1 mx-2 sm:mx-4 h-[1.5px] bg-[repeating-linear-gradient(90deg,#cbd5e1_0px,#cbd5e1_4px,transparent_4px,transparent_8px)] opacity-60 min-w-[20px]" />
+
+                            {/* Step 4: Interview Prep */}
+                            <button
+                                disabled={!isResumePopulated}
+                                onClick={() => navigate('/interview-prep')}
+                                className={`flex items-center gap-1.5 sm:gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-[13px] font-bold transition-all duration-200 border border-transparent shrink-0 ${
+                                    !isResumePopulated
+                                        ? 'opacity-40 cursor-not-allowed text-slate-400'
+                                        : 'text-slate-700 bg-white shadow-sm hover:text-amber-700 hover:border-amber-200 hover:shadow-md'
+                                }`}
+                            >
+                                <BrainCircuit size={14} className={isResumePopulated ? "text-amber-500" : ""} />
+                                Interview Prep
+                            </button>
+                            
+                            {/* Connector */}
+                            <div className="flex-1 mx-2 sm:mx-4 h-[1.5px] bg-[repeating-linear-gradient(90deg,#cbd5e1_0px,#cbd5e1_4px,transparent_4px,transparent_8px)] opacity-60 min-w-[20px]" />
+
+                            {/* Step 5: Download Action */}
+                            <button
+                                disabled={!resume.personalInfo?.fullName}
+                                onClick={handleDownload}
+                                className={`flex items-center gap-1.5 sm:gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-[13px] font-bold transition-all duration-200 shrink-0 mr-1 ${
+                                    !resume.personalInfo?.fullName
+                                        ? 'opacity-40 cursor-not-allowed bg-slate-200 text-slate-400 border border-slate-200'
+                                        : 'bg-slate-900 border border-slate-900 text-white hover:bg-slate-800 shadow-[0_4px_12px_rgba(15,23,42,0.2)] hover:-translate-y-0.5'
+                                }`}
+                            >
+                                <Download size={14} />
+                                Download PDF
                             </button>
                         </div>
                     </div>
                 </div>
-            </div>
+            {/* Subtle bottom accent line */}
+            <div className="h-[1px] bg-gradient-to-r from-transparent via-indigo-200/60 to-transparent" />
+        </header>
 
-            <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${showPreview ? 'grid grid-cols-1 lg:grid-cols-2 gap-8' : 'max-w-4xl'}`}>
-                
-                {/* LEFT SIDE - CONTENT EDITOR */}
-                <div className="space-y-6 tour-editor">
-                    
-                    {/* ATS BREAKDOWN MODAL/POPUP (Compact display) */}
+            {/* ── MAIN LAYOUT ── */}
+            <div className={`flex-1 max-w-screen-2xl mx-auto w-full p-5 lg:p-6 gap-5 ${showPreview ? 'grid grid-cols-1 xl:grid-cols-2 items-start' : 'flex flex-col'}`}>
+
+                {/* ── LEFT: Accordion Editor ── */}
+                <div className="space-y-3 min-w-0">
+
+                    {/* ATS Breakdown Card */}
                     {atsBreakdown && (
-                        <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                            <div className="bg-white rounded-3xl border border-indigo-100 shadow-sm overflow-hidden">
-                                <div className="flex items-center justify-between p-4 bg-indigo-50/30 border-b border-indigo-50">
-                                    <h4 className="text-xs font-black text-indigo-900 uppercase tracking-widest flex items-center gap-2">
-                                        <Activity size={12} /> Detailed ATS Report
-                                    </h4>
-                                    <button onClick={() => setAtsBreakdown(null)} className="text-indigo-300 hover:text-indigo-600">
-                                        <Plus className="rotate-45" size={16} />
-                                    </button>
-                                </div>
-                                <div className="max-h-48 overflow-y-auto">
-                                    <ATSScoreBreakdown breakdown={atsBreakdown} />
-                                </div>
-                            </div>
+                        <div className="animate-in slide-in-from-top-4 duration-500">
+                            <ATSScoreBreakdown breakdown={atsBreakdown} />
                         </div>
                     )}
 
-                    {/* MAIN CONTENT */}
-                    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-
-                        {/* 1. PERSONAL INFO SECTION */}
-                        <div className="border-b border-gray-100">
-                            <AccordionHeader id="personal" title="Personal Information" icon={User} />
-                            {activeSection === 'personal' && (
-                                <div className="p-8 bg-white animate-in slide-in-from-top-2 duration-300">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Full Name</label>
-                                            <input type="text" value={resume.personalInfo?.fullName || ''} onChange={(e) => setResume({ ...resume, personalInfo: { ...resume.personalInfo, fullName: e.target.value } })} className="input-field bg-gray-50/50 focus:bg-white text-xl font-bold" placeholder="Johnathan Doe" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Email Address</label>
-                                            <input type="email" value={resume.personalInfo?.email || ''} onChange={(e) => setResume({ ...resume, personalInfo: { ...resume.personalInfo, email: e.target.value } })} className="input-field bg-gray-50/50 focus:bg-white" placeholder="john@example.com" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Phone Number</label>
-                                            <input type="text" value={resume.personalInfo?.phone || ''} onChange={(e) => setResume({ ...resume, personalInfo: { ...resume.personalInfo, phone: e.target.value } })} className="input-field bg-gray-50/50 focus:bg-white" placeholder="+1 (555) 000-0000" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Location</label>
-                                            <input type="text" value={resume.personalInfo?.location || ''} onChange={(e) => setResume({ ...resume, personalInfo: { ...resume.personalInfo, location: e.target.value } })} className="input-field bg-gray-50/50 focus:bg-white" placeholder="City, State" />
-                                        </div>
+                    {/* Accordion Sections */}
+                    {accordionSections.map(({ id, label, icon: Icon, number }) => {
+                        const isOpen = openSections.has(id);
+                        return (
+                            <div key={id} className={`bg-white rounded-2xl border transition-all overflow-hidden ${
+                                !isResumePopulated 
+                                    ? 'border-gray-100/50 opacity-60 mix-blend-luminosity' 
+                                    : 'border-gray-200/80 shadow-sm'
+                            }`}>
+                                {/* Accordion Header */}
+                                <button
+                                    disabled={!isResumePopulated}
+                                    onClick={() => toggleSection(id)}
+                                    className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors ${
+                                        !isResumePopulated ? 'cursor-not-allowed' : 'hover:bg-gray-50/80'
+                                    }`}
+                                >
+                                    <span className="text-[10px] font-black text-gray-300 tracking-widest w-5 shrink-0 tabular-nums">
+                                        {number}
+                                    </span>
+                                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                                        isOpen && isResumePopulated ? 'bg-indigo-600 shadow-md shadow-indigo-200' : 'bg-gray-100'
+                                    }`}>
+                                        <Icon size={15} className={isOpen && isResumePopulated ? 'text-white' : 'text-gray-400'} />
                                     </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* 2. SUMMARY SECTION */}
-                        <div className="border-b border-gray-100">
-                            <AccordionHeader id="summary" title="Professional Summary" icon={Sparkles} />
-                            {activeSection === 'summary' && (
-                                <div className="p-8 bg-white animate-in slide-in-from-top-2 duration-300">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider">About You</label>
-                                        <button onClick={generateMagicSummary} disabled={generatingSummary || !jobTitle} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${generatingSummary || !jobTitle ? 'bg-gray-100 text-gray-400' : 'bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm hover:bg-indigo-100'}`}>
-                                            {generatingSummary ? <Activity size={14} className="animate-spin" /> : <Sparkles size={14} />} Magic Summary
-                                        </button>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.15em] leading-none">Section {number}</p>
+                                        <h2 className={`text-sm font-bold mt-0.5 ${!isResumePopulated ? 'text-gray-400' : 'text-gray-900'}`}>{label}</h2>
                                     </div>
-                                    <textarea rows={6} value={resume.summary || ''} onChange={(e) => setResume({ ...resume, summary: e.target.value })} className="input-field bg-gray-50/50 focus:bg-white" placeholder="Describe your professional background..." />
-                                </div>
-                            )}
-                        </div>
+                                    <ChevronDown
+                                        size={16}
+                                        className={`text-gray-400 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`}
+                                    />
+                                </button>
 
-                        {/* 3. EXPERIENCE */}
-                        <div className="border-b border-gray-100">
-                            <AccordionHeader id="experience" title="Work Experience" icon={Briefcase} />
-                            {activeSection === 'experience' && (
-                                <div className="p-8 bg-gray-50/20 animate-in slide-in-from-top-2 duration-300">
-                                    {resume.experience.map((exp, index) => (
-                                        <div key={index} className="bg-white p-6 rounded-2xl border border-gray-200 mb-6 shadow-sm relative group/item">
-                                            <button onClick={() => removeExperience(index)} className="absolute top-4 right-4 text-gray-300 hover:text-red-500 opacity-0 group-hover/item:opacity-100 transition-all"><Trash2 size={20} /></button>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-2 mr-10">
-                                                <div><label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Job Title</label><input type="text" value={exp.title || ''} onChange={(e) => updateExperience(index, 'title', e.target.value)} className="input-field" placeholder="Job Title" /></div>
-                                                <div><label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Company</label><input type="text" value={exp.company || ''} onChange={(e) => updateExperience(index, 'company', e.target.value)} className="input-field" placeholder="Company Name" /></div>
-                                                <div className="md:col-span-2"><label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Dates</label><div className="flex gap-4"><input type="text" value={exp.startDate || ''} onChange={(e) => updateExperience(index, 'startDate', e.target.value)} className="input-field w-1/2" placeholder="Start" /><input type="text" value={exp.endDate || ''} onChange={(e) => updateExperience(index, 'endDate', e.target.value)} className="input-field w-1/2" placeholder="End" /></div></div>
-                                                <div className="md:col-span-2"><label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Description</label><textarea rows={5} value={exp.description || ''} onChange={(e) => updateExperience(index, 'description', e.target.value)} className="input-field resize-y font-mono text-sm" /></div>
+                                {/* Accordion Body */}
+                                {isOpen && (
+                                    <div className="border-t border-gray-100">
+
+                                        {/* ── Personal Info ── */}
+                                        {id === 'personal' && (
+                                            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="md:col-span-2">
+                                                    <label className={labelCls}>Full Name</label>
+                                                    <input
+                                                        type="text"
+                                                        value={resume.personalInfo?.fullName || ''}
+                                                        onChange={(e) => setResume({ ...resume, personalInfo: { ...resume.personalInfo, fullName: e.target.value } })}
+                                                        className={inputCls}
+                                                        placeholder="John Doe"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className={labelCls}>Email</label>
+                                                    <input
+                                                        type="email"
+                                                        value={resume.personalInfo?.email || ''}
+                                                        onChange={(e) => setResume({ ...resume, personalInfo: { ...resume.personalInfo, email: e.target.value } })}
+                                                        className={inputCls}
+                                                        placeholder="you@example.com"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className={labelCls}>Phone</label>
+                                                    <input
+                                                        type="text"
+                                                        value={resume.personalInfo?.phone || ''}
+                                                        onChange={(e) => setResume({ ...resume, personalInfo: { ...resume.personalInfo, phone: e.target.value } })}
+                                                        className={inputCls}
+                                                        placeholder="+1 234 567 890"
+                                                    />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <label className={labelCls}>Location</label>
+                                                    <input
+                                                        type="text"
+                                                        value={resume.personalInfo?.location || ''}
+                                                        onChange={(e) => setResume({ ...resume, personalInfo: { ...resume.personalInfo, location: e.target.value } })}
+                                                        className={inputCls}
+                                                        placeholder="New York, NY"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className={labelCls}>LinkedIn</label>
+                                                    <input
+                                                        type="text"
+                                                        value={resume.personalInfo?.linkedin || ''}
+                                                        onChange={(e) => setResume({ ...resume, personalInfo: { ...resume.personalInfo, linkedin: e.target.value } })}
+                                                        className={inputCls}
+                                                        placeholder="linkedin.com/in/johndoe"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className={labelCls}>GitHub</label>
+                                                    <input
+                                                        type="text"
+                                                        value={resume.personalInfo?.github || ''}
+                                                        onChange={(e) => setResume({ ...resume, personalInfo: { ...resume.personalInfo, github: e.target.value } })}
+                                                        className={inputCls}
+                                                        placeholder="github.com/johndoe"
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
-                                    <button onClick={addExperience} className="w-full py-4 border-2 border-dashed border-indigo-200 rounded-2xl text-indigo-600 font-bold hover:bg-white hover:border-indigo-300 transition-all flex items-center justify-center gap-2">
-                                        <Plus size={20} /> Add Experience
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                                        )}
 
-                        {/* 4. EDUCATION */}
-                        <div className="border-b border-gray-100">
-                            <AccordionHeader id="education" title="Education" icon={GraduationCap} />
-                            {activeSection === 'education' && (
-                                <div className="p-8 bg-gray-50/20">
-                                    {resume.education.map((edu, index) => (
-                                        <div key={index} className="bg-white p-6 rounded-2xl border border-gray-200 mb-6 shadow-sm relative group/item">
-                                            <button onClick={() => removeEducation(index)} className="absolute top-4 right-4 text-gray-300 hover:text-red-500 opacity-0 group-hover/item:opacity-100 transition-all"><Trash2 size={20} /></button>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mr-10">
-                                                <div className="md:col-span-2"><label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Institution</label><input type="text" value={edu.institution || ''} onChange={(e) => updateEducation(index, 'institution', e.target.value)} className="input-field" /></div>
-                                                <div><label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Degree</label><input type="text" value={edu.degree || ''} onChange={(e) => updateEducation(index, 'degree', e.target.value)} className="input-field" /></div>
-                                                <div><label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Year</label><input type="text" value={edu.endDate || ''} onChange={(e) => updateEducation(index, 'endDate', e.target.value)} className="input-field" /></div>
+                                        {/* ── Professional Summary ── */}
+                                        {id === 'summary' && (
+                                            <div className="p-5">
+                                                <label className={labelCls}>Summary</label>
+                                                <textarea
+                                                    rows={7}
+                                                    value={resume.summary || ''}
+                                                    onChange={(e) => setResume({ ...resume, summary: e.target.value })}
+                                                    className={inputCls + ' resize-none leading-relaxed'}
+                                                    placeholder="Write a concise professional summary highlighting your key achievements and expertise..."
+                                                />
+                                                <p className="text-[11px] text-gray-400 mt-2">{resume.summary?.length || 0} characters — aim for 150–250</p>
                                             </div>
-                                        </div>
-                                    ))}
-                                    <button onClick={addEducation} className="w-full py-4 border-2 border-dashed border-indigo-200 rounded-2xl text-indigo-600 font-bold hover:bg-white hover:border-indigo-300 transition-all flex items-center justify-center gap-2">
-                                        <Plus size={20} /> Add Education
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                                        )}
 
-                        {/* 5. SKILLS */}
-                        <div className="border-b border-gray-100">
-                            <AccordionHeader id="skills" title="Skills" icon={Code} />
-                            {activeSection === 'skills' && (
-                                <div className="p-8 bg-white transition-all">
-                                    <textarea rows={5} value={resume.skills?.join('\n') || ''} onChange={(e) => setResume({ ...resume, skills: e.target.value.split('\n') })} className="input-field bg-gray-50/50 focus:bg-white" placeholder="List your skills..." />
-                                </div>
-                            )}
-                        </div>
+                                        {/* ── Work Experience ── */}
+                                        {id === 'experience' && (
+                                            <div className="p-5 space-y-4">
+                                                {resume.experience.length === 0 && (
+                                                    <div className="text-center py-8">
+                                                        <Briefcase size={28} className="text-gray-200 mx-auto mb-2" />
+                                                        <p className="text-sm font-semibold text-gray-400">No experience entries yet</p>
+                                                        <p className="text-xs text-gray-300 mt-1">Click below to add your work history</p>
+                                                    </div>
+                                                )}
+                                                {resume.experience.map((exp, index) => (
+                                                    <div key={index} className="border border-gray-200 rounded-xl overflow-hidden">
+                                                        <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-100">
+                                                            <span className="text-xs font-bold text-gray-500">
+                                                                {exp.title || `Position ${index + 1}`}{exp.company ? ` @ ${exp.company}` : ''}
+                                                            </span>
+                                                            <button onClick={() => removeExperience(index)} className="text-gray-300 hover:text-red-500 transition-colors">
+                                                                <X size={14} />
+                                                            </button>
+                                                        </div>
+                                                        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                            <div>
+                                                                <label className={labelCls}>Job Title</label>
+                                                                <input type="text" value={exp.title || ''} onChange={(e) => updateExperience(index, 'title', e.target.value)} className={smallInputCls} placeholder="Software Engineer" />
+                                                            </div>
+                                                            <div>
+                                                                <label className={labelCls}>Company</label>
+                                                                <input type="text" value={exp.company || ''} onChange={(e) => updateExperience(index, 'company', e.target.value)} className={smallInputCls} placeholder="Acme Corp" />
+                                                            </div>
+                                                            <div>
+                                                                <label className={labelCls}>Start Date</label>
+                                                                <input type="text" value={exp.startDate || ''} onChange={(e) => updateExperience(index, 'startDate', e.target.value)} placeholder="Jan 2022" className={smallInputCls} />
+                                                            </div>
+                                                            <div>
+                                                                <label className={labelCls}>End Date</label>
+                                                                <input type="text" value={exp.endDate || ''} onChange={(e) => updateExperience(index, 'endDate', e.target.value)} placeholder="Present" className={smallInputCls} />
+                                                            </div>
+                                                            <div className="md:col-span-2">
+                                                                <label className={labelCls}>Description</label>
+                                                                <textarea rows={4} value={exp.description || ''} onChange={(e) => updateExperience(index, 'description', e.target.value)} className={smallInputCls + ' resize-none leading-relaxed'} placeholder="Describe your key responsibilities and achievements..." />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                <button
+                                                    onClick={addExperience}
+                                                    className="w-full py-3 border-2 border-dashed border-indigo-200 rounded-xl text-indigo-600 text-sm font-semibold hover:border-indigo-400 hover:bg-indigo-50/50 transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <Plus size={15} /> Add Work Experience
+                                                </button>
+                                            </div>
+                                        )}
 
-                        {/* 6. CERTIFICATIONS */}
-                        <div className="border-b border-gray-100">
-                            <AccordionHeader id="certifications" title="Certifications" icon={Award} />
-                            {activeSection === 'certifications' && (
-                                <div className="p-8 bg-gray-50/20">
-                                    {/* Certifications logic omitted for brevity in revert */}
-                                </div>
-                            )}
-                        </div>
+                                        {/* ── Education ── */}
+                                        {id === 'education' && (
+                                            <div className="p-5 space-y-4">
+                                                {resume.education.length === 0 && (
+                                                    <div className="text-center py-8">
+                                                        <GraduationCap size={28} className="text-gray-200 mx-auto mb-2" />
+                                                        <p className="text-sm font-semibold text-gray-400">No education entries yet</p>
+                                                    </div>
+                                                )}
+                                                {resume.education.map((edu, index) => (
+                                                    <div key={index} className="border border-gray-200 rounded-xl overflow-hidden">
+                                                        <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-100">
+                                                            <span className="text-xs font-bold text-gray-500">{edu.institution || `Institution ${index + 1}`}</span>
+                                                            <button
+                                                                onClick={() => { const n = [...resume.education]; n.splice(index, 1); setResume({ ...resume, education: n }); }}
+                                                                className="text-gray-300 hover:text-red-500 transition-colors"
+                                                            >
+                                                                <X size={14} />
+                                                            </button>
+                                                        </div>
+                                                        <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                            <div className="md:col-span-3">
+                                                                <label className={labelCls}>Institution</label>
+                                                                <input type="text" value={edu.institution || ''} onChange={(e) => { const n = [...resume.education]; n[index].institution = e.target.value; setResume({ ...resume, education: n }); }} className={smallInputCls} placeholder="University of..." />
+                                                            </div>
+                                                            <div className="md:col-span-2">
+                                                                <label className={labelCls}>Degree</label>
+                                                                <input type="text" value={edu.degree || ''} onChange={(e) => { const n = [...resume.education]; n[index].degree = e.target.value; setResume({ ...resume, education: n }); }} className={smallInputCls} placeholder="B.Sc Computer Science" />
+                                                            </div>
+                                                            <div>
+                                                                <label className={labelCls}>Year</label>
+                                                                <input type="text" value={edu.endDate || ''} onChange={(e) => { const n = [...resume.education]; n[index].endDate = e.target.value; setResume({ ...resume, education: n }); }} className={smallInputCls} placeholder="2024" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                <button
+                                                    onClick={() => setResume({ ...resume, education: [...resume.education, { institution: '', degree: '', endDate: '' }] })}
+                                                    className="w-full py-3 border-2 border-dashed border-indigo-200 rounded-xl text-indigo-600 text-sm font-semibold hover:border-indigo-400 hover:bg-indigo-50/50 transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <Plus size={15} /> Add Education
+                                                </button>
+                                            </div>
+                                        )}
 
-                        {/* 7. LANGUAGES */}
-                        <div>
-                            <AccordionHeader id="languages" title="Languages" icon={Globe} />
-                            {activeSection === 'languages' && (
-                                <div className="p-8 bg-white">
-                                    <textarea rows={3} value={(resume.languages || []).join('\n')} onChange={(e) => setResume({ ...resume, languages: e.target.value.split('\n') })} className="input-field bg-gray-50/50" placeholder="List your languages..." />
-                                </div>
-                            )}
-                        </div>
+                                        {/* ── Skills ── */}
+                                        {id === 'skills' && (
+                                            <div className="p-5">
+                                                <label className={labelCls}>Skills <span className="normal-case font-normal text-gray-300">— one per line</span></label>
+                                                <textarea
+                                                    rows={9}
+                                                    value={resume.skills?.join('\n') || ''}
+                                                    onChange={(e) => setResume({ ...resume, skills: e.target.value.split('\n') })}
+                                                    className={inputCls + ' resize-none font-mono text-xs leading-loose'}
+                                                    placeholder={"React\nNode.js\nTypeScript\nPython\n..."}
+                                                />
+                                                {resume.skills?.filter(s => s.trim()).length > 0 && (
+                                                    <div className="flex flex-wrap gap-1.5 mt-3">
+                                                        {resume.skills.filter(s => s.trim()).map((s, i) => (
+                                                            <span key={i} className="px-2.5 py-1 bg-indigo-50 text-indigo-700 text-[11px] font-semibold rounded-lg border border-indigo-100">
+                                                                {s}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
 
-                    </div>
+                                        {/* ── Languages ── */}
+                                        {id === 'languages' && (
+                                            <div className="p-5 space-y-3">
+                                                {(resume.languages || []).length === 0 && (
+                                                    <div className="text-center py-8">
+                                                        <Globe size={28} className="text-gray-200 mx-auto mb-2" />
+                                                        <p className="text-sm font-semibold text-gray-400">No languages added yet</p>
+                                                    </div>
+                                                )}
+                                                {(resume.languages || []).map((lang: any, index: number) => (
+                                                    <div key={index} className="flex items-center gap-3">
+                                                        <input
+                                                            type="text"
+                                                            value={typeof lang === 'string' ? lang : lang.language || ''}
+                                                            onChange={(e) => {
+                                                                const n = [...(resume.languages || [])];
+                                                                n[index] = typeof lang === 'string' ? e.target.value : { ...lang, language: e.target.value };
+                                                                setResume({ ...resume, languages: n });
+                                                            }}
+                                                            className={smallInputCls}
+                                                            placeholder="e.g. English"
+                                                        />
+                                                        {typeof lang !== 'string' && (
+                                                            <input
+                                                                type="text"
+                                                                value={lang.proficiency || ''}
+                                                                onChange={(e) => {
+                                                                    const n = [...(resume.languages || [])];
+                                                                    n[index] = { ...lang, proficiency: e.target.value };
+                                                                    setResume({ ...resume, languages: n });
+                                                                }}
+                                                                className={smallInputCls}
+                                                                placeholder="Proficiency (e.g. Fluent)"
+                                                            />
+                                                        )}
+                                                        <button
+                                                            onClick={() => { const n = [...(resume.languages || [])]; n.splice(index, 1); setResume({ ...resume, languages: n }); }}
+                                                            className="text-gray-300 hover:text-red-500 transition-colors shrink-0"
+                                                        >
+                                                            <X size={16} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                <button
+                                                    onClick={() => setResume({ ...resume, languages: [...(resume.languages || []), { language: '', proficiency: '' }] })}
+                                                    className="w-full py-3 border-2 border-dashed border-indigo-200 rounded-xl text-indigo-600 text-sm font-semibold hover:border-indigo-400 hover:bg-indigo-50/50 transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <Plus size={15} /> Add Language
+                                                </button>
+                                            </div>
+                                        )}
+
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+
+
                 </div>
 
-                {/* RIGHT SIDE - PREVIEW */}
-                {showPreview && (
-                    <div className="hidden lg:block sticky top-32 h-[calc(100vh-160px)]">
-                        <div className="bg-gray-900 rounded-3xl h-full shadow-2xl p-6 flex flex-col items-center">
-                            <div className="w-full flex justify-between items-center mb-4 px-2">
-                                <span className="text-xs font-bold text-white/50 uppercase tracking-widest">Interactive Preview</span>
-                                <div className="flex gap-2">
-                                    <button onClick={() => setTemplateId('harvard')} className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase transition-all ${templateId === 'harvard' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}>Classic</button>
-                                    <button onClick={() => setTemplateId('executive')} className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase transition-all ${templateId === 'executive' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}>Clean</button>
+                {/* ── RIGHT: Live Preview Panel — only after import ── */}
+                {showPreview && isResumePopulated && (
+                    <div className="hidden xl:flex flex-col sticky top-24 h-[calc(100vh-7rem)]">
+                        <div className="bg-gray-950 rounded-2xl h-full shadow-2xl flex flex-col overflow-hidden">
+                            {/* Preview Header */}
+                            <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 shrink-0">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Live Preview</span>
+                                    <span className="text-[10px] text-white/20 ml-1">• Real-time update</span>
+                                </div>
+                                <div className="flex bg-white/10 rounded-lg p-0.5 gap-0.5">
+                                    <button
+                                        onClick={() => setTemplateId('harvard')}
+                                        className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${templateId === 'harvard' ? 'bg-white text-gray-950 shadow-sm' : 'text-white/50 hover:text-white'}`}
+                                    >
+                                        Elite
+                                    </button>
+                                    <button
+                                        onClick={() => setTemplateId('executive')}
+                                        className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${templateId === 'executive' ? 'bg-white text-gray-950 shadow-sm' : 'text-white/50 hover:text-white'}`}
+                                    >
+                                        Clean
+                                    </button>
                                 </div>
                             </div>
-                            <div className="flex-1 w-full overflow-y-auto rounded-2xl bg-white scrollbar-hide">
-                                <div className="scale-[0.75] origin-top transform translate-y-4">
+                            {/* Preview Content */}
+                            <div className="flex-1 overflow-y-auto bg-gray-200 mx-4 my-4 rounded-xl">
+                                <div className="scale-[0.72] origin-top-left w-[138.9%]">
                                     {templateId === 'harvard' && <HarvardTemplate ref={componentRef} resume={resume} />}
                                     {templateId === 'executive' && <ExecutiveTemplate ref={componentRef} resume={resume} />}
                                 </div>
@@ -634,21 +769,76 @@ export default function Builder() {
                         </div>
                     </div>
                 )}
+
             </div>
 
-            {/* ATS Overlays */}
-            {atsBreakdown && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-950/60 backdrop-blur-sm" onClick={() => setAtsBreakdown(null)}>
-                    <div className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl h-[80vh] overflow-hidden animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
-                        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
-                            <h2 className="text-xl font-bold text-gray-900">ATS Score Breakdown</h2>
-                            <button onClick={() => setAtsBreakdown(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={24} /></button>
+            {/* Hidden file input */}
+            <input type="file" ref={fileInputRef} onChange={handleFileImport} className="hidden" accept=".pdf,.doc,.docx" />
+
+            {/* ── Deep Tailor Modal ── */}
+            {showTailorModal && (
+                <div
+                    className="fixed inset-0 z-[300] bg-black/50 backdrop-blur-sm flex items-center justify-center p-6"
+                    onClick={() => setShowTailorModal(false)}
+                >
+                    <div
+                        className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-violet-600 rounded-xl flex items-center justify-center shadow-md shadow-violet-200">
+                                    <Sparkles size={18} className="text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900">Deep Tailor</h3>
+                                    <p className="text-xs text-gray-400">AI-powered resume optimization for your target role</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowTailorModal(false)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600">
+                                <X size={20} />
+                            </button>
                         </div>
-                        <div className="p-8 h-full overflow-y-auto"><ATSScoreBreakdown breakdown={atsBreakdown} /></div>
+                        {/* Modal Body */}
+                        <div className="p-8 space-y-5">
+                            <div>
+                                <label className={labelCls + ' text-gray-500'}>Job Title</label>
+                                <input
+                                    type="text"
+                                    value={jobTitle}
+                                    onChange={(e) => setJobTitle(e.target.value)}
+                                    className={inputCls}
+                                    placeholder="e.g. Senior Software Engineer"
+                                />
+                            </div>
+                            <div>
+                                <label className={labelCls + ' text-gray-500'}>Job Description</label>
+                                <textarea
+                                    rows={8}
+                                    value={jobDescription}
+                                    onChange={(e) => setJobDescription(e.target.value)}
+                                    className={inputCls + ' resize-none leading-relaxed'}
+                                    placeholder="Paste the full job description here. The AI will tailor your resume to match the requirements..."
+                                />
+                            </div>
+                            <button
+                                onClick={performOptimization}
+                                disabled={optimizing}
+                                className="w-full py-4 bg-violet-600 text-white rounded-2xl font-bold text-sm hover:bg-violet-700 transition-all flex items-center justify-center gap-3 shadow-xl shadow-violet-200/50 disabled:opacity-70 hover:-translate-y-0.5 active:translate-y-0"
+                            >
+                                {optimizing ? <Activity size={18} className="animate-spin" /> : <Zap size={18} />}
+                                {optimizing ? 'Optimizing your resume...' : 'Start Deep Tailoring'}
+                            </button>
+                            <p className="text-center text-xs text-gray-400">
+                                AI will rewrite your summary, experience bullet points, and skills to match the JD
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}
 
+            {/* Advanced Score Modal */}
             {showAdvancedScore && <AdvancedScorecard data={atsBreakdown} onClose={() => setShowAdvancedScore(false)} />}
         </div>
     );

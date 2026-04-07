@@ -63,6 +63,7 @@ Route::post('/export/pdf', [ExportController::class, 'exportPdfOffline']);
 Route::post('/preview', [ExportController::class, 'previewHtml']);
 
 Route::post('/leads/capture', [LeadController::class, 'capture']);
+Route::post('/leads/update', [LeadController::class, 'update']);
 Route::post('/leads/snapshot', [ExportController::class, 'snapshot']);
 
 // Health check

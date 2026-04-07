@@ -38,6 +38,8 @@ interface Props {
 }
 
 const AdvancedScorecard: React.FC<Props> = ({ data, onClose }) => {
+  if (!data) return null;
+
   const getScoreColor = (score: number, max: number) => {
     const percentage = (score / max) * 100;
     if (percentage >= 80) return 'text-emerald-600 bg-emerald-50 border-emerald-100';

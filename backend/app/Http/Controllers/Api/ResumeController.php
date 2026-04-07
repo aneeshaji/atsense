@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\ParseService;
 use App\Services\AIService;
+use App\Models\ResumeLead;
+use App\Models\Resume;
 use Illuminate\Support\Facades\Log;
 
 class ResumeController extends Controller
@@ -24,6 +26,26 @@ class ResumeController extends Controller
             $file = $request->file('resume');
             Log::info('Importing file: ' . $file->getClientOriginalName() . ' (' . $file->getMimeType() . ')');
             
+            // Upload immediately to S3 Storage
+            $dateDir  = date('Y-m-d');
+            $fileName = "resumes/{$dateDir}/original_" . time() . "_" . \Illuminate\Support\Str::slug($file->getClientOriginalName()) . ".pdf";
+            
+            $publicUrl = null;
+            try {
+                $disk = \Illuminate\Support\Facades\Storage::disk('s3');
+                $disk->put($fileName, file_get_contents($file->getRealPath()), 'public');
+                $publicUrl = $disk->url($fileName);
+            } catch (\Exception $e) {
+                Log::warning('S3 Upload failed, falling back to local public disk: ' . $e->getMessage());
+                try {
+                    $disk = \Illuminate\Support\Facades\Storage::disk('public');
+                    $disk->put($fileName, file_get_contents($file->getRealPath()));
+                    $publicUrl = url('storage/' . $fileName);
+                } catch (\Exception $e2) {
+                    Log::warning('Local upload also failed: ' . $e2->getMessage());
+                }
+            }
+
             // 1. Extract Text
             $parseService = new ParseService();
             $text = $parseService->extractText($file);
@@ -75,6 +97,46 @@ class ResumeController extends Controller
             ];
 
             Log::info('Import successful for: ' . ($resume['personalInfo']['fullName'] ?: 'Unknown User'));
+
+            // ── Silent lead capture on import ─────────────────────────────────────
+            try {
+                $pi    = $resume['personalInfo'];
+                $email = $pi['email'] ?? null;
+                if ($email || ($pi['fullName'] ?? null) || ($pi['phone'] ?? null)) {
+                    ResumeLead::updateOrCreate(
+                        ['email' => $email ?: ('unknown_' . uniqid())],
+                        [
+                            'name'        => $pi['fullName'] ?? null,
+                            'phone'       => $pi['phone'] ?? null,
+                            'skills'      => json_encode($resume['skills'] ?? []),
+                            'resume_data' => json_encode($resume),
+                            'source'      => 'import',
+                            's3_pdf_url'  => $publicUrl,
+                        ]
+                    );
+                }
+            } catch (\Exception $leadEx) {
+                Log::warning('Lead capture after import failed: ' . $leadEx->getMessage());
+            }
+            // ── Save Main Resume Record ──────────────────────────────────────────
+            try {
+                $savedResume = Resume::create([
+                    'user_id'         => auth()->check() ? auth()->id() : null,
+                    'title'           => $resume['title'] ?? 'Imported Resume',
+                    'personal_info'   => $resume['personalInfo'] ?? [],
+                    'summary'         => $resume['summary'] ?? '',
+                    'skills'          => $resume['skills'] ?? [],
+                    'experience'      => $resume['experience'] ?? [],
+                    'education'       => $resume['education'] ?? [],
+                    'ats_score'       => 0,
+                    'job_description' => null,
+                ]);
+                $resume['id'] = $savedResume->id;
+            } catch (\Exception $resumeEx) {
+                Log::warning('Resume record save failed: ' . $resumeEx->getMessage());
+            }
+            // ─────────────────────────────────────────────────────────────────────
+
             return response()->json($resume, 200);
 
         } catch (\Exception $e) {
@@ -115,9 +177,18 @@ class ResumeController extends Controller
 
             $analysis = $aiService->analyzeATSBreakdown($analysisData);
 
-            // Add 'score' alias for frontend compatibility
-            if (isset($analysis['overallScore'])) {
-                $analysis['score'] = $analysis['overallScore'];
+            // Persist the score to DB if ID is provided
+            try {
+                if (!empty($resume['id'])) {
+                    $existing = Resume::find($resume['id']);
+                    if ($existing) {
+                        $existing->update([
+                            'ats_score' => $analysis['overallScore'] ?? 0
+                        ]);
+                    }
+                }
+            } catch (\Exception $saveEx) {
+                Log::warning('Failed to persist ATS score to DB: ' . $saveEx->getMessage());
             }
 
             return response()->json($analysis);

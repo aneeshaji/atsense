@@ -15,6 +15,8 @@ class ResumeLead extends Model
         'source',
         's3_pdf_url',
         'status',
-        'notes'
+        'notes',
+        'job_title',
+        'job_description',
     ];
 }

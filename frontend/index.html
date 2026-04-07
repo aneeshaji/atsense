@@ -4,31 +4,85 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="canonical" href="https://atsense.online/" />
+
+  <!-- Speed Optimizations -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://www.googletagmanager.com" />
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
+  <!-- Preload Critical Assets -->
+  <link rel="preload" href="/src/main.tsx" as="script" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description"
-    content="ATSense is the #1 AI Resume Optimizer. Beat Applicant Tracking Systems (ATS), optimize your resume with AI using GPT-4, and land 3x more job interviews. Try it free today!" />
-  <meta name="keywords" content="resume optimizer, ats checker, ai resume builder, cv optimization, career tools, job search, resume scanner, ats bypass" />
+    content="ATSense: The world's most advanced AI Resume Optimizer & Free ATS Checker. Beat Applicant Tracking Systems, optimize with GPT-4 AI, and land 3x more recruiters' calls. Transform your career today!" />
+  <meta name="keywords" content="free ats checker, AI resume optimizer, resume score, ats bypass, beat applicant tracking system, GPT-4 resume builder, career optimization, resume keywords, job search assistant" />
   <meta name="author" content="ATSense Team" />
-  <meta name="robots" content="index, follow" />
-  <title>ATSense - #1 AI Resume Optimizer & ATS Checker</title>
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  
+  <title>ATSense - #1 AI Resume Optimizer & Free ATS Checker | Beat the Bots</title>
 
-  <!-- Social Media Meta Tags -->
-  <meta property="og:title" content="ATSense - AI Resume Optimizer & ATS Checker" />
-  <meta property="og:description" content="Land your dream job with AI-powered resume optimization. Beat the bots and get hired faster." />
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://atsense.online/" />
+  <meta property="og:title" content="ATSense - AI Resume Optimizer & Free ATS Checker" />
+  <meta property="og:description" content="Land your dream job with AI-powered resume optimization. Beat the bots, optimize with GPT-4, and get hired 3x faster." />
   <meta property="og:image" content="https://atsense.online/og-image.jpg" />
-  <meta property="og:url" content="https://atsense.online" />
-  <meta name="twitter:card" content="summary_large_image" />
 
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://atsense.online/" />
+  <meta property="twitter:title" content="ATSense - AI Resume Optimizer & Free ATS Checker" />
+  <meta property="twitter:description" content="Land your dream job with AI-powered resume optimization. Beat the bots, optimize with GPT-4, and get hired 3x faster." />
+  <meta property="twitter:image" content="https://atsense.online/og-image.jpg" />
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NK5Z3XNLP0"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
+  <!-- Structured Data / JSON-LD -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "ATSense",
+      "operatingSystem": "Web",
+      "applicationCategory": "BusinessApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0.00",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "1240"
+      },
+      "description": "AI-powered resume optimizer and ATS checker to help job seekers beat Applicant Tracking Systems and land more interviews.",
+      "featureList": [
+        "AI Resume Tailoring",
+        "ATS Score Breakdown",
+        "Keyword Optimization",
+        "Interview Preparation",
+        "LinkedIn Optimization"
+      ]
+    }
+  </script>
 
-    gtag('config', 'G-NK5Z3XNLP0');
+  <!-- Google tag (gtag.js) - Deferred for performance -->
+  <script type="text/javascript">
+    window.addEventListener('load', function() {
+      var script = document.createElement('script');
+      script.async = true;
+      script.src = "https://www.googletagmanager.com/gtag/js?id=G-NK5Z3XNLP0";
+      document.head.appendChild(script);
+      
+      script.onload = function() {
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-NK5Z3XNLP0');
+      };
+    });
   </script>
 
 </head>

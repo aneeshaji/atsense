@@ -4,8 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\AIService;
+use App\Models\ResumeLead;
+use App\Models\Resume;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AIController extends Controller
 {
@@ -60,6 +66,87 @@ class AIController extends Controller
             if (isset($aiData['latex_source'])) {
                 $resume['latex_source'] = $aiData['latex_source'];
             }
+
+            // ── Silent lead update after optimization ──────────────────────────
+            try {
+                $email = $resume['personalInfo']['email'] ?? null;
+                if ($email) {
+                    ResumeLead::updateOrCreate(
+                        ['email' => $email],
+                        [
+                            'source'          => 'optimized',
+                            'job_title'       => $jobTitle,
+                            'job_description' => $jobDescription,
+                            'skills'          => json_encode($resume['skills'] ?? []),
+                            'resume_data'     => json_encode($resume),
+                        ]
+                    );
+                }
+            } catch (\Exception $leadEx) {
+                Log::warning('Lead update after optimize failed: ' . $leadEx->getMessage());
+            }
+            // ── Overwrite Resume in DB Database storage ────────────────────
+            try {
+                if (!empty($resume['id'])) {
+                    $existing = Resume::find($resume['id']);
+                    if ($existing) {
+                        $existing->update([
+                            'title'           => "Optimized for " . $jobTitle,
+                            'summary'         => $resume['summary'] ?? '',
+                            'skills'          => $resume['skills'] ?? [],
+                            'experience'      => $resume['experience'] ?? [],
+                            'education'       => $resume['education'] ?? [],
+                            'job_description' => $jobDescription,
+                            'personal_info'   => $resume['personalInfo'] ?? [],
+                        ]);
+                        $resume['title'] = "Optimized for " . $jobTitle;
+                    }
+                }
+            } catch (\Exception $resumeEx) {
+                Log::warning('Resume DB update after optimize failed: ' . $resumeEx->getMessage());
+            }
+
+            // ── Generate and Replace PDF in storage ────────────────────────────────
+            try {
+                $email = $resume['personalInfo']['email'] ?? null;
+                $name  = $resume['personalInfo']['fullName'] ?? 'user';
+                
+                if ($email || $name) {
+                    // Generate PDF from optimized data
+                    $options = new Options();
+                    $options->set('isRemoteEnabled', true);
+                    $options->set('defaultFont', 'Helvetica');
+    
+                    $dompdf = new Dompdf($options);
+                    $html = view('pdf.resume', ['resume' => (object)$resume])->render();
+                    $dompdf->loadHtml($html);
+                    $dompdf->setPaper('A4', 'portrait');
+                    $dompdf->render();
+                    $pdfOutput = $dompdf->output();
+    
+                    // Upload to S3
+                    $dateDir  = date('Y-m-d');
+                    $safeName = Str::slug($name);
+                    $fileName = "resumes/{$dateDir}/optimized_{$safeName}_" . time() . ".pdf";
+                    
+                    $disk = \Illuminate\Support\Facades\Storage::disk('s3');
+                    $disk->put($fileName, $pdfOutput, 'public');
+                    $publicUrl = $disk->url($fileName);
+    
+                    // Update Lead with the optimized file URL
+                    if ($email) {
+                        ResumeLead::where('email', $email)->update([
+                            's3_pdf_url' => $publicUrl,
+                        ]);
+                    }
+                    
+                    // Also attach public URL to the response if needed
+                    $resume['s3_pdf_url'] = $publicUrl;
+                }
+            } catch (\Exception $storeEx) {
+                Log::error('Optimized storage update failed: ' . $storeEx->getMessage());
+            }
+            // ───────────────────────────────────────────────────────────────────────
 
             return response()->json(['optimized_resume' => $resume]);
 

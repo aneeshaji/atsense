@@ -164,6 +164,8 @@ function AdminDashboard() {
             });
             setLeads(res.data);
             setSelectedIds(new Set());
+        } catch (err: any) {
+            if (err.response?.status === 401) handleLogout();
         } finally {
             setRefreshing(false);
         }
@@ -177,7 +179,9 @@ function AdminDashboard() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setStats(res.data);
-        } catch {}
+        } catch (err: any) {
+            if (err.response?.status === 401) handleLogout();
+        }
     }, []);
 
     useEffect(() => {

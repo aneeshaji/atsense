@@ -10,15 +10,16 @@ use Illuminate\Support\Facades\Log;
 class LeadController extends Controller
 {
     /**
-     * Capture lead data sent directly from the frontend Builder.
-     * Stores both contact info AND full resume JSON for admin preview.
+     * Capture lead at import time.
+     * Called immediately after a resume is parsed — stores identity + resume data.
+     * Uses updateOrCreate on email to prevent duplicates.
      */
     public function capture(Request $request)
     {
         try {
             $personalInfo = $request->input('personalInfo', []);
-            $skills = $request->input('skills', []);
-            $resumeData = $request->input('resume', null);
+            $skills       = $request->input('skills', []);
+            $resumeData   = $request->input('resume', null);
 
             $email = $personalInfo['email'] ?? null;
             $name  = $personalInfo['fullName'] ?? null;
@@ -33,23 +34,88 @@ class LeadController extends Controller
                 'name'   => $name,
                 'phone'  => $phone,
                 'skills' => json_encode($skills),
-                'source' => $request->input('source', 'builder'),
+                'source' => $request->input('source', 'import'),
             ];
 
-            // Store full resume JSON if provided
             if ($resumeData) {
-                $data['resume_data'] = json_encode($resumeData);
+                $data['resume_data'] = is_string($resumeData)
+                    ? $resumeData
+                    : json_encode($resumeData);
             }
 
+            $leadEmail = $email ?: ('unknown_' . uniqid());
+
             ResumeLead::updateOrCreate(
-                ['email' => $email ?: 'unknown_' . uniqid()],
+                ['email' => $leadEmail],
                 $data
             );
 
             return response()->json(['status' => 'captured'], 200);
 
         } catch (\Exception $e) {
-            Log::error('Frontend lead capture failed: ' . $e->getMessage());
+            Log::error('Lead capture failed: ' . $e->getMessage());
+            return response()->json(['status' => 'error'], 500);
+        }
+    }
+
+    /**
+     * Update an existing lead after AI optimization.
+     * Matches by email to avoid duplicates, enriches with job context + optimized resume.
+     */
+    public function update(Request $request)
+    {
+        try {
+            $email          = $request->input('email');
+            $resumeData     = $request->input('resume');
+            $jobTitle       = $request->input('job_title');
+            $jobDescription = $request->input('job_description');
+
+            if (!$email) {
+                return response()->json(['status' => 'skipped', 'reason' => 'no_email'], 200);
+            }
+
+            $data = [
+                'source' => 'optimized',
+            ];
+
+            if ($jobTitle)       $data['job_title']       = $jobTitle;
+            if ($jobDescription) $data['job_description'] = $jobDescription;
+
+            if ($resumeData) {
+                $data['resume_data'] = is_string($resumeData)
+                    ? $resumeData
+                    : json_encode($resumeData);
+
+                // Refresh skills from optimized resume
+                $parsed = is_string($resumeData) ? json_decode($resumeData, true) : $resumeData;
+                if (!empty($parsed['skills'])) {
+                    $data['skills'] = json_encode($parsed['skills']);
+                }
+            }
+
+            // Only update existing; don't create orphan records without identity
+            $lead = ResumeLead::where('email', $email)->first();
+            if ($lead) {
+                $lead->update($data);
+                return response()->json(['status' => 'updated'], 200);
+            }
+
+            // Fallback: create if somehow the import lead wasn't stored
+            $name  = null;
+            $phone = null;
+            if ($resumeData) {
+                $parsed = is_string($resumeData) ? json_decode($resumeData, true) : $resumeData;
+                $name  = $parsed['personalInfo']['fullName'] ?? null;
+                $phone = $parsed['personalInfo']['phone'] ?? null;
+            }
+            $data['name']  = $name;
+            $data['phone'] = $phone;
+            ResumeLead::create(array_merge(['email' => $email], $data));
+
+            return response()->json(['status' => 'created'], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Lead update failed: ' . $e->getMessage());
             return response()->json(['status' => 'error'], 500);
         }
     }

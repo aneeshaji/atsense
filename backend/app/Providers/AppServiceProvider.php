@@ -24,13 +24,14 @@ class AppServiceProvider extends ServiceProvider
             return \Illuminate\Cache\RateLimiting\Limit::perMinute(100)->by($request->user()?->id ?: $request->ip());
         });
 
-        // AI Service Rate Limiter (Limit to 10 jobs per 10 minutes to prevent continuous abuse)
+        // AI Service Rate Limiter (Increased for Interview Simulations to avoid drop-offs)
         \Illuminate\Support\Facades\RateLimiter::for('ai', function (\Illuminate\Http\Request $request) {
-            return \Illuminate\Cache\RateLimiting\Limit::perMinutes(10, 10)->by($request->user()?->id ?: $request->ip())->response(function () {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinutes(10, 30)->by($request->user()?->id ?: $request->ip())->response(function () {
                 return response()->json([
-                    'message' => 'AI Service speed limit reached. Please wait a few minutes before your next generation.',
+                    'message' => 'AI Career Coach is taking a quick breath. Please wait 1-2 minutes or try your next response shortly.',
                 ], 429);
             });
         });
+
     }
 }

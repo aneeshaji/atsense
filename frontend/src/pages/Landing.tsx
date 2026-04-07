@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { CheckCircle, Zap, Star, Brain, Search, FileText, Upload, Plus, Briefcase, Activity, Target, ChevronRight } from 'lucide-react';
+import { CheckCircle, Zap, Star, Brain, Search, FileText, Upload, Briefcase, Activity, Target, ChevronRight } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
 import api from '../services/api';
@@ -151,9 +151,9 @@ const Landing = () => {
     return (
         <main className="-mx-4 -my-8 font-sans bg-gray-50 overflow-hidden">
             <SEO
-                title="ATSense - Professional Resume Builder & ATS Checker"
-                description="Build a professional resume in minutes. Use our expert-approved templates and ATS optimization tools to land interviews faster."
-                keywords="resume builder, professional resume, ats checker, ai resume, cv templates"
+                title="ATSense - #1 Free AI Resume Optimizer & ATS Checker"
+                description="The world's most advanced AI Resume Optimizer & Free ATS Checker. Beat Applicant Tracking Systems, optimize with GPT-4 AI, and land 3x more recruiter calls instantly."
+                keywords="free ats checker, AI resume optimizer, resume score, ats bypass, beat applicant tracking system, GPT-4 resume builder, career optimization, resume keywords, job search assistant"
                 schemas={[faqSchema]}
             />
             
@@ -187,29 +187,21 @@ const Landing = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <FadeInSection className="space-y-8 text-center lg:text-left">
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight">
-                                The #1 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#60efff] to-blue-400">AI Resume</span> Builder & Optimizer
+                                #1 Free <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#60efff] to-blue-400">AI Resume Optimizer</span> & ATS Checker
                             </h1>
                             <p className="text-lg md:text-xl text-blue-100 max-w-xl mx-auto lg:mx-0 opacity-90 leading-relaxed">
                                 Create an ATS-friendly resume that highlights your best achievements and gets you hired faster, completely frictionless.
                             </p>
                             
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
-                                <Link
-                                    to="/builder"
-                                    onClick={() => localStorage.removeItem('atsense_current_resume')}
-                                    className="group relative px-8 py-4 bg-white text-[#0b1f3b] font-bold rounded-full text-lg hover:bg-blue-50 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] hover:-translate-y-1 flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap"
-                                >
-                                    <div className="absolute inset-0 bg-white/40 w-1/2 -skew-x-12 translate-x-[-250%] group-hover:animate-[shimmer_1.5s_infinite]"></div>
-                                    <Plus size={22} className="shrink-0 group-hover:rotate-90 transition-transform duration-300" />
-                                    <span className="relative z-10">Create a New Resume</span>
-                                </Link>
                                 <button
                                     onClick={() => fileInputRef.current?.click()}
                                     disabled={importing}
-                                    className="group px-8 py-4 bg-transparent border-2 border-[#60efff] text-[#60efff] font-bold rounded-full text-lg hover:bg-[#60efff]/10 transition-all shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2 whitespace-nowrap"
+                                    className="group relative px-12 py-5 bg-white text-[#0b1f3b] font-black rounded-full text-xl hover:bg-blue-50 transition-all shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:-translate-y-1 flex items-center justify-center gap-3 overflow-hidden whitespace-nowrap active:scale-95"
                                 >
-                                    <Upload size={22} className="shrink-0 group-hover:-translate-y-1 transition-transform" />
-                                    {importing ? 'Importing...' : 'Upload Existing Resume'}
+                                    <div className="absolute inset-0 bg-white/40 w-1/2 -skew-x-12 translate-x-[-250%] group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                                    <Upload size={24} className="shrink-0 group-hover:-translate-y-1 transition-transform" />
+                                    <span>{importing ? 'Importing...' : 'Upload & Optimize Resume'}</span>
                                 </button>
                                 <input
                                     type="file"
@@ -457,26 +449,7 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* Bottom CTA Banner */}
-            <section className="py-32 bg-gradient-to-br from-[#0b1f3b] to-indigo-950 text-center text-white relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }}></div>
-                <div className="absolute inset-0 bg-blue-500 mix-blend-overlay opacity-20 blur-[100px] pointer-events-none"></div>
-                
-                <FadeInSection className="max-w-4xl mx-auto px-4 relative z-10">
-                    <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tight">Stop letting your resume hold you back.</h2>
-                    <p className="text-2xl text-blue-200 mb-12 w-full mx-auto font-medium">
-                        Create an impressive, highly-optimized resume in under 15 minutes today. Completely free to start.
-                    </p>
-                    <Link
-                        to="/builder"
-                        onClick={() => localStorage.removeItem('atsense_current_resume')}
-                        className="group inline-flex items-center gap-3 px-12 py-6 bg-[#60efff] text-[#0b1f3b] font-black rounded-full text-2xl hover:bg-white transition-all shadow-[0_0_40px_rgba(96,239,255,0.4)] hover:shadow-[0_0_60px_rgba(255,255,255,0.6)] hover:-translate-y-2"
-                    >
-                        <span>Create Your Resume</span>
-                        <Zap size={24} className="group-hover:translate-x-1 group-hover:rotate-12 transition-all fill-current" />
-                    </Link>
-                </FadeInSection>
-            </section>
+
         </main>
     );
 };

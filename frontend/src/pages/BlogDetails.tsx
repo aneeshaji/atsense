@@ -1,121 +1,210 @@
-import { useParams, Link, Navigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Calendar, Share2, Linkedin, Twitter, Bookmark } from 'lucide-react';
-import { blogPosts } from '../data/blogPosts';
+import { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Clock, Calendar, Share2, Linkedin, Twitter, Bookmark, User, Tag, Sparkles, ArrowRight } from 'lucide-react';
 import SEO from '../components/SEO';
+import api from '../services/api';
+import parse from 'html-react-parser';
 
 const BlogDetails = () => {
     const { id } = useParams();
-    const post = blogPosts.find(p => p.id === Number(id));
+    const navigate = useNavigate();
+    const [post, setPost] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
 
-    if (!post) {
-        return <Navigate to="/blog" replace />;
+    useEffect(() => {
+        const fetchPost = async () => {
+            setLoading(true);
+            try {
+                const res = await api.get(`/posts/${id}`);
+                setPost(res.data);
+                
+                const allRes = await api.get('/posts');
+                const others = allRes.data.filter((p: any) => p.slug !== id && p.id !== parseInt(id as string)).slice(0, 3);
+                setRelatedPosts(others);
+            } catch (err) {
+                console.error('Failed to fetch post details:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        if (id) fetchPost();
+    }, [id, navigate]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+            </div>
+        );
     }
 
-    // Mock related posts (excluding current one)
-    const relatedPosts = blogPosts.filter(p => p.id !== post.id).slice(0, 3);
+    if (!post) {
+        return (
+            <div className="min-h-screen bg-white pt-32 text-center px-4">
+                <div className="max-w-md mx-auto">
+                    <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-slate-100">
+                        <Sparkles className="text-slate-300" size={32} />
+                    </div>
+                    <h1 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">Article not found</h1>
+                    <p className="text-slate-500 mb-8 font-medium">The resource you're looking for might have been moved or is currently being updated by our team.</p>
+                    <Link to="/blog" className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
+                        <ArrowLeft size={18} /> Back to Library
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    const postDate = new Date(post.created_at).toLocaleDateString('en-US', { 
+        month: 'long', 
+        day: 'numeric', 
+        year: 'numeric' 
+    });
 
     return (
-        <div className="bg-white min-h-screen pb-20">
+        <div className="bg-white min-h-screen pb-20 font-sans">
             <SEO
-                title={post.title}
-                description={post.excerpt}
-                url={`https://atsense.online/blog/${post.id}`}
+                title={post.meta_title || post.title}
+                description={post.meta_description || post.excerpt}
+                url={`https://atsense.online/blog/${post.slug || post.id}`}
+                type="article"
             />
-            {/* Header/Hero */}
-            <div className="bg-gray-50 border-b border-gray-100 pt-20 pb-16">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <Link to="/blog" className="inline-flex items-center text-gray-500 hover:text-indigo-600 transition-colors mb-8 group font-medium text-sm">
-                        <ArrowLeft size={16} className="mr-2 group-hover:-translate-x-1 transition-transform" />
-                        Back to Blog
+            
+            <div className="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-20 z-40 py-3 hidden md:block">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                    <Link to="/blog" className="text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                        <ArrowLeft size={14} /> Back to Resources
                     </Link>
+                    <div className="text-slate-400 text-xs font-bold truncate max-w-md">
+                        Reading: <span className="text-slate-900 ml-1">{post.title}</span>
+                    </div>
+                </div>
+            </div>
 
-                    <div className="space-y-6">
-                        <span className="inline-flex items-center px-3 py-1 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wide">
-                            {post.category}
+            <div className="bg-slate-50/50 pt-20 pb-16 border-b border-slate-100">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center md:text-left">
+                    <div className="mb-8">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase tracking-[0.15em] border border-indigo-100 shadow-sm">
+                            <Tag size={12} /> {post.category || 'Expert Insight'}
                         </span>
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight tracking-tight">
-                            {post.title}
-                        </h1>
+                    </div>
 
-                        <div className="flex flex-wrap items-center gap-6 text-gray-500 text-sm">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs ring-2 ring-white">
-                                    {post.author.charAt(0)}
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-8 leading-[1.1] tracking-tight">
+                        {post.title}
+                    </h1>
+
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                        <div className="flex items-center gap-2.5 bg-white px-3 py-2 rounded-xl shadow-sm border border-slate-100">
+                            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white scale-90">
+                                <User size={14} />
+                            </div>
+                            <span className="text-slate-900">ATSense Expert</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Calendar size={14} />
+                            <span>{postDate}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Clock size={14} />
+                            <span>~6 MIN READ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-16">
+                    <div className="lg:col-span-1 hidden lg:block">
+                        <div className="sticky top-40 space-y-12">
+                            <div>
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Spread the word</h4>
+                                <div className="flex flex-col gap-3">
+                                    <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-sky-50 hover:text-sky-600 transition-all flex items-center justify-center border border-slate-100">
+                                        <Twitter size={18} />
+                                    </button>
+                                    <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all flex items-center justify-center border border-slate-100">
+                                        <Linkedin size={18} />
+                                    </button>
+                                    <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center border border-slate-100">
+                                        <Share2 size={18} />
+                                    </button>
                                 </div>
-                                <span className="font-medium text-gray-900">{post.author}</span>
                             </div>
-                            <span className="hidden sm:block w-1 h-1 bg-gray-300 rounded-full"></span>
-                            <div className="flex items-center gap-2">
-                                <Calendar size={16} />
-                                {post.date}
+                            <div>
+                                <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl">
+                                    <Sparkles className="text-indigo-400 mb-4" size={24} />
+                                    <h5 className="font-black text-sm mb-2">Resume Score: 98%</h5>
+                                    <p className="text-[11px] text-slate-400 leading-relaxed mb-4">Want to pass the ATS filter like a pro? Check your resume score now.</p>
+                                    <Link to="/resume-grader" className="block w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-center text-[10px] font-black uppercase tracking-widest transition-colors">
+                                        Test Free
+                                    </Link>
+                                </div>
                             </div>
-                            <span className="hidden sm:block w-1 h-1 bg-gray-300 rounded-full"></span>
-                            <div className="flex items-center gap-2">
-                                <Clock size={16} />
-                                5 min read
+                        </div>
+                    </div>
+
+                    <div className="lg:col-span-3">
+                        <p className="text-xl text-slate-600 leading-relaxed font-medium mb-12 border-l-4 border-indigo-500 pl-8 italic">
+                            {post.excerpt}
+                        </p>
+
+                        <article className="blog-content prose prose-slate prose-lg lg:prose-xl max-w-none 
+                            prose-headings:text-slate-900 prose-headings:font-black prose-headings:tracking-tight
+                            prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-slate-900
+                            prose-li:text-slate-600 prose-a:text-indigo-600 lg:prose-p:text-lg">
+                            {parse(post.content || '')}
+                        </article>
+
+                        <div className="mt-20 pt-12 border-t border-slate-100">
+                            <div className="bg-slate-50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left">
+                                <div className="w-20 h-20 rounded-2xl bg-slate-900 flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                                    <User size={32} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                                        <div>
+                                            <h3 className="text-xl font-black text-slate-900">ATSense Excellence Team</h3>
+                                            <p className="text-indigo-600 font-bold text-xs uppercase tracking-widest">Career Strategy & AI Ethics</p>
+                                        </div>
+                                    </div>
+                                    <p className="text-slate-500 text-sm leading-relaxed mb-4">
+                                        Our content is crafted by a specialized team of recruitment veterans and AI engineers to ensure you get the absolute best, most up-to-date career advice for the 2025 job market.
+                                    </p>
+                                </div>
                             </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-center gap-4 mt-12 py-8 border-y border-slate-100 lg:hidden">
+                             <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl text-xs font-bold text-slate-600"><Twitter size={14} /> Tweet</button>
+                             <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl text-xs font-bold text-slate-600"><Linkedin size={14} /> Share</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 grid grid-cols-1 lg:grid-cols-12 gap-12">
-                {/* Main Content */}
-                <div className="lg:col-span-8 lg:col-start-3">
-                    <article className="prose prose-lg prose-indigo max-w-none text-gray-700 leading-relaxed font-newsreader">
-                        {/* Drop cap for first paragraph logic would go here in CSS usually */}
-                        <div dangerouslySetInnerHTML={{ __html: post.content }} />
-                    </article>
-
-                    {/* Author Bio Box */}
-                    <div className="mt-16 bg-gray-50 rounded-2xl p-8 flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left border border-gray-100">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white text-2xl font-bold shadow-md">
-                            {post.author.charAt(0)}
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">About {post.author}</h3>
-                            <p className="text-gray-600 text-sm mb-4">
-                                Senior Career Strategist and Resume Expert. Passionate about helping professionals unlock their potential and land their dream jobs through actionable advice.
-                            </p>
-                            <button className="text-indigo-600 text-sm font-semibold hover:text-indigo-800 transition-colors">
-                                View all articles
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Share Actions */}
-                    <div className="mt-12 pt-8 border-t border-gray-100">
-                        <h4 className="font-bold text-gray-900 mb-4 text-center">Share this article</h4>
-                        <div className="flex justify-center gap-4">
-                            <button className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-colors">
-                                <Twitter size={18} />
-                            </button>
-                            <button className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-100 transition-colors">
-                                <Linkedin size={18} />
-                            </button>
-                            <button className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                                <Share2 size={18} />
-                            </button>
-                            <button className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                                <Bookmark size={18} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Related Articles Strip */}
-            <div className="mt-24 border-t border-gray-100 bg-gray-50 py-16">
+            <div className="bg-slate-50 py-24 border-t border-slate-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-8">Read next</h2>
+                    <div className="flex flex-col md:flex-row items-center md:items-end justify-between mb-12 gap-4">
+                        <div className="text-center md:text-left">
+                            <h2 className="text-3xl font-black text-slate-900 mb-2">Continue Reading</h2>
+                            <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Broaden your career intelligence</p>
+                        </div>
+                        <Link to="/blog" className="text-indigo-600 font-black text-sm hover:underline underline-offset-4">Browse All →</Link>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {relatedPosts.map(related => (
-                            <Link key={related.id} to={`/blog/${related.id}`} className="group block bg-white rounded-xl border border-gray-100 p-5 hover:shadow-lg transition-all hover:-translate-y-1">
-                                <span className="text-xs font-bold text-indigo-600 mb-2 block">{related.category}</span>
-                                <h3 className="font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                            <Link key={related.id} to={`/blog/${related.slug || related.id}`} className="group bg-white rounded-3xl border border-slate-100 p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col h-full">
+                                <span className="inline-block px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase tracking-widest mb-6 w-fit">
+                                    {related.category || 'Article'}
+                                </span>
+                                <h3 className="text-xl font-black text-slate-900 mb-4 group-hover:text-indigo-600 transition-colors leading-tight line-clamp-2">
                                     {related.title}
                                 </h3>
-                                <p className="text-sm text-gray-500 line-clamp-2">{related.excerpt}</p>
+                                <p className="text-slate-500 text-sm leading-relaxed line-clamp-2 mb-8 flex-1">{related.excerpt}</p>
+                                <div className="flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-[0.2em] mt-auto">
+                                    Read Article <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                </div>
                             </Link>
                         ))}
                     </div>

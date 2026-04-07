@@ -110,7 +110,7 @@ const Footer = () => {
                             <li><Link to="/builder" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">AI Resume Builder</Link></li>
                             <li><Link to="/builder" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">ATS Resume Checker</Link></li>
                             <li><Link to="/builder" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Resume Optimization</Link></li>
-                            <li><Link to="/builder" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">CV Templates</Link></li>
+                            <li><Link to="/templates" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">CV Templates</Link></li>
                         </ul>
                     </div>
 
