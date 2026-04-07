@@ -176,8 +176,15 @@ export default function Builder() {
             setOpenSections(new Set(['personal']));
             showToast('Resume imported successfully!', 'success');
             if (jobDescription) setTimeout(() => fetchBreakdown(importedResume), 800);
-        } catch {
-            showToast('Failed to import resume.', 'error');
+        } catch (err: any) {
+            const status = err.response?.status;
+            const errorMsg = err.response?.data?.error || err.response?.data?.message || 'Failed to import resume';
+            
+            if (status === 422) {
+                showAlert('Invalid Document', errorMsg, 'warning');
+            } else {
+                showToast(errorMsg, 'error');
+            }
         } finally {
             setImporting(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -839,7 +846,16 @@ export default function Builder() {
             )}
 
             {/* Advanced Score Modal */}
-            {showAdvancedScore && <AdvancedScorecard data={atsBreakdown} onClose={() => setShowAdvancedScore(false)} />}
+            {showAdvancedScore && (
+                <AdvancedScorecard 
+                    data={atsBreakdown} 
+                    onClose={() => setShowAdvancedScore(false)} 
+                    onOptimize={() => {
+                        setShowAdvancedScore(false);
+                        setShowTailorModal(true);
+                    }}
+                />
+            )}
         </div>
     );
 }

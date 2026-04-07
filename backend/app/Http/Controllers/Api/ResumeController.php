@@ -69,9 +69,23 @@ class ResumeController extends Controller
             Log::info('Connecting to AI for parsing...');
             $parsedData = $aiService->parseResumeJSON($text);
             
-            if (!$parsedData) {
-                Log::error('AI Parsing returned null');
-                throw new \Exception('AI failed to interpret the resume data structure.');
+            // 2b. Validate parsed data actually looks like a resume
+            $hasName = !empty($parsedData['personalInfo']['fullName']);
+            $hasExperience = !empty($parsedData['experience']) && count($parsedData['experience']) > 0;
+            $hasEducation = !empty($parsedData['education']) && count($parsedData['education']) > 0;
+
+            if (!$hasName || (!$hasExperience && !$hasEducation)) {
+                Log::warning('Validation failed: Non-resume document uploaded or poor parsing.', [
+                    'hasName' => $hasName,
+                    'expCount' => count($parsedData['experience'] ?? []),
+                    'eduCount' => count($parsedData['education'] ?? [])
+                ]);
+                
+                return response()->json([
+                    'message' => 'Invalid Resume Document',
+                    'error' => 'The uploaded file does not clearly look like a resume. Please ensure it contains your name, work history, or education.',
+                    'suggestion' => 'Try a different layout or ensure the file is not just an image.'
+                ], 422);
             }
 
             // 3. Map to dynamic Resume object
