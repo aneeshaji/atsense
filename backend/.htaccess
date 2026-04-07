@@ -1,7 +1,8 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Redirect all traffic into the Laravel public folder
+    # Redirect all traffic into the Laravel public folder AND re-append /api prefix
+    # so Laravel's router (which sees the base /api) finds the routes in api.php
     RewriteCond %{REQUEST_URI} !^/api/public/
-    RewriteRule ^(.*)$ public/$1 [L]
+    RewriteRule ^(.*)$ public/api/$1 [L]
 </IfModule>
