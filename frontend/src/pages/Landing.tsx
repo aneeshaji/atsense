@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
 import api from '../services/api';
 import { useToast } from '../context/ToastContext';
-import { useModal } from '../context/ModalContext';
 
 // Scroll reveal component
 const FadeInSection = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => {
@@ -100,7 +99,6 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = '' }: { end: number; d
 const Landing = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
-    const { showAlert } = useModal();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [importing, setImporting] = useState(false);
 
@@ -120,14 +118,7 @@ const Landing = () => {
             navigate('/builder');
         } catch (err: any) {
             console.error(err);
-            const status = err.response?.status;
-            const errorMsg = err.response?.data?.error || err.response?.data?.message || 'Failed to import resume';
-            
-            if (status === 422) {
-                showAlert('Invalid Document', errorMsg, 'warning');
-            } else {
-                showToast(errorMsg, 'error');
-            }
+            showToast(err.response?.data?.message || 'Failed to import resume', 'error');
         } finally {
             setImporting(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -457,6 +448,8 @@ const Landing = () => {
                     </div>
                 </div>
             </section>
+
+
         </main>
     );
 };

@@ -86,7 +86,7 @@ const Navbar = () => {
 
                         <Link to="/blog" className={getLinkClass('/blog')}>
                             <FileText size={14} className={isActive('/blog') ? 'text-indigo-600' : 'text-gray-400'} />
-                            Blogs
+                            Resources
                         </Link>
                     </div>
 
@@ -110,7 +110,7 @@ const Navbar = () => {
                     <Link to="/job-matcher" className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl text-sm font-bold"><Briefcase size={18} /> Job Matcher</Link>
                     <Link to="/linkedin-optimizer" className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl text-sm font-bold"><Linkedin size={18} /> LinkedIn</Link>
                     <Link to="/templates" className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl text-sm font-bold"><LayoutTemplate size={18} /> Templates</Link>
-                    <Link to="/blog" className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl text-sm font-bold"><FileText size={18} /> Blogs</Link>
+                    <Link to="/blog" className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl text-sm font-bold"><FileText size={18} /> Resources</Link>
                 </div>
             )}
         </nav>

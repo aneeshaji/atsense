@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, CheckCircle, AlertTriangle, XCircle, ChevronRight, FileText, Zap, Target, Shield, Linkedin } from 'lucide-react';
+import { Upload, CheckCircle, AlertTriangle, XCircle, ChevronRight, FileText, Zap, Target, Shield } from 'lucide-react';
 import SEO from '../components/SEO';
 
 const SAMPLE_ISSUES = [
@@ -194,22 +194,6 @@ export default function ResumeGrader() {
                                         <span className="text-slate-700 text-sm leading-relaxed">{issue.text}</span>
                                     </div>
                                 ))}
-                            </div>
-
-                            {/* Viral Share Loop */}
-                            <div className="mb-10 p-6 bg-indigo-50/50 rounded-2xl border border-indigo-100/50 text-center">
-                                <h4 className="text-sm font-black text-indigo-900 uppercase tracking-widest mb-3">🔥 Brag about your score</h4>
-                                <p className="text-xs text-indigo-700 font-medium mb-6">Users with {scoreLevel === 'high' ? 'elite' : 'improving'} scores are 3x more likely to be noticed by recruiters.</p>
-                                <button 
-                                    onClick={() => {
-                                        const text = encodeURIComponent(`Just checked my resume with @ATSense and got a score of ${score}/100! 🚀 It's an incredible tool for anyone looking to beat the ATS in 2025. Check your score for free: https://atsense.online/resume-grader`);
-                                        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=https://atsense.online/resume-grader&text=${text}`, '_blank');
-                                    }}
-                                    className="inline-flex items-center gap-2 bg-[#0077b5] hover:bg-[#005582] text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-blue-200 text-xs uppercase tracking-wider"
-                                >
-                                    <Linkedin size={16} fill="currentColor" />
-                                    Post My Score to LinkedIn
-                                </button>
                             </div>
 
                             {/* CTA */}

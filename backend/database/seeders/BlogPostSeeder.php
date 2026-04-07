@@ -43,16 +43,6 @@ class BlogPostSeeder extends Seeder
                 'meta_description' => 'Identify the top reasons resumes get rejected by ATS filters. Save your job search by fixing these common formatting mistakes.',
                 'is_published' => true,
                 'author_id' => $adminId,
-            ],
-            [
-                'title' => 'How to land a FAANG interview in 2025 using ATSense',
-                'slug' => 'land-faang-interview-2025-atsense',
-                'excerpt' => 'The secret blueprint for bypassing elite company filters at Meta, Apple, Amazon, Netflix, and Google.',
-                'content' => '<h2>The FAANG Standard</h2><p>Top-tier tech companies receive millions of resumes yearly. To stand out, your document needs more than just good experience—it needs technical perfection.</p><h3>The "Golden Thread" Strategy</h3><p>Identify the core values of the company (e.g., Amazon\'s Leadership Principles) and weave them into your STAR method bullets.</p><h3>Quantifiable impact</h3><p>Avoid: "Managed a team." Use: "Scaling a cross-functional team of 15+ to deliver a $2M project 2 months ahead of schedule."</p><h3>Optimizing with ATSense</h3><p>Use our real-time feedback loop to match your resume to specific FAANG job descriptions. Our AI ensures your skills align with their internal grading rubrics.</p>',
-                'meta_title' => 'Land a FAANG Interview 2025 | ATSense Guide',
-                'meta_description' => 'Step-by-step blueprint to getting noticed by FAANG recruiters. Lean how to use ATSense to optimize for elite tech roles.',
-                'is_published' => true,
-                'author_id' => $adminId,
             ]
         ];
 

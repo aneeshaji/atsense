@@ -35,10 +35,9 @@ interface BreakdownData {
 interface Props {
   data: BreakdownData;
   onClose: () => void;
-  onOptimize: () => void;
 }
 
-const AdvancedScorecard: React.FC<Props> = ({ data, onClose, onOptimize }) => {
+const AdvancedScorecard: React.FC<Props> = ({ data, onClose }) => {
   if (!data) return null;
 
   const getScoreColor = (score: number, max: number) => {
@@ -204,8 +203,9 @@ const AdvancedScorecard: React.FC<Props> = ({ data, onClose, onOptimize }) => {
                 </p>
               </div>
 
+              {/* Action */}
               <button 
-                onClick={onOptimize}
+                onClick={onClose}
                 className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg active:scale-[0.98]"
               >
                 Got it, let's optimize!
