@@ -33,9 +33,9 @@ jobs:
           npm ci
           npm run build
         env:
-          # The frontend api.ts automatically appends + '/api' to the base URL
-          VITE_API_URL: https://atsense.online
-          VITE_API_BASE_URL: https://atsense.online
+          # The frontend api.ts does not append /api anymore, so provide it fully
+          VITE_API_URL: https://atsense.online/api
+          VITE_API_BASE_URL: https://atsense.online/api
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
