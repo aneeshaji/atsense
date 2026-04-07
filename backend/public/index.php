@@ -1,5 +1,11 @@
 <?php
 
+@mkdir(__DIR__.'/../storage/framework/cache/data', 0775, true);
+@mkdir(__DIR__.'/../storage/framework/views', 0775, true);
+@mkdir(__DIR__.'/../storage/framework/sessions', 0775, true);
+@mkdir(__DIR__.'/../storage/logs', 0775, true);
+@mkdir(__DIR__.'/../bootstrap/cache', 0775, true);
+
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
