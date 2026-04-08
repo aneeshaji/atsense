@@ -1,14 +1,20 @@
 <IfModule mod_rewrite.c>
+  Options -MultiViews
   RewriteEngine On
   RewriteBase /
 
-  # Do not rewrite requests for actual files or directories
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
+  # 1. Pass through real files (JS, CSS, images, fonts, etc.)
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^ - [L]
 
-  # Do not rewrite API requests — let them fall through to /api/
-  RewriteCond %{REQUEST_URI} !^/api/
+  # 2. Pass through real directories
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
 
-  # Serve index.html for all other routes (React SPA routing)
-  RewriteRule . /index.html [L]
+  # 3. Pass through all /api/* requests to the Laravel backend subfolder
+  RewriteCond %{REQUEST_URI} ^/api/ [NC]
+  RewriteRule ^ - [L]
+
+  # 4. Everything else → React SPA (handles client-side routing)
+  RewriteRule ^ /index.html [L]
 </IfModule>
