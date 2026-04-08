@@ -77,6 +77,8 @@ class GenerateSeoPosts extends Command
 
             if ($response->failed()) {
                 $this->error("Failed to call OpenAI for topic: {$topic}");
+                $this->error("Status: " . $response->status());
+                $this->error("Response: " . $response->body());
                 continue;
             }
 
