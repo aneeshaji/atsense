@@ -66,13 +66,14 @@ class GenerateSeoPosts extends Command
             - 'content': The full HTML content of the post (using <h2>, <h3>, <p>, <ul>). At the end of the post, strongly pitch testing their resume at the link: <a href='/resume-grader'>ATSense Free Resume Grader</a>.
             - 'category': A short category name (e.g. 'ATS Tips', 'Job Search', 'Templates')";
 
-            $response = Http::withToken($apiKey)->timeout(120)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => 'gpt-4o-mini',
+            $response = Http::withToken($apiKey)->timeout(120)->post('https://api.groq.com/openai/v1/chat/completions', [
+                'model' => 'llama3-8b-8192',
                 'messages' => [
                     ['role' => 'system', 'content' => 'Output ONLY valid JSON. No markdown wrappers like ```json.'],
                     ['role' => 'user', 'content' => $prompt]
                 ],
-                'temperature' => 0.7,
+                'temperature' => 0.5,
+                'response_format' => ['type' => 'json_object']
             ]);
 
             if ($response->failed()) {
