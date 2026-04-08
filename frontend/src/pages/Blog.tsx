@@ -119,14 +119,20 @@ const Blog = () => {
                                     to={`/blog/${post.slug || post.id}`}
                                     className="group relative flex flex-col bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden hover:border-indigo-200 hover:shadow-[0_20px_50px_rgba(79,70,229,0.1)] transition-all duration-500 hover:-translate-y-2 h-full"
                                 >
-                                    {/* Card Header with Icon/Visual */}
-                                    <div className="h-48 bg-slate-50 p-8 flex items-center justify-center relative overflow-hidden shrink-0">
-                                        <div className="absolute inset-0 opacity-40 pointer-events-none">
-                                            <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl ${idx % 3 === 0 ? 'bg-indigo-200' : idx % 3 === 1 ? 'bg-purple-200' : 'bg-emerald-200'}`}></div>
-                                        </div>
-                                        <div className="relative z-10 w-16 h-16 rounded-2xl bg-white shadow-xl border border-slate-100 flex items-center justify-center text-indigo-600 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                                            {post.category === 'ATS Tips' ? <Target size={28}/> : post.category === 'LinkedIn' ? <Linkedin size={28}/> : <FileText size={28}/>}
-                                        </div>
+                                    {/* Card Header with Icon/Visual or Cover Image */}
+                                    <div className="h-48 bg-slate-50 flex items-center justify-center relative overflow-hidden shrink-0 border-b border-slate-100">
+                                        {post.cover_image ? (
+                                            <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
+                                        ) : (
+                                            <>
+                                                <div className="absolute inset-0 opacity-40 pointer-events-none p-8">
+                                                    <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl ${idx % 3 === 0 ? 'bg-indigo-200' : idx % 3 === 1 ? 'bg-purple-200' : 'bg-emerald-200'}`}></div>
+                                                </div>
+                                                <div className="relative z-10 w-16 h-16 rounded-2xl bg-white shadow-xl border border-slate-100 flex items-center justify-center text-indigo-600 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                                                    {post.category === 'ATS Tips' ? <Target size={28}/> : post.category === 'LinkedIn' ? <Linkedin size={28}/> : <FileText size={28}/>}
+                                                </div>
+                                            </>
+                                        )}
                                         <div className="absolute top-6 left-6">
                                             <span className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-black text-slate-800 shadow-sm uppercase tracking-widest border border-white/50">
                                                 {post.category || 'Expert Insight'}
