@@ -130,6 +130,7 @@ jobs:
           server-dir: /atsense.online/
           dangerous-clean-slate: false
           log-level: verbose
+          timeout: 120000
           exclude: |
             **/.git*
             **/.DS_Store
@@ -145,6 +146,7 @@ jobs:
           server-dir: /atsense.online/api/
           dangerous-clean-slate: false
           log-level: verbose
+          timeout: 120000
           exclude: |
             **/.git*
             **/.env
