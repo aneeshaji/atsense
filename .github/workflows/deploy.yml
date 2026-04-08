@@ -33,9 +33,16 @@ jobs:
           npm ci
           npm run build
         env:
-          # The frontend api.ts does not append /api anymore, so provide it fully
           VITE_API_URL: https://atsense.online/api
           VITE_API_BASE_URL: https://atsense.online/api
+
+      # Vite 5 uses fast-glob with dot:false — dotfiles like .htaccess are NOT
+      # copied from public/ to dist/ automatically. Force-copy it here.
+      - name: Copy .htaccess into dist (Vite 5 dotfile fix)
+        run: cp frontend/public/.htaccess frontend/dist/.htaccess
+
+      - name: Verify dist contents (debug)
+        run: ls -la frontend/dist/
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
@@ -43,6 +50,7 @@ jobs:
           name: frontend-dist
           path: frontend/dist/
           retention-days: 1
+          include-hidden-files: true
 
   # ──────────────────────────────────────────────────────────────────────────
   # JOB 2 — Prepare the Laravel backend (Composer install, no dev)
@@ -71,12 +79,16 @@ jobs:
             --no-interaction \
             --prefer-dist
 
+      - name: Verify backend .htaccess exists (debug)
+        run: ls -la backend/.htaccess backend/index.php
+
       - name: Upload backend artifact
         uses: actions/upload-artifact@v4
         with:
           name: backend-build
           path: backend/
           retention-days: 1
+          include-hidden-files: true
 
   # ──────────────────────────────────────────────────────────────────────────
   # JOB 3 — Deploy (depends on both build jobs passing)
@@ -100,6 +112,13 @@ jobs:
           name: backend-build
           path: ./backend-build/
 
+      - name: Verify downloaded artifacts (debug)
+        run: |
+          echo "=== Frontend dist ==="
+          ls -la ./frontend-dist/
+          echo "=== Backend build (root) ==="
+          ls -la ./backend-build/
+
       # ── Deploy React SPA → domain root ──────────────────────────────────
       - name: Sync Frontend → /atsense.online/
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -110,7 +129,7 @@ jobs:
           local-dir: ./frontend-dist/
           server-dir: /atsense.online/
           dangerous-clean-slate: false
-          log-level: minimal
+          log-level: verbose
           exclude: |
             **/.git*
             **/.DS_Store
@@ -125,7 +144,7 @@ jobs:
           local-dir: ./backend-build/
           server-dir: /atsense.online/api/
           dangerous-clean-slate: false
-          log-level: minimal
+          log-level: verbose
           exclude: |
             **/.git*
             **/.env
