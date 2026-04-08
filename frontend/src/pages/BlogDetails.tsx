@@ -74,7 +74,7 @@ const BlogDetails = () => {
             <div className="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-20 z-40 py-3 hidden md:block">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                     <Link to="/blog" className="text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
-                        <ArrowLeft size={14} /> Back to Resources
+                        <ArrowLeft size={14} /> Back to Blog
                     </Link>
                     <div className="text-slate-400 text-xs font-bold truncate max-w-md">
                         Reading: <span className="text-slate-900 ml-1">{post.title}</span>
