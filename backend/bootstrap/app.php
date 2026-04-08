@@ -10,8 +10,7 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
-        apiPrefix: env('APP_ENV') === 'production' ? '' : 'api',
-
+        apiPrefix: (dirname($_SERVER['SCRIPT_NAME'] ?? '') === '/api' || dirname($_SERVER['SCRIPT_NAME'] ?? '') === '\\api') ? '' : 'api',
     )
     ->withMiddleware(function (Middleware $middleware): void {
         //
