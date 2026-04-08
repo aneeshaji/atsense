@@ -3,18 +3,19 @@
   RewriteEngine On
   RewriteBase /
 
-  # 1. Pass through real files (JS, CSS, images, fonts, etc.)
+  # 1. Pass through real static files (JS, CSS, images, fonts)
+  #    but NOT /api files — those must be routed to PHP below
   RewriteCond %{REQUEST_FILENAME} -f
+  RewriteCond %{REQUEST_URI} !^/api
   RewriteRule ^ - [L]
 
-  # 2. Pass through real directories
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
+  # 2. Route ALL /api/* requests directly to Laravel entry point
+  #    LiteSpeed does NOT cascade into subdirectory .htaccess after [L],
+  #    so we must handle this here in the root .htaccess explicitly.
+  RewriteCond %{REQUEST_URI} ^/api
+  RewriteRule ^ /api/index.php [L,QSA]
 
-  # 3. Pass through all /api/* requests to the Laravel backend subfolder
-  RewriteCond %{REQUEST_URI} ^/api/ [NC]
-  RewriteRule ^ - [L]
-
-  # 4. Everything else → React SPA (handles client-side routing)
+  # 3. All other routes → React SPA (handles /blog, /builder, etc.)
   RewriteRule ^ /index.html [L]
 </IfModule>
+
