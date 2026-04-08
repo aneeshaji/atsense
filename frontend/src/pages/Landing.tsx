@@ -151,9 +151,9 @@ const Landing = () => {
     return (
         <main className="-mx-4 -my-8 font-sans bg-gray-50 overflow-hidden">
             <SEO
-                title="ATSense - #1 Free AI Resume Optimizer & ATS Checker"
-                description="The world's most advanced AI Resume Optimizer & Free ATS Checker. Beat Applicant Tracking Systems, optimize with GPT-4 AI, and land 3x more recruiter calls instantly."
-                keywords="free ats checker, AI resume optimizer, resume score, ats bypass, beat applicant tracking system, GPT-4 resume builder, career optimization, resume keywords, job search assistant"
+                title="Free ATS Resume Builder & Free ATS Checker | ATSense"
+                description="Make your resume ATS-friendly. ATSense is the #1 Free ATS Resume Builder and Applicant Tracking System checker. Get your ATS score, optimize your keywords, and get hired."
+                keywords="ATS resume builder, free ats checker, AI resume optimizer, resume score, ats friendly resume, applicant tracking system test, resume keywords"
                 schemas={[faqSchema]}
             />
             
@@ -187,7 +187,7 @@ const Landing = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <FadeInSection className="space-y-8 text-center lg:text-left">
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight">
-                                #1 Free <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#60efff] to-blue-400">AI Resume Optimizer</span> & ATS Checker
+                                #1 Free <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#60efff] to-blue-400">ATS Resume Builder</span> & ATS Checker
                             </h1>
                             <p className="text-lg md:text-xl text-blue-100 max-w-xl mx-auto lg:mx-0 opacity-90 leading-relaxed">
                                 Create an ATS-friendly resume that highlights your best achievements and gets you hired faster, completely frictionless.
