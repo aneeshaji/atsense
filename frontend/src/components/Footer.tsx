@@ -101,6 +101,18 @@ const Footer = () => {
                             Helping job seekers land their dream jobs with AI-powered resume optimization and intelligent insights.
                         </p>
 
+                        <div className="mb-8">
+                            <a href="https://www.producthunt.com/products/atsense?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-atsense" target="_blank" rel="noopener noreferrer">
+                                <img 
+                                    alt="ATSense - #1 Free ATS Resume Builder &amp; ATS Checker | Product Hunt" 
+                                    width="250" 
+                                    height="54" 
+                                    src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1118763&amp;theme=neutral&amp;t=1775656443723" 
+                                    className="w-[200px] h-auto"
+                                />
+                            </a>
+                        </div>
+
                     </div>
 
                     {/* Product Links */}
