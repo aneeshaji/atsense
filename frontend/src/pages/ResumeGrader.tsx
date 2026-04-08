@@ -75,9 +75,9 @@ export default function ResumeGrader() {
     return (
         <div className="bg-white min-h-screen pt-20 pb-24 font-sans">
             <SEO
-                title="Free ATS Resume Checker & Grader"
-                description="Upload your resume and get a free ATS compatibility score instantly. Identify exactly what's stopping your resume from passing recruiter filters — no signup required."
-                keywords="free ats resume checker, resume grader, ats score, resume scanner free, ats resume test"
+                title="Best ATS Resume Checker Free & ATS Resume Score Calculator"
+                description="Use our free ATS resume checker to instantly test and calculate your ATS resume score. Upload your resume to bypass Applicant Tracking Systems completely free."
+                keywords="ats resume checker, free ats resume checker, ats resume score, best ats resume checker free, ats resume score checker"
                 url="https://atsense.online/resume-grader"
                 schemas={[faqSchema]}
             />

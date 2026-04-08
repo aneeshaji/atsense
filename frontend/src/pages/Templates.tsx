@@ -57,16 +57,16 @@ export default function Templates() {
     return (
         <div className="min-h-screen bg-gray-50/50 pt-24 pb-20 px-4 sm:px-6 lg:px-8 font-sans">
             <SEO
-                title="Free ATS Resume Templates — By Industry & Role"
-                description="Browse ATS-optimized resume templates for Software Engineers, Product Managers, Nurses, Data Scientists, and more. Free, instant, and recruiter-approved."
-                keywords="ats resume templates, free resume templates, resume template by industry, software engineer resume template, nurse resume template"
+                title="Free ATS Resume Templates — Build an ATS Resume FAST"
+                description="Download the best free ATS resume templates. An ATS resume is designed to bypass Applicant Tracking Systems and land you more interviews instantly."
+                keywords="ats resume template, ats resume, free ats resume templates, ats friendly resume template, what is ats resume, ats resume maker"
                 url="https://atsense.online/templates"
                 schemas={[faqSchema]}
             />
             <div className="max-w-5xl mx-auto">
                 <div className="text-center mb-16">
                     <h1 className="text-4xl font-black text-gray-900 tracking-tight uppercase mb-4">
-                        Premium Resume <span className="text-indigo-600">Templates</span>
+                        Free ATS Resume <span className="text-indigo-600">Templates</span>
                     </h1>
                     <p className="text-lg text-gray-500 max-w-2xl mx-auto font-medium">
                         Select a professionally designed, ATS-compliant template to start building your career-defining resume.
