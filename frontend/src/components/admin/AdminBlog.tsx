@@ -7,7 +7,7 @@ export default function AdminBlog() {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingPost, setEditingPost] = useState<any>(null);
-    const [formData, setFormData] = useState({ title: '', slug: '', content: '', excerpt: '', meta_title: '', meta_description: '', is_published: false });
+    const [formData, setFormData] = useState({ title: '', slug: '', category: '', cover_image: '', content: '', excerpt: '', meta_title: '', meta_description: '', is_published: false });
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
@@ -28,7 +28,7 @@ export default function AdminBlog() {
             setFormData(post);
         } else {
             setEditingPost(null);
-            setFormData({ title: '', slug: '', content: '', excerpt: '', meta_title: '', meta_description: '', is_published: false });
+            setFormData({ title: '', slug: '', category: '', cover_image: '', content: '', excerpt: '', meta_title: '', meta_description: '', is_published: false });
         }
         setIsModalOpen(true);
     };
@@ -126,6 +126,25 @@ export default function AdminBlog() {
                                         <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-widest mb-1.5">URL Slug *</label>
                                         <input required type="text" value={formData.slug} onChange={e => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} 
                                             className="w-full px-4 py-2.5 text-sm font-semibold border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-300 outline-none" placeholder="e.g. top-10-resume-tips" />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-5">
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-widest mb-1.5">Category</label>
+                                        <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} 
+                                            className="w-full px-4 py-2.5 text-sm font-semibold border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-300 outline-none">
+                                            <option value="">Select a category</option>
+                                            <option value="ATS Tips">ATS Tips</option>
+                                            <option value="LinkedIn">LinkedIn</option>
+                                            <option value="Job Search">Job Search</option>
+                                            <option value="Templates">Templates</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-widest mb-1.5">Cover Image (URL)</label>
+                                        <input type="text" value={formData.cover_image} onChange={e => setFormData({ ...formData, cover_image: e.target.value })} 
+                                            className="w-full px-4 py-2.5 text-sm font-semibold border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-300 outline-none" placeholder="https://unsplash.com/..." />
                                     </div>
                                 </div>
 
