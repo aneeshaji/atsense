@@ -3,6 +3,10 @@
   RewriteEngine On
   RewriteBase /
 
+  # 0. Force HTTPS Redirect
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
   # 1. Pass through real static files (JS, CSS, images, fonts)
   #    but NOT /api files — those must be routed to PHP below
   RewriteCond %{REQUEST_FILENAME} -f
