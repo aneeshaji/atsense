@@ -98,6 +98,35 @@ const About = () => {
                 </div>
             </section>
 
+            {/* Expert Team Section - Critical for E-E-A-T */}
+            <section className="bg-gray-900 py-32 rounded-[4rem] text-white overflow-hidden relative">
+                 <div className="absolute inset-0 bg-indigo-500/5 blur-3xl rounded-full"></div>
+                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="text-center mb-20">
+                        <h2 className="text-3xl md:text-5xl font-black mb-4">Crafted by Experts</h2>
+                        <p className="text-indigo-400 font-bold uppercase tracking-widest text-xs">Decades of Hiring Experience</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+                        <div className="flex flex-col items-center text-center group">
+                            <div className="w-32 h-32 rounded-[2rem] bg-gradient-to-br from-indigo-500 to-blue-600 mb-6 flex items-center justify-center shadow-2xl group-hover:scale-105 transition-transform duration-500">
+                                <Users size={48} className="text-white" />
+                            </div>
+                            <h4 className="text-2xl font-black mb-2">Aneesh Aji</h4>
+                            <p className="text-indigo-300 font-bold text-xs uppercase tracking-widest mb-4">Chief Product Officer</p>
+                            <p className="text-gray-400 font-medium leading-relaxed max-w-xs">AI Architect with 10+ years in HR technology. Specializing in semantic parsing and recruitment automation.</p>
+                        </div>
+                        <div className="flex flex-col items-center text-center group">
+                            <div className="w-32 h-32 rounded-[2rem] bg-gradient-to-br from-purple-500 to-pink-600 mb-6 flex items-center justify-center shadow-2xl group-hover:scale-105 transition-transform duration-500">
+                                <ShieldCheck size={48} className="text-white" />
+                            </div>
+                            <h4 className="text-2xl font-black mb-2">The Editorial Team</h4>
+                            <p className="text-purple-300 font-bold text-xs uppercase tracking-widest mb-4">Career Strategists</p>
+                            <p className="text-gray-400 font-medium leading-relaxed max-w-xs">A collective of former Fortune 500 recruiters and resume consultants dedicated to transparent hiring.</p>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+
             {/* Values / Features Section */}
             <section className="bg-gray-50 py-32 rounded-[4rem]">
                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -113,6 +113,11 @@ const Footer = () => {
                             </a>
                         </div>
 
+                        <div className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-8 flex flex-col gap-1">
+                            <span>ATSense Systems Inc.</span>
+                            <span>16192 Coastal Highway</span>
+                            <span>Lewes, DE 19958, USA</span>
+                        </div>
                     </div>
 
                     {/* Product Links */}
