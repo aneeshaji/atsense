@@ -149,7 +149,7 @@ const Landing = () => {
     };
 
     return (
-        <main className="-mx-4 -my-8 font-sans bg-gray-50 overflow-hidden">
+        <main id="main-content" className="-mx-4 -my-8 font-sans bg-gray-50 overflow-hidden">
             <SEO
                 title="Free CV Maker — Clear Hiring Filters"
                 description="Make a professional CV that clears hiring filters and stand out to recruiters instantly."
@@ -185,6 +185,7 @@ const Landing = () => {
                                 <button
                                     onClick={() => fileInputRef.current?.click()}
                                     disabled={importing}
+                                    aria-label="Upload and fix your CV"
                                     className="group relative px-12 py-5 bg-white text-[#0b1f3b] font-black rounded-full text-xl hover:bg-blue-50 transition-all shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:-translate-y-1 flex items-center justify-center gap-3 overflow-hidden whitespace-nowrap active:scale-95"
                                 >
                                     <div className="absolute inset-0 bg-white/40 w-1/2 -skew-x-12 translate-x-[-250%] group-hover:animate-[shimmer_1.5s_infinite]"></div>
@@ -193,9 +194,11 @@ const Landing = () => {
                                 </button>
                                 <input
                                     type="file"
+                                    id="resume-upload"
                                     ref={fileInputRef}
                                     className="hidden"
                                     accept=".pdf,.docx"
+                                    aria-label="Choose resume file"
                                     onChange={handleFileChange}
                                 />
                             </div>
@@ -414,19 +417,19 @@ const Landing = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <FadeInSection>
                         <h2 className="text-4xl md:text-5xl font-black text-[#0b1f3b] mb-6 tracking-tight">
-                            AI-Powered <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Career Intelligence</span>
+                            AI-Driven <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Career Intelligence</span>
                         </h2>
                         <p className="text-gray-500 text-xl max-w-2xl mx-auto mb-20 leading-relaxed font-medium">
-                            More than just a resume builder. ATSense uses advanced GPT-4 models to act as your personal career coach around the clock.
+                            More than just a builder. ATSense uses LLM experts to act as your personal coach around the clock.
                         </p>
                     </FadeInSection>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-left">
                         {[
-                            { icon: <Zap size={28} className="text-amber-500" />, title: "Better Achievement Text", desc: "Create professional bullet points in seconds based on your target role." },
-                            { icon: <Briefcase size={28} className="text-blue-500" />, title: "Role Requirement Analysis", desc: "Upload any job post and instantly see where your profile can improve." },
-                            { icon: <Search size={28} className="text-purple-500" />, title: "Skill Extraction", desc: "Identify the crucial abilities that hiring teams are scanning for." },
-                            { icon: <Activity size={28} className="text-emerald-500" />, title: "Clearance Optimization", desc: "Automatically structure your content to pass technical screening hurdles." }
+                            { icon: <Zap size={28} className="text-amber-500" />, title: "Better Text Results", desc: "Create top achievement statements in seconds based on your target role." },
+                            { icon: <Briefcase size={28} className="text-blue-500" />, title: "Role Analysis", desc: "Upload any job post and instantly see where your profile can improve." },
+                            { icon: <Search size={28} className="text-purple-500" />, title: "Skill Search", desc: "Identify the crucial abilities that teams are scanning for." },
+                            { icon: <Activity size={28} className="text-emerald-500" />, title: "Clearance Tools", desc: "Automatically structure your content to pass technical screening hurdles." }
                         ].map((feat, i) => (
                             <FadeInSection key={i} delay={i * 150} className="p-8 rounded-[2rem] bg-gray-50/80 border border-gray-100 hover:border-indigo-200 hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-default">
                                 <div className="mb-6 bg-white w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-300 ring-1 ring-gray-100">
@@ -459,6 +462,14 @@ const Landing = () => {
                             </p>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            {/* E-E-A-T Footer Author Section */}
+            <section className="py-12 bg-white border-t border-gray-50">
+                <div className="max-w-4xl mx-auto px-4 text-center">
+                    <p className="text-gray-400 text-sm font-bold uppercase tracking-widest mb-4">Published by ATSense Editorial Team</p>
+                    <p className="text-gray-400 text-xs">Last updated: April 9, 2026 • Fact-checked by Career Specialists</p>
                 </div>
             </section>
 

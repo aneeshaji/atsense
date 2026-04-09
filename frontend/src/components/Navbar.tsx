@@ -21,9 +21,13 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
-            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-20">
-                <div className="flex justify-between items-center h-full">
+        <>
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-6 focus:py-3 focus:bg-indigo-600 focus:text-white focus:font-black focus:rounded-xl focus:shadow-2xl">
+                Skip to Content
+            </a>
+            <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300">
+                <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-20">
+                    <div className="flex justify-between items-center h-full">
                     
                     {/* Brand Section */}
                     <div className="flex items-center shrink-0">
@@ -94,6 +98,7 @@ const Navbar = () => {
                     <div className="flex md:hidden items-center group">
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            aria-label={isMobileMenuOpen ? "Close main menu" : "Open main menu"}
                             className="p-3 bg-gray-50 rounded-xl text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all border border-gray-100"
                         >
                             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -114,6 +119,7 @@ const Navbar = () => {
                 </div>
             )}
         </nav>
+        </>
     );
 };
 

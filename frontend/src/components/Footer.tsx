@@ -128,10 +128,11 @@ const Footer = () => {
 
                     {/* Company Links */}
                     <div className="group">
-                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider">Company</h3>
+                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider underline decoration-purple-200 decoration-2 underline-offset-4">Company</h3>
                         <ul className="space-y-3 text-sm text-gray-600 font-medium">
                             <li><Link to="/about" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">About Us</Link></li>
-                            <li><Link to="/blog" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Blog</Link></li>
+                            <li><Link to="/blog" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Editorial Policy</Link></li>
+                            <li><Link to="/blog" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Expert Bylines</Link></li>
                             <li><Link to="/contact" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Contact</Link></li>
                         </ul>
                     </div>
