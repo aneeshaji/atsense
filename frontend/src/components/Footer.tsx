@@ -54,10 +54,13 @@ const Footer = () => {
                             </div>
                         ) : (
                             <form onSubmit={handleSubscribe} className="flex w-full max-w-md gap-3">
+                                <label htmlFor="newsletter-email" className="sr-only">Email address</label>
                                 <input
+                                    id="newsletter-email"
                                     type="email"
                                     required
                                     placeholder="Enter your email"
+                                    aria-label="Newsletter email address"
                                     className="flex-1 px-6 py-4 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all font-medium shadow-lg"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}

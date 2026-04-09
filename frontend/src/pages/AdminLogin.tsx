@@ -52,12 +52,13 @@ function AdminLogin() {
                         )}
 
                         <div>
-                            <label className="block text-sm font-bold text-gray-700">Email Address</label>
+                            <label htmlFor="admin-email" className="block text-sm font-bold text-gray-700">Email Address</label>
                             <div className="mt-2 relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <Mail className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
+                                    id="admin-email"
                                     type="email"
                                     required
                                     className="pl-10 block w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-gray-900 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 font-medium transition-colors"
@@ -69,12 +70,13 @@ function AdminLogin() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-bold text-gray-700">Password</label>
+                            <label htmlFor="admin-password" className="block text-sm font-bold text-gray-700">Password</label>
                             <div className="mt-2 relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <Key className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
+                                    id="admin-password"
                                     type="password"
                                     required
                                     className="pl-10 block w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-gray-900 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 font-medium transition-colors"
