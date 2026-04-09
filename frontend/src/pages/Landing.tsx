@@ -151,31 +151,19 @@ const Landing = () => {
     return (
         <main className="-mx-4 -my-8 font-sans bg-gray-50 overflow-hidden">
             <SEO
-                title="Free Application Builder — Pass Recruiters Online"
-                description="Make a professional CV that clears hiring filters. Get your compatibility score and stand out to hiring managers instantly."
-                keywords="career builder, cv optimizer, hiring software bypass, job application tool, professional cv maker"
+                title="Free CV Maker — Clear Hiring Filters"
+                description="Make a professional CV that clears hiring filters and stand out to recruiters instantly."
+                keywords="cv maker, career builder, hiring software bypass, professional cv"
                 schemas={[faqSchema]}
             />
             
             {/* Custom Animations injected directly to avoid tailwind config changes */}
-            <style>
-                {`
-                @keyframes float {
-                    0% { transform: translateY(0px) rotate(2deg); }
-                    50% { transform: translateY(-15px) rotate(-1deg); }
-                    100% { transform: translateY(0px) rotate(2deg); }
-                }
-                .animate-float {
-                    animation: float 6s ease-in-out infinite;
-                }
-                @keyframes shimmer {
-                    100% { transform: translateX(200%); }
-                }
-                .glass-flare {
-                    background: radial-gradient(circle at center, rgba(96, 239, 255, 0.15) 0%, transparent 70%);
-                }
-                `}
-            </style>
+            <style dangerouslySetInnerHTML={{ __html: `
+                @keyframes float{0%{transform:translateY(0px) rotate(2deg)}50%{transform:translateY(-15px) rotate(-1deg)}100%{transform:translateY(0px) rotate(2deg)}}
+                .animate-float{animation:float 6s ease-in-out infinite}
+                @keyframes shimmer{100%{transform:translateX(200%)}}
+                .glass-flare{background:radial-gradient(circle at center,rgba(96,239,255,0.15) 0%,transparent 70%)}
+            ` }} />
 
             {/* HERO SECTION - Deep Navy Blue with Glowing Orbs */}
             <section className="relative bg-[#0b1f3b] pt-16 pb-32 overflow-hidden text-white">
@@ -232,9 +220,12 @@ const Landing = () => {
 
                         {/* Hero Image Mockup */}
                         <FadeInSection delay={200} className="relative mx-auto w-full max-w-lg perspective-1000">
-                            <img 
+                             <img 
                                 src="/hero-mockup.png" 
                                 alt="Intelligent Application Designer Interface" 
+                                width="600"
+                                height="400"
+                                fetchPriority="high"
                                 className="w-full h-auto rounded-xl shadow-2xl animate-float border-[6px] border-white/10 ring-1 ring-black/10"
                             />
                             {/* Decorative badge */}
@@ -264,21 +255,21 @@ const Landing = () => {
                             <div className="w-16 h-16 bg-yellow-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                                 <Zap className="text-yellow-500" size={32} />
                             </div>
-                            <h3 className="text-xl font-black text-gray-900 mb-2">Fast & Easy to Use</h3>
+                            <h2 className="text-xl font-black text-gray-900 mb-2">Fast & Easy to Use</h2>
                             <p className="text-gray-600 text-sm">Intuitive interface that walks you through creation from start to finish. Built to save you time.</p>
                         </FadeInSection>
                         <FadeInSection delay={200} className="px-6 py-4 group cursor-default">
                             <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
                                 <Brain className="text-blue-500" size={32} />
                             </div>
-                            <h3 className="text-xl font-black text-gray-900 mb-2">Step-by-Step Guidance</h3>
+                            <h2 className="text-xl font-black text-gray-900 mb-2">Step-by-Step Guidance</h2>
                             <p className="text-gray-600 text-sm">AI assistance and expert-approved bullet points customized for your industry.</p>
                         </FadeInSection>
                         <FadeInSection delay={300} className="px-6 py-4 group cursor-default">
                             <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                                 <FileText className="text-pink-500" size={32} />
                             </div>
-                            <h3 className="text-xl font-black text-gray-900 mb-2">Machine-Readable Formats</h3>
+                            <h2 className="text-xl font-black text-gray-900 mb-2">Machine-Readable Formats</h2>
                             <p className="text-gray-600 text-sm">Clean structures that clear screening filters and capture professional attention.</p>
                         </FadeInSection>
                     </div>
@@ -365,7 +356,7 @@ const Landing = () => {
                                             <CheckCircle size={24} />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-gray-900 text-lg">{item.title}</h4>
+                                            <h3 className="font-bold text-gray-900 text-lg">{item.title}</h3>
                                             <p className="text-gray-500 leading-relaxed mt-1">{item.desc}</p>
                                         </div>
                                     </FadeInSection>
@@ -455,16 +446,16 @@ const Landing = () => {
                         <h2 className="text-3xl font-black text-gray-900 mb-8">Why Professional Formatting Matters in 2025</h2>
                         <div className="space-y-6 text-gray-600 leading-relaxed text-lg font-medium">
                             <p>
-                                In today's competitive job market, your career documents act as the first handshake with a potential employer. Most large companies now use automated systems to scan and sort through thousands of submissions. This means that even the most qualified candidates can be overlooked if their profile isn't structured correctly for these digital readers.
+                                In today's fast job market, your CV is your first chance to impress. Many big firms use smart software to read and sort applications. This means good people can be missed if their file isn't easy for these tools to read.
                             </p>
                             <p>
-                                At ATSense, we believe that your talent shouldn't be hidden behind a wall of code. Our platform is built to help you bridge this gap. We focus on clean typography, logical section mapping, and keyword relevancy. By using standard fonts and layouts, we ensure your professional story remains clear and easy to read for both humans and machines.
+                                At ATSense, we help you get past these digital gates. We focus on clean layouts and the right keywords. By using standard fonts, we make sure your story is clear for both machines and human hiring managers.
                             </p>
                             <p>
-                                Our intelligent tools analyze your text specifically for clarity and impact. Instead of just listing tasks, we show you how to present your work as a series of achievements. This shift in perspective is often what makes the difference between a rejection and an invitation to an interview. Whether you are a fresh graduate or a seasoned executive, having a clear and accessible profile is your best strategy for success.
+                                Our tools scan your text to make it better. Instead of just listing tasks, we help you show your wins. This small change often leads to more interview invites. Whether you are starting out or have years of experience, a clear profile is your best plan.
                             </p>
                             <p>
-                                We've simplified the entire process so you can focus on what matters: your career goals. With zero cost to start and no complex forms, you can transform your existing document into a high-impact application in minutes. Thousands of people have used these techniques to land roles at top-tier companies, and now these same professional standards are available to you.
+                                We made this easy so you can focus on your goals. With zero cost and no complex forms, you can fix your file in minutes. Join thousands who have used these tips to land great roles.
                             </p>
                         </div>
                     </div>

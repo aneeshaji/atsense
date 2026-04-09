@@ -10,20 +10,26 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://www.googletagmanager.com" />
   <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-  <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+  
+  <!-- Critical Font Loading -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" media="print" onload="this.media='all'" />
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" />
+  </noscript>
 
-  <!-- Preload Critical Assets -->
-  <link rel="preload" href="/src/main.tsx" as="script" />
+  <!-- Preload Hero Image -->
+  <link rel="preload" href="/hero-mockup.png" as="image" fetchpriority="high" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description"
-    content="ATSense is the #1 Free ATS Resume Builder and Applicant Tracking System Checker. Score your resume, optimize keywords with AI, and pass the ATS to land more interviews." />
-  <meta name="keywords" content="ATS resume builder, free ATS checker, applicant tracking system resume test, ATS friendly resume maker, AI resume optimizer, resume score, ats bypass, GPT-4 resume builder" />
+    content="Build a professional CV that clears hiring filters. Check your match score and stand out to recruiters instantly." />
+  <meta name="keywords" content="professional cv maker, career builder, hiring software bypass, job application tool, resume optimizer" />
   <meta name="author" content="ATSense Team" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
   
-  <title>ATSense - Free ATS Resume Builder & ATS Checker</title>
+  <title>ATSense — Clear Hiring Filters Instantly</title>
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
