@@ -20,7 +20,7 @@ const SEO = ({
     type = 'website',
 }: SEOProps) => {
     const siteTitle = "ATSense";
-    const fullTitle = title === siteTitle ? `${siteTitle} - #1 AI Resume Optimizer` : `${title} | ${siteTitle}`;
+    const fullTitle = title.includes(siteTitle) ? title : `${title} | ${siteTitle}`;
 
     const softwareAppSchema = {
         "@context": "https://schema.org",

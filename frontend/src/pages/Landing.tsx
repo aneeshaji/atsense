@@ -151,9 +151,9 @@ const Landing = () => {
     return (
         <main className="-mx-4 -my-8 font-sans bg-gray-50 overflow-hidden">
             <SEO
-                title="Free ATS Resume Builder & Free ATS Checker | ATSense"
-                description="Make your resume ATS-friendly. ATSense is the #1 Free ATS Resume Builder and Applicant Tracking System checker. Get your ATS score, optimize your keywords, and get hired."
-                keywords="ATS resume builder, free ats checker, AI resume optimizer, resume score, ats friendly resume, applicant tracking system test, resume keywords"
+                title="Free ATS Resume Builder — Check & Beat the ATS Online"
+                description="The #1 Free ATS Resume Builder & Checker. Get a professional ATS score, optimize with AI keywords, and bypass Applicant Tracking Systems to land more interviews."
+                keywords="ats resume builder, free ats checker, resume score, ats friendly resume maker, ai resume optimizer, resume keywords, resume scanner"
                 schemas={[faqSchema]}
             />
             
