@@ -139,10 +139,10 @@ const Landing = () => {
             },
             {
                 "@type": "Question",
-                "name": "What exactly is an ATS-friendly resume?",
+                "name": "What exactly is a modern hiring document?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "An ATS (Applicant Tracking System) friendly resume is a document specifically optimized for the algorithms used by Fortune 500 companies."
+                    "text": "A modern hiring document is a file specifically built to pass the automated filters used by large companies."
                 }
             }
         ]
@@ -151,9 +151,9 @@ const Landing = () => {
     return (
         <main className="-mx-4 -my-8 font-sans bg-gray-50 overflow-hidden">
             <SEO
-                title="Free ATS Resume Builder — Check & Beat the ATS Online"
-                description="The #1 Free ATS Resume Builder & Checker. Get a professional ATS score, optimize with AI keywords, and bypass Applicant Tracking Systems to land more interviews."
-                keywords="ats resume builder, free ats checker, resume score, ats friendly resume maker, ai resume optimizer, resume keywords, resume scanner"
+                title="Free Application Builder — Pass Recruiters Online"
+                description="Make a professional CV that clears hiring filters. Get your compatibility score and stand out to hiring managers instantly."
+                keywords="career builder, cv optimizer, hiring software bypass, job application tool, professional cv maker"
                 schemas={[faqSchema]}
             />
             
@@ -187,10 +187,10 @@ const Landing = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <FadeInSection className="space-y-8 text-center lg:text-left">
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight">
-                                #1 Free <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#60efff] to-blue-400">ATS Resume Builder</span> & ATS Checker
+                                #1 Zero-Cost <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#60efff] to-blue-400">Application Maker</span> & Profile Tester
                             </h1>
                             <p className="text-lg md:text-xl text-blue-100 max-w-xl mx-auto lg:mx-0 opacity-90 leading-relaxed">
-                                Create an ATS-friendly resume that highlights your best achievements and gets you hired faster, completely frictionless.
+                                Build a professional CV that clears recruitment filters. Showcase your top skills and get seen by hiring teams faster.
                             </p>
                             
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
@@ -201,7 +201,7 @@ const Landing = () => {
                                 >
                                     <div className="absolute inset-0 bg-white/40 w-1/2 -skew-x-12 translate-x-[-250%] group-hover:animate-[shimmer_1.5s_infinite]"></div>
                                     <Upload size={24} className="shrink-0 group-hover:-translate-y-1 transition-transform" />
-                                    <span>{importing ? 'Importing...' : 'Upload & Optimize Resume'}</span>
+                                    <span>{importing ? 'Processing...' : 'Upload & Fix My CV'}</span>
                                 </button>
                                 <input
                                     type="file"
@@ -225,7 +225,7 @@ const Landing = () => {
                                     className="inline-flex items-center gap-2 text-[#60efff] font-bold text-sm hover:underline underline-offset-4 transition-all"
                                 >
                                     <Target size={15} />
-                                    Already have a resume? Check your ATS Score for free →
+                                    Already have a document? Test your match score now →
                                 </Link>
                             </div>
                         </FadeInSection>
@@ -234,7 +234,7 @@ const Landing = () => {
                         <FadeInSection delay={200} className="relative mx-auto w-full max-w-lg perspective-1000">
                             <img 
                                 src="/hero-mockup.png" 
-                                alt="ATSense AI Resume Builder Interface" 
+                                alt="Intelligent Application Designer Interface" 
                                 className="w-full h-auto rounded-xl shadow-2xl animate-float border-[6px] border-white/10 ring-1 ring-black/10"
                             />
                             {/* Decorative badge */}
@@ -278,8 +278,8 @@ const Landing = () => {
                             <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                                 <FileText className="text-pink-500" size={32} />
                             </div>
-                            <h3 className="text-xl font-black text-gray-900 mb-2">ATS-Friendly Templates</h3>
-                            <p className="text-gray-600 text-sm">Optimized formatting and templates that bypass ATS software and catch recruiter attention.</p>
+                            <h3 className="text-xl font-black text-gray-900 mb-2">Machine-Readable Formats</h3>
+                            <p className="text-gray-600 text-sm">Clean structures that clear screening filters and capture professional attention.</p>
                         </FadeInSection>
                     </div>
                 </div>
@@ -295,9 +295,9 @@ const Landing = () => {
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white font-bold text-xs uppercase tracking-widest mb-3">
                                 <Target size={12} /> Free Tool
                             </div>
-                            <h2 className="text-2xl md:text-3xl font-black text-white mb-2">Is Your Resume Actually Passing ATS Filters?</h2>
+                            <h2 className="text-2xl md:text-3xl font-black text-white mb-2">Is Your CV Actually Passing Hiring Filters?</h2>
                             <p className="text-indigo-200 font-medium max-w-xl">
-                                Upload your existing resume and get an instant ATS compatibility score with personalized fixes — completely free, no account needed.
+                                Upload your current document and get an instant professional match score with clear fixes — accessible to all.
                             </p>
                         </div>
                         <Link
@@ -305,7 +305,7 @@ const Landing = () => {
                             className="shrink-0 inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo-700 font-black rounded-2xl hover:bg-indigo-50 transition-all shadow-xl hover:-translate-y-1 text-sm uppercase tracking-wider whitespace-nowrap"
                         >
                             <Target size={16} />
-                            Check My ATS Score <ChevronRight size={16} />
+                            Check My Score <ChevronRight size={16} />
                         </Link>
                     </div>
                 </div>
@@ -323,9 +323,9 @@ const Landing = () => {
                         <div className="hidden md:block absolute top-[3.5rem] left-[16.66%] right-[16.66%] h-[3px] bg-gradient-to-r from-blue-100 via-indigo-200 to-purple-100 -z-10"></div>
                         
                         {[
-                            { num: "1", title: "Choose a template", desc: "Select from expertly designed ATS-friendly templates that grab recruiters' attention instantly." },
-                            { num: "2", title: "Let AI write your bullets", desc: "Just provide a brief summary of what you did, and our AI perfectly translates it to professional achievements." },
-                            { num: "3", title: "Download & apply", desc: "Export to flawless PDF instantly, bypassing the bots to land your next big job interview." }
+                            { num: "1", title: "Select your format", desc: "Select from clean, machine-readable layouts that grab focus instantly." },
+                            { num: "2", title: "Craft your achievements", desc: "Describe your work, and our AI perfectly translates it into professional results." },
+                            { num: "3", title: "Apply with confidence", desc: "Export to flawless files instantly, clearing the hurdles to land your next big interview." }
                         ].map((step, i) => (
                             <FadeInSection key={i} delay={i * 200} className="flex flex-col items-center group cursor-default">
                                 <div className="w-24 h-24 bg-white border-[6px] border-[#0b1f3b] text-[#0b1f3b] rounded-full flex items-center justify-center text-4xl font-black mb-6 shadow-xl group-hover:bg-[#0b1f3b] group-hover:text-white group-hover:scale-110 transition-all duration-300">
@@ -356,9 +356,9 @@ const Landing = () => {
                             
                             <div className="space-y-6 mt-8">
                                 {[
-                                    { title: "Smart Keyword Alignment", desc: "Our AI identifies the exact keywords from the job description and weaves them naturally into your resume." },
-                                    { title: "Standardized Formatting", desc: "We use machine-readable layouts that ensure your data is parsed correctly by systems like Workday, Greenhouse, and Lever." },
-                                    { title: "Real-time ATS Scoring", desc: "Get an instant score based on how well your resume matches the job requirements." }
+                                    { title: "Smart Achievement Alignment", desc: "Our AI identifies the key skills from the job post and weaves them naturally into your text." },
+                                    { title: "Verified Structures", desc: "We use layouts that ensure your data is parsed correctly by systems like Workday and Greenhouse." },
+                                    { title: "Live Feedback Loop", desc: "Get an instant rating based on how well your profile matches the role requirements." }
                                 ].map((item, i) => (
                                     <FadeInSection key={i} delay={200 + (i * 150)} className="flex gap-5 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                                         <div className="mt-1 bg-indigo-50 p-2 rounded-xl text-indigo-600 h-fit shrink-0">
@@ -380,7 +380,7 @@ const Landing = () => {
                                         <Zap size={20} className="fill-current" />
                                         <span><AnimatedCounter end={98} />% Match</span>
                                     </div>
-                                    <h3 className="font-black text-2xl mb-8 text-gray-900">Live ATS Readiness Report</h3>
+                                    <h3 className="font-black text-2xl mb-8 text-gray-900">Live Compatibility Report</h3>
                                     <div className="space-y-8">
                                         <div>
                                             <div className="flex justify-between mb-2 font-bold text-sm">
@@ -432,10 +432,10 @@ const Landing = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-left">
                         {[
-                            { icon: <Zap size={28} className="text-amber-500" />, title: "AI Bullet Points", desc: "Generate professional achievement statements in seconds based on your role." },
-                            { icon: <Briefcase size={28} className="text-blue-500" />, title: "Job Description Analysis", desc: "Upload any job post and instantly get an actionable gap analysis." },
-                            { icon: <Search size={28} className="text-purple-500" />, title: "Keyword Extraction", desc: "Never miss the crucial soft and hard skills recruiters are intensely searching for." },
-                            { icon: <Activity size={28} className="text-emerald-500" />, title: "ATS Optimization", desc: "Automatically format and structure your resume to definitively pass the bots." }
+                            { icon: <Zap size={28} className="text-amber-500" />, title: "Better Achievement Text", desc: "Create professional bullet points in seconds based on your target role." },
+                            { icon: <Briefcase size={28} className="text-blue-500" />, title: "Role Requirement Analysis", desc: "Upload any job post and instantly see where your profile can improve." },
+                            { icon: <Search size={28} className="text-purple-500" />, title: "Skill Extraction", desc: "Identify the crucial abilities that hiring teams are scanning for." },
+                            { icon: <Activity size={28} className="text-emerald-500" />, title: "Clearance Optimization", desc: "Automatically structure your content to pass technical screening hurdles." }
                         ].map((feat, i) => (
                             <FadeInSection key={i} delay={i * 150} className="p-8 rounded-[2rem] bg-gray-50/80 border border-gray-100 hover:border-indigo-200 hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group cursor-default">
                                 <div className="mb-6 bg-white w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-300 ring-1 ring-gray-100">
@@ -445,6 +445,28 @@ const Landing = () => {
                                 <p className="text-gray-500 text-base leading-relaxed font-medium">{feat.desc}</p>
                             </FadeInSection>
                         ))}
+                    </div>
+                </div>
+            </section>
+            {/* NEW Text-to-HTML Ratio Section: Detailed Guides */}
+            <section className="pb-32 bg-white">
+                <div className="max-w-4xl mx-auto px-4">
+                    <div className="prose prose-slate max-w-none">
+                        <h2 className="text-3xl font-black text-gray-900 mb-8">Why Professional Formatting Matters in 2025</h2>
+                        <div className="space-y-6 text-gray-600 leading-relaxed text-lg font-medium">
+                            <p>
+                                In today's competitive job market, your career documents act as the first handshake with a potential employer. Most large companies now use automated systems to scan and sort through thousands of submissions. This means that even the most qualified candidates can be overlooked if their profile isn't structured correctly for these digital readers.
+                            </p>
+                            <p>
+                                At ATSense, we believe that your talent shouldn't be hidden behind a wall of code. Our platform is built to help you bridge this gap. We focus on clean typography, logical section mapping, and keyword relevancy. By using standard fonts and layouts, we ensure your professional story remains clear and easy to read for both humans and machines.
+                            </p>
+                            <p>
+                                Our intelligent tools analyze your text specifically for clarity and impact. Instead of just listing tasks, we show you how to present your work as a series of achievements. This shift in perspective is often what makes the difference between a rejection and an invitation to an interview. Whether you are a fresh graduate or a seasoned executive, having a clear and accessible profile is your best strategy for success.
+                            </p>
+                            <p>
+                                We've simplified the entire process so you can focus on what matters: your career goals. With zero cost to start and no complex forms, you can transform your existing document into a high-impact application in minutes. Thousands of people have used these techniques to land roles at top-tier companies, and now these same professional standards are available to you.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </section>
