@@ -53,7 +53,7 @@ function CoverLetterList() {
             <div>
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Cover Letters</h1>
+                        <div className="text-3xl font-bold text-gray-900">Cover Letters</div>
                         <p className="text-gray-500 mt-1">AI-generated personalized letters</p>
                     </div>
                 </div>

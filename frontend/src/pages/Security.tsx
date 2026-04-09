@@ -8,7 +8,10 @@ const Security = () => {
 
     return (
         <div className="bg-white min-h-screen py-20 font-sans selection:bg-slate-100 selection:text-slate-900">
-            <SEO title="Data Security - ATSense" />
+            <SEO 
+                title="Data Security & Reliability - Your Privacy Matters" 
+                description="Explore ATSense's enterprise-grade security protocols. We use advanced encryption to ensure your career data remains private and protected."
+            />
             
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Brand Header */}

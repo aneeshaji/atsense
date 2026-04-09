@@ -8,7 +8,10 @@ const Terms = () => {
 
     return (
         <div className="bg-white min-h-screen py-20 font-sans selection:bg-slate-100 selection:text-slate-900">
-            <SEO title="Terms of Service - ATSense" />
+            <SEO 
+                title="Terms of Service - ATSense Platform Rules" 
+                description="Review the ATSense Terms of Service. By using our AI resume builder, you agree to our platform rules regarding data processing and usage."
+            />
             
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Brand Header */}

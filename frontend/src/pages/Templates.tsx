@@ -57,9 +57,9 @@ export default function Templates() {
     return (
         <div className="min-h-screen bg-gray-50/50 pt-24 pb-20 px-4 sm:px-6 lg:px-8 font-sans">
             <SEO
-                title="Free ATS Resume Templates — Build an ATS Resume FAST"
-                description="Download the best free ATS resume templates. An ATS resume is designed to bypass Applicant Tracking Systems and land you more interviews instantly."
-                keywords="ats resume template, ats resume, free ats resume templates, ats friendly resume template, what is ats resume, ats resume maker"
+                title="Free ATS Resume Templates — 100% ATS Compatible CVs"
+                description="Download and use the best free ATS resume templates. Every template is rigorously tested to pass Applicant Tracking Systems and recruiter screens."
+                keywords="ats resume template, free ats resume templates, ats friendly resume template, recruiter approved resumes, ats maker"
                 url="https://atsense.online/templates"
                 schemas={[faqSchema]}
             />
@@ -101,8 +101,8 @@ export default function Templates() {
                                 >
                                     {/* Template Preview Section */}
                                     <div className={`h-64 bg-gradient-to-br ${gradient} p-8 flex items-center justify-center relative overflow-hidden`}>
-                                        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
-                                        <div className="relative z-10 w-40 h-52 bg-white/90 backdrop-blur-md rounded-lg shadow-2xl transform rotate-2 group-hover:rotate-0 transition-transform duration-500 border border-white/50 flex flex-col p-4 space-y-3">
+                                        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} aria-hidden="true"></div>
+                                        <div className="relative z-10 w-40 h-52 bg-white/90 backdrop-blur-md rounded-lg shadow-2xl transform rotate-2 group-hover:rotate-0 transition-transform duration-500 border border-white/50 flex flex-col p-4 space-y-3" role="img" aria-label={`${tpl.name} Preview Card`}>
                                             <div className="w-full h-4 bg-gray-200 rounded animate-pulse"></div>
                                             <div className="w-2/3 h-2 bg-gray-100 rounded"></div>
                                             <div className="space-y-2 mt-4">

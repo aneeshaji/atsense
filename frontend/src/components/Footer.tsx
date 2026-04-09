@@ -153,6 +153,11 @@ const Footer = () => {
                     <p className="text-sm text-gray-500 font-medium mb-1">
                         &copy; {currentYear} ATSense. All rights reserved.
                     </p>
+                    <div className="flex justify-center gap-6 mt-2">
+                        <a href="/sitemap.xml" className="text-[10px] text-gray-400 font-bold uppercase tracking-widest hover:text-indigo-600 transition-colors">Sitemap</a>
+                        <span className="text-gray-200">|</span>
+                        <Link to="/security" className="text-[10px] text-gray-400 font-bold uppercase tracking-widest hover:text-indigo-600 transition-colors">Infra Status: 100%</Link>
+                    </div>
 
                 </div>
             </div>

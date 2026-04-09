@@ -1,6 +1,10 @@
 export default function Logo({ className = "w-11 h-11" }: { className?: string }) {
     return (
-        <div className={`relative flex items-center justify-center ${className} group shrink-0`}>
+        <div 
+            className={`relative flex items-center justify-center ${className} group shrink-0`}
+            role="img"
+            aria-label="ATSense Logo"
+        >
             {/* Glowing Aura shadow (pulsing) */}
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl blur-md opacity-40 group-hover:opacity-70 transition-opacity duration-700 animate-pulse"></div>
             

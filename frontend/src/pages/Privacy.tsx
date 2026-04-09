@@ -8,7 +8,10 @@ const Privacy = () => {
 
     return (
         <div className="bg-white min-h-screen py-20 font-sans selection:bg-slate-100 selection:text-slate-900">
-            <SEO title="Privacy Policy - ATSense" />
+            <SEO 
+                title="Privacy Policy - How We Protect Your Data" 
+                description="Read the ATSense Privacy Policy. Learn how we securely handle your resume data and personal information with industry-leading encryption."
+            />
 
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Brand Header */}
