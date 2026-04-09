@@ -443,7 +443,7 @@ const Landing = () => {
             <section className="pb-32 bg-white">
                 <div className="max-w-4xl mx-auto px-4">
                     <div className="prose prose-slate max-w-none">
-                        <h2 className="text-3xl font-black text-gray-900 mb-8">Why Professional Formatting Matters in 2025</h2>
+                        <h2 className="text-3xl font-black text-gray-900 mb-8">Why Professional Formatting Matters in 2026</h2>
                         <div className="space-y-6 text-gray-600 leading-relaxed text-lg font-medium">
                             <p>
                                 In today's fast job market, your CV is your first chance to impress. Many big firms use smart software to read and sort applications. This means good people can be missed if their file isn't easy for these tools to read.
