@@ -71,7 +71,7 @@ const Privacy = () => {
                             If you have questions, concerns, or requests regarding this Privacy Policy or how we handle your data, please contact us at:
                         </p>
                         <p>
-                            <a href="mailto:privacy@atsense.com" className="font-medium text-slate-900 hover:text-indigo-600">privacy@atsense.com</a>
+                            <a href="mailto:privacy@atsense.online" className="font-medium text-slate-900 hover:text-indigo-600">privacy@atsense.online</a>
                         </p>
                     </section>
 
