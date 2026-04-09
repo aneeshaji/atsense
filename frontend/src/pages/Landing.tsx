@@ -465,6 +465,45 @@ const Landing = () => {
                 </div>
             </section>
 
+            {/* Detailed FAQ Section to boost Text-to-HTML ratio */}
+            <section className="py-24 bg-gray-50/50">
+                <div className="max-w-4xl mx-auto px-4">
+                    <h2 className="text-3xl font-black text-[#0b1f3b] mb-12 text-center underline decoration-indigo-200 decoration-8 underline-offset-4">Common Questions About CV Optimization</h2>
+                    <div className="space-y-8">
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">What is an Applicant Tracking System (ATS)?</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                An Applicant Tracking System is a software application used by recruitment teams to handle the entire hiring process. It scans every CV submitted and looks for specific keywords that match the job description. If your file does not have these keywords or uses a format that the software cannot read, you might be rejected before a human even sees your application.
+                            </p>
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">How does the free CV grader work?</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Our tool uses advanced intelligence to look at your file the same way a recruiter would. It checks for layout clarity, font usage, and section headers. After the scan, you get a score out of 100. This score tells you how well your profile matches the roles you are applying for. It also gives you tips on how to improve your bullet points and skills section.
+                            </p>
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Is ATSense really free to use?</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Yes, ATSense is a zero-cost tool built for the community. We believe that everyone should have access to quality career tools without paying high fees. You can build, scan, and optimize your documents as many times as you want. There are no hidden costs or paywalls for the core features because we want to help as many people as possible land their dream roles.
+                            </p>
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Why should I use standard fonts in my application?</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                While fancy fonts might look nice to you, they can be very difficult for screening software to decode. Standard fonts like Inter, Arial, or Calibri are recognized by every recruitment system. Using these fonts ensures that your personal information and work history are correctly extracted. Our templates are pre-configured with these safe choices so you never have to worry about technical rejection.
+                            </p>
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Can I optimize multiple CVs for different jobs?</h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Absolutely. In the modern job market, tailoring your profile is the best way to get results. You should have a base file and then make small changes for every role you apply to. Our "Job Matcher" feature helps you identify which parts of your history you should highlight based on specific job posts. This targeted approach significantly increases your chances of getting an interview invite.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* E-E-A-T Footer Author Section */}
             <section className="py-12 bg-white border-t border-gray-50">
                 <div className="max-w-4xl mx-auto px-4 text-center">
