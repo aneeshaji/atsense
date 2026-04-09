@@ -22,6 +22,7 @@ import TemplateBuilder from './pages/TemplateBuilder';
 import InterviewSimulator from './pages/InterviewSimulator';
 import ResumeGrader from './pages/ResumeGrader';
 import GuideDetail from './pages/GuideDetail';
+import SharedSpace from './pages/SharedSpace';
 import { ModalProvider } from './context/ModalContext';
 import Layout from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
@@ -56,6 +57,7 @@ export default function App() {
                                 <Route path="/templates/:slug" element={<TemplateDetail />} />
                                 <Route path="/template-builder" element={<TemplateBuilder />} />
                                 <Route path="/resume-grader" element={<ResumeGrader />} />
+                                <Route path="/community" element={<SharedSpace />} />
                             </Route>
 
                             {/* Application Routes with Layout */}

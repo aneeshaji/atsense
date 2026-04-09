@@ -1,0 +1,23 @@
+# ATSense AI Disclosure
+
+ATSense is an AI-powered resume optimization platform designed to help job seekers bypass Applicant Tracking Systems (ATS).
+
+## Key Features
+- AI-driven resume tailoring
+- Real-time ATS match scoring
+- Semantic keyword optimization
+- Expert career advice generation
+
+## Technology Stack
+- LLM: GPT-4o / Claude 3.5 Sonnet
+- Frontend: React / Vite
+- Backend: Laravel
+
+## Authors
+- Chief Product Officer: Aneesh Ajithkumar
+- Editorial Team: ATSense Career Strategists
+
+## Links
+- Homepage: https://atsense.online/
+- Resume Builder: https://atsense.online/builder
+- About: https://atsense.online/about
