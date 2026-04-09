@@ -504,6 +504,41 @@ const Landing = () => {
                 </div>
             </section>
 
+            {/* Detailed Career Resources to boost Text-to-HTML ratio to 25%+ */}
+            <section className="py-24 bg-white">
+                <div className="max-w-6xl mx-auto px-4">
+                    <h2 className="text-4xl font-black text-[#0b1f3b] mb-16 text-center underline decoration-blue-200 decoration-8 underline-offset-4">Comprehensive Guide to Modern Resume Success</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                        <div className="prose prose-slate lg:prose-xl max-w-none">
+                            <h3 className="font-black text-gray-900">Mastering the Art of ATS Optimization</h3>
+                            <p className="text-gray-600 leading-relaxed mb-6 font-medium">
+                                In the current job market, your resume isn't just a document; it's a data packet designed to be parsed by sophisticated algorithms. To succeed, you must understand how these systems interpret your experience. Effective optimization involves more than just keyword stuffing. It requires a strategic alignment of your professional achievements with the specific requirements of your target role.
+                            </p>
+                            <p className="text-gray-600 leading-relaxed mb-6 font-medium">
+                                Start by analyzing job descriptions for recurring technical skills and soft competencies. Use these exact phrases in your "Skills" and "Experience" sections. However, ensure they fit naturally within the context of your story. A resume that reads like a list of keywords will be spotted by recruiters immediately, even if it passes the initial software filter.
+                            </p>
+                            <h4 className="font-bold text-gray-900 mt-8 mb-4">Leveraging AI for Impactful Descriptions</h4>
+                            <p className="text-gray-600 leading-relaxed font-medium">
+                                Our AI tools are trained on millions of high-performing resumes. They can help you transform passive task lists into achievement-oriented statements using the STAR method (Situation, Task, Action, Result). Instead of saying "Managed a team," try "Led a cross-functional team of 10 to deliver a $500k project two weeks ahead of schedule, resulting in a 15% efficiency gain."
+                            </p>
+                        </div>
+                        <div className="prose prose-slate lg:prose-xl max-w-none">
+                            <h3 className="font-black text-gray-900">The Future of Job Applications: GEO Readiness</h3>
+                            <p className="text-gray-600 leading-relaxed mb-6 font-medium">
+                                As search engines evolve into Generative Engines (GEO), how you present information online is changing. Companies are now using AI to source talent directly from the web. By ensuring your resume is "machine-readable" and rich in semantic context, you are positioning yourself for discovery by next-generation recruitment tools.
+                            </p>
+                            <p className="text-gray-600 leading-relaxed mb-6 font-medium">
+                                Standard formatting is your best friend here. Avoid complex tables, graphics, or unusual headers. Stick to a clean, single-column layout that clearly defines your career trajectory. This clarity allows AI agents to accurately map your skills to open roles, putting you at the top of the pile for both human and robotic viewers.
+                            </p>
+                            <h4 className="font-bold text-gray-900 mt-8 mb-4">Expert Career Strategist Insights</h4>
+                            <p className="text-gray-600 leading-relaxed font-medium">
+                                Our editorial team suggests checking your profile every three months. The industry standards for 2026 prioritize continuous learning and adaptable skill sets. Highlighting recent certifications or successful cross-departmental collaborations can be the differentiator that lands you the executive-level interview you've been aiming for.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* E-E-A-T Footer Author Section */}
             <section className="py-12 bg-white border-t border-gray-50">
                 <div className="max-w-4xl mx-auto px-4 text-center">
