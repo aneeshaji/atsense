@@ -23,7 +23,7 @@ const Contact = () => {
     };
 
     return (
-        <main className="-mx-4 -my-8 font-sans bg-white overflow-hidden">
+        <main className="font-sans bg-white overflow-hidden">
             <SEO
                 title="Contact Our Team - Support & Business Inquiries"
                 description="Have questions about our AI resume optimizer? Get in touch with the ATSense team for premium support, feedback, or business collaborations."

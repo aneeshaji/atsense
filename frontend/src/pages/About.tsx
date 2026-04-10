@@ -4,7 +4,7 @@ import { Target, Users, Zap, ShieldCheck, Heart, Sparkles, ArrowRight } from 'lu
 
 const About = () => {
     return (
-        <main className="-mx-4 -my-8 font-sans bg-white overflow-hidden">
+        <main className="font-sans bg-white overflow-hidden">
             <SEO
                 title="About Us - Reimagining the Job Search with AI"
                 description="Learn the story behind ATSense. We're on a mission to empower job seekers with premium AI tools that beat the ATS and land dream interviews."

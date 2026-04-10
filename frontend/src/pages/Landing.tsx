@@ -149,7 +149,7 @@ const Landing = () => {
     };
 
     return (
-        <main id="main-content" className="-mx-4 -my-8 font-sans bg-gray-50 overflow-hidden">
+        <main id="main-content" className="font-sans bg-gray-50 overflow-hidden">
             <SEO
                 title="Free CV Maker — Clear Hiring Filters"
                 description="Make a professional CV that clears hiring filters and stand out to recruiters instantly."
