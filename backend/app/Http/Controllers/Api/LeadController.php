@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ResumeLead;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Log;
 
 class LeadController extends Controller
@@ -48,6 +49,14 @@ class LeadController extends Controller
             ResumeLead::updateOrCreate(
                 ['email' => $leadEmail],
                 $data
+            );
+
+            ActivityLog::record(
+                'LEAD_CAPTURED',
+                "New lead captured: '{$name}' ({$email}).",
+                'info',
+                ['email' => $email, 'source' => $data['source']],
+                $request
             );
 
             return response()->json(['status' => 'captured'], 200);
@@ -97,6 +106,15 @@ class LeadController extends Controller
             $lead = ResumeLead::where('email', $email)->first();
             if ($lead) {
                 $lead->update($data);
+
+                ActivityLog::record(
+                    'LEAD_OPTIMIZED',
+                    "Lead '{$email}' resume optimized for job: '{$jobTitle}'.",
+                    'info',
+                    ['email' => $email, 'job_title' => $jobTitle],
+                    $request
+                );
+
                 return response()->json(['status' => 'updated'], 200);
             }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import {
@@ -6,7 +6,8 @@ import {
     Search, Trash2, ChevronLeft, ChevronRight, X,
     TrendingUp, Mail, Phone, RefreshCw,
     BarChart2, Settings, CheckSquare, Square, AlertTriangle,
-    Lock, Check, Eye, ArrowUpRight, Zap, Calendar, Layout, Globe
+    Lock, Check, Eye, ArrowUpRight, Zap, Calendar, Layout, Globe,
+    Activity, ShieldAlert, Info, AlertOctagon, Filter
 } from 'lucide-react';
 import AdminBlog from '../components/admin/AdminBlog';
 import AdminTemplates from '../components/admin/AdminTemplates';
@@ -76,7 +77,29 @@ interface Stats {
     sources: SourceStat[];
 }
 
-type View = 'overview' | 'leads' | 'analytics' | 'blog' | 'templates' | 'site_settings' | 'settings';
+type View = 'overview' | 'leads' | 'analytics' | 'blog' | 'templates' | 'site_settings' | 'settings' | 'activity_log';
+
+type LogLevel = 'all' | 'info' | 'warning' | 'error' | 'critical';
+
+interface ActivityLogEntry {
+    id: number;
+    action: string;
+    message: string;
+    level: string;
+    ip_address: string | null;
+    user_agent: string | null;
+    metadata: Record<string, any> | null;
+    created_at: string;
+}
+
+interface PaginatedLogs {
+    data: ActivityLogEntry[];
+    current_page: number;
+    last_page: number;
+    total: number;
+    from: number;
+    to: number;
+}
 
 function MiniBarChart({ data }: { data: ChartPoint[] }) {
     const max = Math.max(...data.map(d => d.count), 1);
@@ -130,6 +153,19 @@ function AdminDashboard() {
     // CRM state
     const [updatingLead, setUpdatingLead] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState(EMAIL_TEMPLATES[0]);
+
+    // Activity Log state
+    const [logs, setLogs] = useState<PaginatedLogs | null>(null);
+    const [logsLoading, setLogsLoading] = useState(false);
+    const [logPage, setLogPage] = useState(1);
+    const [logLevel, setLogLevel] = useState<LogLevel>('all');
+    const [logSearch, setLogSearch] = useState('');
+    const [logDateFrom, setLogDateFrom] = useState('');
+    const [logDateTo, setLogDateTo] = useState('');
+    const [purging, setPurging] = useState(false);
+    const [autoRefresh, setAutoRefresh] = useState(false);
+    const autoRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const [expandedLog, setExpandedLog] = useState<number | null>(null);
 
     const navigate = useNavigate();
 
@@ -316,6 +352,58 @@ function AdminDashboard() {
 
     const clearFilters = () => { setSearch(''); setSource('all'); setDateFrom(''); setDateTo(''); };
 
+    const fetchLogs = useCallback(async (pg = 1, level = logLevel, search = logSearch, df = logDateFrom, dt = logDateTo) => {
+        const token = getToken(); if (!token) return;
+        setLogsLoading(true);
+        try {
+            const params = new URLSearchParams({ page: String(pg), per_page: '50' });
+            if (level !== 'all') params.set('level', level);
+            if (search) params.set('search', search);
+            if (df) params.set('date_from', df);
+            if (dt) params.set('date_to', dt);
+            const res = await api.get(`/admin/activity-logs?${params}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setLogs(res.data);
+        } catch (err: any) {
+            if (err.response?.status === 401) handleLogout();
+        } finally {
+            setLogsLoading(false);
+        }
+    }, [logLevel, logSearch, logDateFrom, logDateTo]);
+
+    const handlePurgeLogs = async () => {
+        if (!window.confirm('Purge ALL activity logs? This cannot be undone.')) return;
+        const token = getToken(); if (!token) return;
+        setPurging(true);
+        try {
+            await api.delete('/admin/activity-logs', { headers: { Authorization: `Bearer ${token}` } });
+            setLogs(null);
+            await fetchLogs(1);
+        } finally { setPurging(false); }
+    };
+
+    useEffect(() => {
+        if (view === 'activity_log') {
+            fetchLogs(1, logLevel, logSearch, logDateFrom, logDateTo);
+        }
+    }, [view]);
+
+    useEffect(() => {
+        if (view !== 'activity_log') return;
+        const t = setTimeout(() => { setLogPage(1); fetchLogs(1, logLevel, logSearch, logDateFrom, logDateTo); }, 400);
+        return () => clearTimeout(t);
+    }, [logLevel, logSearch, logDateFrom, logDateTo]);
+
+    useEffect(() => {
+        if (autoRefresh && view === 'activity_log') {
+            autoRefreshRef.current = setInterval(() => fetchLogs(logPage, logLevel, logSearch, logDateFrom, logDateTo), 10000);
+        } else {
+            if (autoRefreshRef.current) clearInterval(autoRefreshRef.current);
+        }
+        return () => { if (autoRefreshRef.current) clearInterval(autoRefreshRef.current); };
+    }, [autoRefresh, view, logPage]);
+
     const navItems: { id: View; label: string; icon: React.ReactNode }[] = [
         { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={15} /> },
         { id: 'leads', label: 'Leads', icon: <Users size={15} /> },
@@ -323,6 +411,7 @@ function AdminDashboard() {
         { id: 'blog', label: 'Blog & Content', icon: <FileText size={15} /> },
         { id: 'templates', label: 'Templates', icon: <Layout size={15} /> },
         { id: 'site_settings', label: 'Site Settings', icon: <Globe size={15} /> },
+        { id: 'activity_log', label: 'Activity Log', icon: <Activity size={15} /> },
         { id: 'settings', label: 'Admin Account', icon: <Settings size={15} /> },
     ];
 
@@ -861,6 +950,215 @@ function AdminDashboard() {
                     {view === 'blog' && <AdminBlog />}
                     {view === 'templates' && <AdminTemplates />}
                     {view === 'site_settings' && <AdminSettings />}
+
+                    {/* ===== ACTIVITY LOG ===== */}
+                    {view === 'activity_log' && (
+                        <div className="space-y-4">
+                            {/* Toolbar */}
+                            <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4 flex flex-wrap items-center gap-3">
+                                {/* Search */}
+                                <div className="relative flex-1 min-w-[220px]">
+                                    <Search size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search action, message, IP…"
+                                        value={logSearch}
+                                        onChange={e => setLogSearch(e.target.value)}
+                                        className="w-full pl-9 pr-4 py-2 text-xs font-semibold border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 focus:bg-white transition-all placeholder:text-gray-300"
+                                    />
+                                </div>
+
+                                {/* Level Filter */}
+                                <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl p-1">
+                                    {(['all', 'info', 'warning', 'error', 'critical'] as LogLevel[]).map(lvl => {
+                                        const colors: Record<string, string> = {
+                                            all: 'bg-indigo-600 text-white',
+                                            info: 'bg-blue-600 text-white',
+                                            warning: 'bg-amber-500 text-white',
+                                            error: 'bg-red-600 text-white',
+                                            critical: 'bg-rose-900 text-white',
+                                        };
+                                        return (
+                                            <button
+                                                key={lvl}
+                                                onClick={() => setLogLevel(lvl)}
+                                                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                                    logLevel === lvl ? colors[lvl] : 'text-gray-400 hover:text-gray-700'
+                                                }`}
+                                            >
+                                                {lvl}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Date Range */}
+                                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2">
+                                    <Calendar size={13} className="text-gray-400" />
+                                    <input type="date" value={logDateFrom} onChange={e => setLogDateFrom(e.target.value)}
+                                        className="text-[11px] font-bold text-slate-600 bg-transparent focus:outline-none w-28 cursor-pointer" />
+                                    <span className="text-gray-300 text-[10px] font-bold">TO</span>
+                                    <input type="date" value={logDateTo} onChange={e => setLogDateTo(e.target.value)}
+                                        className="text-[11px] font-bold text-slate-600 bg-transparent focus:outline-none w-28 cursor-pointer" />
+                                </div>
+
+                                {/* Auto-refresh toggle */}
+                                <button
+                                    onClick={() => setAutoRefresh(v => !v)}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-bold border transition-all ${
+                                        autoRefresh
+                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                            : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                                    }`}
+                                >
+                                    <span className={`w-2 h-2 rounded-full ${autoRefresh ? 'bg-emerald-500 animate-pulse' : 'bg-gray-300'}`} />
+                                    Live
+                                </button>
+
+                                <button
+                                    onClick={() => fetchLogs(logPage, logLevel, logSearch, logDateFrom, logDateTo)}
+                                    className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl border border-transparent hover:border-indigo-100 transition-all"
+                                    title="Refresh"
+                                >
+                                    <RefreshCw size={14} className={logsLoading ? 'animate-spin' : ''} />
+                                </button>
+
+                                <button
+                                    onClick={handlePurgeLogs}
+                                    disabled={purging || !logs?.total}
+                                    className="flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-red-600 border border-red-200 bg-red-50 rounded-xl hover:bg-red-100 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                    <Trash2 size={12} />
+                                    {purging ? 'Purging…' : 'Purge All'}
+                                </button>
+
+                                <span className="ml-auto text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                    {logs?.total ?? 0} Events
+                                </span>
+                            </div>
+
+                            {/* Log Table */}
+                            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                                {logsLoading && !logs ? (
+                                    <div className="flex items-center justify-center py-20">
+                                        <div className="text-center">
+                                            <RefreshCw size={20} className="animate-spin text-indigo-400 mx-auto mb-3" />
+                                            <p className="text-xs text-gray-400 font-medium">Loading event stream…</p>
+                                        </div>
+                                    </div>
+                                ) : !logs?.data?.length ? (
+                                    <div className="text-center py-20">
+                                        <Activity size={32} className="text-gray-200 mx-auto mb-3" />
+                                        <p className="text-sm font-bold text-gray-400">No events recorded yet</p>
+                                        <p className="text-xs text-gray-300 mt-1">Activity will appear here as the platform is used</p>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y divide-gray-50">
+                                        {logs.data.map(log => {
+                                            const levelConfig: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
+                                                info:     { bg: 'bg-blue-50 text-blue-700 border-blue-100',    text: 'text-blue-600',   icon: <Info size={12} /> },
+                                                warning:  { bg: 'bg-amber-50 text-amber-700 border-amber-100',  text: 'text-amber-600',  icon: <AlertTriangle size={12} /> },
+                                                error:    { bg: 'bg-red-50 text-red-700 border-red-100',         text: 'text-red-600',    icon: <ShieldAlert size={12} /> },
+                                                critical: { bg: 'bg-rose-100 text-rose-800 border-rose-200',     text: 'text-rose-700',   icon: <AlertOctagon size={12} /> },
+                                            };
+                                            const cfg = levelConfig[log.level] ?? levelConfig.info;
+                                            const isExpanded = expandedLog === log.id;
+
+                                            return (
+                                                <div
+                                                    key={log.id}
+                                                    className={`px-5 py-3.5 hover:bg-gray-50/70 transition-colors cursor-pointer ${
+                                                        log.level === 'critical' ? 'border-l-2 border-rose-500' :
+                                                        log.level === 'error'    ? 'border-l-2 border-red-400' :
+                                                        log.level === 'warning'  ? 'border-l-2 border-amber-400' : ''
+                                                    }`}
+                                                    onClick={() => setExpandedLog(isExpanded ? null : log.id)}
+                                                >
+                                                    <div className="flex items-start gap-4">
+                                                        {/* Level Badge */}
+                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shrink-0 mt-0.5 ${cfg.bg}`}>
+                                                            {cfg.icon} {log.level}
+                                                        </span>
+
+                                                        {/* Action + Message */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-md">
+                                                                    {log.action}
+                                                                </span>
+                                                                <span className="text-xs text-slate-700 font-medium truncate">{log.message}</span>
+                                                            </div>
+
+                                                            {isExpanded && (
+                                                                <div className="mt-2.5 space-y-1.5">
+                                                                    {log.ip_address && (
+                                                                        <p className="text-[11px] text-gray-400 font-mono">
+                                                                            <span className="font-bold text-gray-500">IP:</span> {log.ip_address}
+                                                                        </p>
+                                                                    )}
+                                                                    {log.user_agent && (
+                                                                        <p className="text-[11px] text-gray-400 font-mono truncate">
+                                                                            <span className="font-bold text-gray-500">UA:</span> {log.user_agent}
+                                                                        </p>
+                                                                    )}
+                                                                    {log.metadata && Object.keys(log.metadata).length > 0 && (
+                                                                        <pre className="text-[11px] bg-slate-50 border border-slate-100 rounded-lg p-2.5 overflow-x-auto text-slate-600 font-mono mt-1">
+                                                                            {JSON.stringify(log.metadata, null, 2)}
+                                                                        </pre>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Timestamp */}
+                                                        <div className="text-right shrink-0">
+                                                            <span className="text-[10px] font-bold text-gray-400 block">
+                                                                {new Date(log.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                                                            </span>
+                                                            <span className="text-[10px] text-gray-300 font-medium block">
+                                                                {new Date(log.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Pagination */}
+                            {logs && logs.last_page > 1 && (
+                                <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-6 py-4 flex items-center justify-between">
+                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                        Showing {logs.from}–{logs.to} of {logs.total}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <button disabled={logs.current_page <= 1}
+                                            onClick={() => { setLogPage(p => p - 1); fetchLogs(logPage - 1, logLevel, logSearch, logDateFrom, logDateTo); }}
+                                            className="p-2 rounded-lg border border-gray-200 text-slate-500 bg-white hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                                            <ChevronLeft size={14} />
+                                        </button>
+                                        {Array.from({ length: Math.min(logs.last_page, 7) }, (_, i) => i + 1).map(p => (
+                                            <button key={p}
+                                                onClick={() => { setLogPage(p); fetchLogs(p, logLevel, logSearch, logDateFrom, logDateTo); }}
+                                                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                                                    p === logs.current_page
+                                                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100'
+                                                        : 'text-slate-500 hover:bg-gray-50 border border-transparent'
+                                                }`}>{p}
+                                            </button>
+                                        ))}
+                                        <button disabled={logs.current_page >= logs.last_page}
+                                            onClick={() => { setLogPage(p => p + 1); fetchLogs(logPage + 1, logLevel, logSearch, logDateFrom, logDateTo); }}
+                                            className="p-2 rounded-lg border border-gray-200 text-slate-500 bg-white hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                                            <ChevronRight size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                 </main>
             </div>

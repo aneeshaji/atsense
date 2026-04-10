@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Models\ResumeLead;
+use App\Models\ActivityLog;
 use Carbon\Carbon;
 
 class AdminController extends Controller
@@ -28,6 +29,15 @@ class AdminController extends Controller
         }
 
         $token = $user->createToken('admin-token')->plainTextToken;
+
+        ActivityLog::record(
+            'ADMIN_LOGIN',
+            "Admin '{$user->email}' logged in successfully.",
+            'info',
+            ['email' => $user->email],
+            $request,
+            $user->id
+        );
 
         return response()->json([
             'user' => ['name' => $user->name, 'email' => $user->email],
@@ -69,7 +79,18 @@ class AdminController extends Controller
     public function deleteLead(Request $request, $id)
     {
         $lead = ResumeLead::findOrFail($id);
+        $leadName = $lead->name;
         $lead->delete();
+
+        ActivityLog::record(
+            'LEAD_DELETED',
+            "Lead '{$leadName}' (ID: {$id}) was permanently deleted.",
+            'warning',
+            ['lead_id' => $id, 'lead_name' => $leadName],
+            $request,
+            $request->user()?->id
+        );
+
         return response()->json(['message' => 'Lead deleted successfully.']);
     }
 
@@ -86,6 +107,15 @@ class AdminController extends Controller
         if ($request->has('notes')) $lead->notes = $request->notes;
         
         $lead->save();
+
+        ActivityLog::record(
+            'LEAD_UPDATED',
+            "Lead '{$lead->name}' (ID: {$id}) was updated.",
+            'info',
+            array_filter(['status' => $request->status ?? null, 'notes_changed' => $request->has('notes')]),
+            $request,
+            $request->user()?->id
+        );
 
         return response()->json([
             'message' => 'Lead updated successfully.',
@@ -142,6 +172,15 @@ class AdminController extends Controller
 
         $user->password = Hash::make($request->new_password);
         $user->save();
+
+        ActivityLog::record(
+            'PASSWORD_CHANGED',
+            "Admin '{$user->email}' changed their password.",
+            'warning',
+            ['email' => $user->email],
+            $request,
+            $user->id
+        );
 
         return response()->json(['message' => 'Password updated successfully.']);
     }

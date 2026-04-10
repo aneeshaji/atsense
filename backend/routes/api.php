@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\InterviewController;
 use App\Http\Controllers\Api\Admin\PostController;
 use App\Http\Controllers\Api\Admin\DesignTemplateController;
 use App\Http\Controllers\Api\Admin\SiteSettingController;
+use App\Http\Controllers\Api\ActivityLogController;
 
 // Authentication requirements removed
 
@@ -34,6 +35,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('admin/templates', DesignTemplateController::class);
     Route::post('admin/templates/{template}/toggle', [DesignTemplateController::class, 'toggleActive']);
     Route::apiResource('admin/settings', SiteSettingController::class)->except(['destroy']);
+
+    // Activity Logs
+    Route::get('admin/activity-logs', [ActivityLogController::class, 'index']);
+    Route::delete('admin/activity-logs', [ActivityLogController::class, 'purge']);
 });
 
 // Public Endpoints for CMS
