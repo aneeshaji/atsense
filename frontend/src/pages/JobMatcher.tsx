@@ -13,6 +13,7 @@ function JobMatcher() {
     const [jobDescription, setJobDescription] = useState('');
     const [result, setResult] = useState<JobMatchResult | null>(null);
     const [loading, setLoading] = useState(false);
+    const [extracting, setExtracting] = useState(false);
     const { showToast } = useToast();
 
     useEffect(() => {
@@ -92,6 +93,24 @@ function JobMatcher() {
         }
     };
 
+    const handleExtract = async () => {
+        if (!jobDescription) return;
+        setExtracting(true);
+        try {
+            const res = await api.post('/ai/jobs/extract', { url_or_text: jobDescription });
+            const data = res.data;
+            const cleanedDesc = `Job Title: ${data.jobTitle}\nCompany: ${data.companyName}\n\n${data.jobDescription}`;
+            setJobDescription(cleanedDesc);
+            showToast('Successfully extracted and cleaned job details!', 'success');
+        } catch (err: any) {
+            console.error(err);
+            const msg = err.response?.data?.suggestion || err.response?.data?.message || 'Extraction failed. Please paste the job description text manually.';
+            showToast(msg, 'error');
+        } finally {
+            setExtracting(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
             <SEO title="Smart Job Matcher - ATSense" description="Compare your resume against any job description automatically." />
@@ -130,12 +149,22 @@ function JobMatcher() {
                                 )}
                             </div>
 
-                            <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Paste Job Description</label>
+                            <div className="flex items-center justify-between mb-3">
+                                <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">Paste JD or URL</label>
+                                <button 
+                                    onClick={handleExtract}
+                                    disabled={extracting || !jobDescription || loading}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg transition-all border border-indigo-200 shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {extracting ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                                    {extracting ? 'Extracting...' : 'Magic Clean / Extract URL'}
+                                </button>
+                            </div>
                             <textarea
                                 className="w-full flex-grow p-5 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all resize-none min-h-[350px] font-medium text-gray-700 placeholder:text-gray-400"
                                 value={jobDescription}
                                 onChange={e => setJobDescription(e.target.value)}
-                                placeholder="Paste the entire JD here..."
+                                placeholder="Paste a Job Link (e.g. Lever, Greenhouse) OR paste the messy text from LinkedIn and we'll clean it automatically..."
                             />
 
                             <button

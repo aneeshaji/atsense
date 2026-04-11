@@ -460,4 +460,30 @@ INSTRUCTIONS:
 ";
         return $this->chat([['role' => 'user', 'content' => $prompt]], 0.7);
     }
+
+    /**
+     * Extract clean Job Details from raw web-page text (Scraping fallback)
+     */
+    public function extractJobFromText($text)
+    {
+        $textChunk = substr($text, 0, 15000); // Prevent token overflow limits
+        $prompt = "
+You are an expert Job Data Extractor.
+Extract the core details from the following raw text scraped from a job board webpage (like LinkedIn, Indeed).
+The text is messy and contains headers, footers, buttons, and navigation text.
+Ignore the garbage and extract the true Job Title, Company, and full Job Description/Requirements.
+
+RAW TEXT:
+{$textChunk}
+
+Return STRICT JSON:
+{
+  \"jobTitle\": \"The extracted job title\",
+  \"companyName\": \"The hiring company name or 'Unknown'\",
+  \"jobDescription\": \"The clean, full job description and requirements without headers/footers. Preserve line breaks (\n).\"
+}
+";
+        $response = $this->chat([['role' => 'user', 'content' => $prompt]], 0.1, true);
+        return json_decode($this->cleanJson($response), true);
+    }
 }

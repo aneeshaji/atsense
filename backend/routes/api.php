@@ -62,6 +62,7 @@ Route::middleware(['throttle:ai'])->group(function () {
     Route::post('/ai/linkedin-optimize', [AIController::class, 'optimizeLinkedInOffline']);
     Route::post('/ai/interview/questions', [InterviewController::class, 'generateQuestions']);
     Route::post('/ai/interview/evaluate', [InterviewController::class, 'evaluateAnswer']);
+    Route::post('/ai/jobs/extract', [AIController::class, 'extractJobOffline']);
 });
 
 Route::post('/import', [ResumeController::class, 'importOffline']);

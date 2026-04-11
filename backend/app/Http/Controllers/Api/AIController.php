@@ -305,4 +305,71 @@ class AIController extends Controller
             ], 503);
         }
     }
+
+    /**
+     * Scrape URL or Raw Text to instantly extract Job Details
+     */
+    public function extractJobOffline(Request $request)
+    {
+        $input = $request->input('url_or_text');
+        
+        if (!$input) {
+             return response()->json(['message' => 'Input is required.'], 422);
+        }
+
+        $rawText = $input;
+
+        // If it looks like a URL, try to fetch it first.
+        if (filter_var($input, FILTER_VALIDATE_URL)) {
+             try {
+                 $client = new \GuzzleHttp\Client();
+                 $response = $client->request('GET', $input, [
+                     'headers' => [
+                         'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                         'Accept' => 'text/html,application/xhtml+xml,application/xml',
+                         'Accept-Language' => 'en-US,en;q=0.9',
+                     ],
+                     'timeout' => 8,
+                     'allow_redirects' => true,
+                     'http_errors' => false
+                 ]);
+
+                 if ($response->getStatusCode() === 200) {
+                     $html = (string) $response->getBody();
+                     // Basic cleanup to reduce token size
+                     $cleaned = preg_replace([
+                         '@<head[^>]*?>.*?</head>@siu',
+                         '@<style[^>]*?>.*?</style>@siu',
+                         '@<script[^>]*?.*?</script>@siu',
+                         '@<nav[^>]*?>.*?</nav>@siu',
+                         '@<footer[^>]*?>.*?</footer>@siu',
+                     ], '', $html);
+                     $rawText = strip_tags($cleaned);
+                     $rawText = preg_replace('/\s+/', ' ', $rawText);
+                 }
+                 // If status is 403 (blocked by LinkedIn), we just pass the URL string to AI? 
+                 // No, AI can't browse natively via standard chat endpoint easily unless using tools.
+                 // We will just process what we got (or fallback to error if empty).
+             } catch (\Exception $e) {
+                 Log::warning('Job Scrape failed: ' . $e->getMessage());
+             }
+        }
+
+        if (strlen($rawText) < 50) {
+             return response()->json([
+                 'message' => 'Failed to extract content.',
+                 'suggestion' => 'Anti-bot protection blocked the extraction. Please select all text on the job page (Ctrl+A), copy it (Ctrl+C), and paste it directly into the box.'
+             ], 403);
+        }
+
+        try {
+            $jobData = $this->aiService->extractJobFromText($rawText);
+            return response()->json($jobData);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'AI Extraction failed.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
