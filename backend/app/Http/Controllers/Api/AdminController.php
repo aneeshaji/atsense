@@ -45,6 +45,24 @@ class AdminController extends Controller
         ]);
     }
 
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+        if ($user) {
+            $user->currentAccessToken()->delete();
+            ActivityLog::record(
+                'ADMIN_LOGOUT',
+                "Admin '{$user->email}' logged out.",
+                'info',
+                ['email' => $user->email],
+                $request,
+                $user->id
+            );
+        }
+
+        return response()->json(['message' => 'Logged out successfully.']);
+    }
+
     public function getLeads(Request $request)
     {
         $query = ResumeLead::orderBy('created_at', 'desc');

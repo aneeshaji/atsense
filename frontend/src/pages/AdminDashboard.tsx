@@ -271,7 +271,19 @@ function AdminDashboard() {
         else setSelectedIds(new Set(leads.data.map(l => l.id)));
     };
 
-    const handleLogout = () => { localStorage.removeItem('admin_token'); navigate('/admin/login'); };
+    const handleLogout = async () => {
+        try {
+            const token = localStorage.getItem('admin_token');
+            if (token) {
+                await api.post('/admin/logout', {}, { headers: { Authorization: `Bearer ${token}` } });
+            }
+        } catch (e) {
+            console.error('Logout error', e);
+        } finally {
+            localStorage.removeItem('admin_token');
+            navigate('/admin/login');
+        }
+    };
 
     const downloadResume = async (url: string, name: string) => {
         try {

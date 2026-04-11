@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\ActivityLog;
 
 class AuthController extends Controller
 {
@@ -29,6 +30,15 @@ class AuthController extends Controller
             ]);
 
             $token = $user->createToken('auth_token')->plainTextToken;
+
+            ActivityLog::record(
+                'USER_REGISTERED',
+                "New user registered: '{$user->email}'.",
+                'info',
+                ['email' => $user->email],
+                $request,
+                $user->id
+            );
 
             return response()->json([
                 'token' => $token,
@@ -66,6 +76,15 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        ActivityLog::record(
+            'USER_LOGIN',
+            "User '{$user->email}' logged in.",
+            'info',
+            ['email' => $user->email],
+            $request,
+            $user->id
+        );
+
         return response()->json([
             'token' => $token,
             'user' => [
@@ -81,7 +100,18 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        if ($user) {
+            $user->currentAccessToken()->delete();
+            ActivityLog::record(
+                'USER_LOGOUT',
+                "User '{$user->email}' logged out.",
+                'info',
+                ['email' => $user->email],
+                $request,
+                $user->id
+            );
+        }
 
         return response()->json([
             'message' => 'Logged out successfully',

@@ -8,6 +8,7 @@ use App\Services\ParseService;
 use App\Services\AIService;
 use App\Models\ResumeLead;
 use App\Models\Resume;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Log;
 
 class ResumeController extends Controller
@@ -136,6 +137,15 @@ class ResumeController extends Controller
                 Log::warning('Resume record save failed: ' . $resumeEx->getMessage());
             }
             // ─────────────────────────────────────────────────────────────────────
+
+            ActivityLog::record(
+                'RESUME_UPLOAD',
+                "Resume uploaded: " . ($resume['personalInfo']['fullName'] ?: 'Unknown User'),
+                'info',
+                ['file' => $file->getClientOriginalName(), 'url' => $publicUrl],
+                $request,
+                auth()->check() ? auth()->id() : null
+            );
 
             return response()->json($resume, 200);
 
