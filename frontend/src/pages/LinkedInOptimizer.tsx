@@ -21,6 +21,7 @@ const LinkedInOptimizer = () => {
     const [result, setResult] = useState<LinkedInData | null>(null);
     const [error, setError] = useState('');
     const [copiedSection, setCopiedSection] = useState('');
+    const [extracting, setExtracting] = useState(false);
 
     useEffect(() => {
         const savedData = localStorage.getItem('atsense_current_resume');
@@ -98,6 +99,28 @@ const LinkedInOptimizer = () => {
         }
     };
 
+    const handleExtract = async () => {
+        if (!targetRole) {
+            setError('Please paste a job link or raw text into the input field first.');
+            return;
+        }
+        setExtracting(true);
+        setError('');
+        try {
+            const res = await api.post('/ai/jobs/extract', { url_or_text: targetRole });
+            const data = res.data;
+            if (data.jobTitle) {
+                setTargetRole(`${data.jobTitle}${data.companyName && data.companyName !== 'Unknown' ? ` at ${data.companyName}` : ''}`);
+            }
+        } catch (err: any) {
+            console.error(err);
+            const msg = err.response?.data?.suggestion || err.response?.data?.message || 'Extraction failed. Please type the role manually.';
+            setError(msg);
+        } finally {
+            setExtracting(false);
+        }
+    };
+
     const copyToClipboard = (text: string, section: string) => {
         navigator.clipboard.writeText(text);
         setCopiedSection(section);
@@ -139,13 +162,24 @@ const LinkedInOptimizer = () => {
                     </div>
 
                     <div className="mb-6">
-                        <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">Target Role (Optional)</label>
+                        <div className="flex items-center justify-between mb-2">
+                            <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">Target Role or job url (Optional)</label>
+                            <button 
+                                onClick={handleExtract}
+                                disabled={extracting || !targetRole}
+                                className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-lg transition-colors disabled:opacity-50 border border-blue-100 shadow-sm"
+                            >
+                                {extracting ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                                {extracting ? 'Extracting...' : 'Magic Extract'}
+                            </button>
+                        </div>
                         <input
                             type="text"
                             value={targetRole}
                             onChange={(e) => setTargetRole(e.target.value)}
-                            placeholder="e.g. Senior Product Manager"
-                            className="w-full text-lg p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all outline-none"
+                            disabled={extracting}
+                            placeholder="e.g. Senior Product Manager OR paste a linkedin.com/jobs/ URL"
+                            className="w-full text-lg p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all outline-none disabled:opacity-50"
                         />
                     </div>
 
