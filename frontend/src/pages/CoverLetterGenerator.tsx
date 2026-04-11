@@ -24,6 +24,7 @@ function CoverLetterGenerator() {
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
     const [hasResume, setHasResume] = useState(false);
+    const [extracting, setExtracting] = useState(false);
 
     const isNew = id === 'new';
 
@@ -129,6 +130,29 @@ function CoverLetterGenerator() {
             showAlert('Generation Failed', 'Our AI service encountered an error while writing your letter. Please check your internet connection or try again in a moment.', 'danger');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleExtract = async () => {
+        if (!jobDescription) {
+            showAlert('Notice', 'Paste a job link or raw text into the description box first.', 'info');
+            return;
+        }
+        setExtracting(true);
+        try {
+            const res = await api.post('/ai/jobs/extract', { url_or_text: jobDescription });
+            const data = res.data;
+            if (data.jobTitle) setJobTitle(data.jobTitle);
+            if (data.companyName && data.companyName !== 'Unknown') setCompanyName(data.companyName);
+            const cleanedDesc = `Job Title: ${data.jobTitle}\nCompany: ${data.companyName}\n\n${data.jobDescription}`;
+            setJobDescription(cleanedDesc);
+            showAlert('Extraction Complete', 'Successfully loaded job details!', 'success');
+        } catch (err: any) {
+            console.error(err);
+            const msg = err.response?.data?.suggestion || err.response?.data?.message || 'Extraction failed. Please paste the job description text manually.';
+            showAlert('Extraction Failed', msg, 'danger');
+        } finally {
+            setExtracting(false);
         }
     };
 
@@ -257,12 +281,24 @@ function CoverLetterGenerator() {
                                     <FileText size={16} />
                                 </div>
                                 <div className="flex-grow min-w-0">
-                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-0.5 group-focus-within:text-indigo-600 transition-colors">Job Description</label>
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest group-focus-within:text-indigo-600 transition-colors">Job Description or URL</label>
+                                        {isNew && (
+                                            <button 
+                                                onClick={handleExtract}
+                                                disabled={extracting || !jobDescription}
+                                                className="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-lg transition-colors disabled:opacity-50 border border-indigo-100"
+                                            >
+                                                {extracting ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                                {extracting ? 'Extracting...' : 'Magic Extract'}
+                                            </button>
+                                        )}
+                                    </div>
                                     <textarea
                                         value={jobDescription}
                                         onChange={e => setJobDescription(e.target.value)}
-                                        disabled={!isNew}
-                                        placeholder="Paste the full job description here..."
+                                        disabled={!isNew || extracting}
+                                        placeholder="Paste a link (e.g. lever.co/job) or the full job description here..."
                                         className="bg-transparent border-none focus:outline-none text-[14px] font-medium leading-relaxed text-gray-700 w-full placeholder:text-gray-300 p-0 resize-y min-h-[140px] outline-none ring-0 disabled:text-gray-500 scrollbar-hide"
                                     />
                                 </div>
