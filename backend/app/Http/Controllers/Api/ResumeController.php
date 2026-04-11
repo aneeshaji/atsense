@@ -29,7 +29,8 @@ class ResumeController extends Controller
             
             // Upload immediately to S3 Storage
             $dateDir  = date('Y-m-d');
-            $fileName = "resumes/{$dateDir}/original_" . time() . "_" . \Illuminate\Support\Str::slug($file->getClientOriginalName()) . ".pdf";
+            $extension = $file->getClientOriginalExtension() ?: 'pdf';
+            $fileName = "resumes/{$dateDir}/original_" . time() . "_" . \Illuminate\Support\Str::slug($file->getClientOriginalName()) . "." . $extension;
             
             $publicUrl = null;
             try {

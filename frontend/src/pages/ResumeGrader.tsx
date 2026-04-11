@@ -48,8 +48,9 @@ export default function ResumeGrader() {
     const scoreLevel = score === null ? 'low' : score >= 80 ? 'high' : score >= 60 ? 'mid' : 'low';
 
     const handleFile = (f: File) => {
-        if (f.type !== 'application/pdf') {
-            showAlert('Invalid File', 'Please upload a professional PDF resume. Word documents and images are not supported for ATS grading.', 'warning');
+        const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        if (!allowedTypes.includes(f.type)) {
+            showAlert('Invalid File', 'Please upload a professional PDF or DOCX resume.', 'warning');
             return;
         }
         setFile(f);
@@ -129,7 +130,7 @@ export default function ResumeGrader() {
                             onClick={() => fileRef.current?.click()}
                             className={`cursor-pointer border-2 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center transition-all duration-300 ${isDragging ? 'border-indigo-400 bg-indigo-50/50' : file ? 'border-emerald-300 bg-emerald-50/30' : 'border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/20'}`}
                         >
-                            <input ref={fileRef} type="file" accept=".pdf" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+                            <input ref={fileRef} type="file" accept=".pdf,.docx" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
                             {file ? (
                                 <>
                                     <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mb-4">
@@ -144,7 +145,7 @@ export default function ResumeGrader() {
                                         <Upload className="text-indigo-600" size={28} />
                                     </div>
                                     <p className="font-bold text-slate-900 text-lg mb-2">Drop your resume here</p>
-                                    <p className="text-slate-500 text-sm">PDF format only · Max 10MB</p>
+                                    <p className="text-slate-500 text-sm">PDF or DOCX format · Max 10MB</p>
                                 </>
                             )}
                         </div>

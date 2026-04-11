@@ -173,6 +173,12 @@ export default function Builder() {
     const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        if (!allowedTypes.includes(file.type)) {
+            showToast('Please upload a PDF or DOCX file.', 'error');
+            return;
+        }
         const formData = new FormData();
         formData.append('resume', file);
         setImporting(true);
@@ -814,7 +820,7 @@ export default function Builder() {
             </div>
 
             {/* Hidden file input */}
-            <input type="file" ref={fileInputRef} onChange={handleFileImport} className="hidden" accept=".pdf,.doc,.docx" />
+            <input type="file" ref={fileInputRef} onChange={handleFileImport} className="hidden" accept=".pdf,.docx" />
 
             {/* ── Deep Tailor Modal ── */}
             {showTailorModal && (
