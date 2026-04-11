@@ -61,6 +61,7 @@ const InterviewSimulator: React.FC = () => {
     const [isComplete, setIsComplete] = useState(false);
 
     const [expandedIdx, setExpandedIdx] = useState<number | null>(0);
+    const [extracting, setExtracting] = useState(false);
 
     useEffect(() => {
         const checkContext = () => {
@@ -150,6 +151,28 @@ const InterviewSimulator: React.FC = () => {
         handleStartSimulation(resumeData, setupJD);
     };
 
+    const handleExtract = async () => {
+        if (!setupJD) {
+            showToast('Paste a job link or raw text into the job description box first.', 'info');
+            return;
+        }
+        setExtracting(true);
+        try {
+            const res = await api.post('/ai/jobs/extract', { url_or_text: setupJD });
+            const data = res.data;
+            if (data.jobTitle) setTargetRole(data.jobTitle);
+            const cleanedDesc = `Job Title: ${data.jobTitle}\nCompany: ${data.companyName}\n\n${data.jobDescription}`;
+            setSetupJD(cleanedDesc);
+            showToast('Successfully loaded job details!', 'success');
+        } catch (err: any) {
+            console.error(err);
+            const msg = err.response?.data?.suggestion || err.response?.data?.message || 'Extraction failed. Please paste the job description text manually.';
+            showToast(msg, 'error');
+        } finally {
+            setExtracting(false);
+        }
+    };
+
     const handleEvaluate = async () => {
         if (!userAnswer.trim() || !data) return;
         
@@ -230,15 +253,26 @@ const InterviewSimulator: React.FC = () => {
                         </div>
 
                         <div className="group relative">
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 px-1">Job Description or Requirements</label>
+                            <div className="flex items-center justify-between mb-2 px-1">
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Job Description or URL</label>
+                                <button 
+                                    onClick={handleExtract}
+                                    disabled={extracting || !setupJD}
+                                    className="flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-lg transition-colors disabled:opacity-50 border border-indigo-100 shadow-sm"
+                                >
+                                    {extracting ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                    {extracting ? 'Extracting...' : 'Magic Extract'}
+                                </button>
+                            </div>
                             <div className="flex items-start gap-4 p-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100 transition-all">
                                 <Search className="text-gray-400 mt-1" size={20} />
                                 <textarea 
                                     value={setupJD}
                                     onChange={(e) => setSetupJD(e.target.value)}
+                                    disabled={extracting}
                                     rows={6}
-                                    placeholder="Paste the job description here (skills, responsibilities...)"
-                                    className="bg-transparent border-none focus:outline-none text-base font-medium text-gray-700 placeholder:text-gray-300 w-full resize-none outline-none ring-0"
+                                    placeholder="Paste a link (e.g. lever.co/job) or the job description here..."
+                                    className="bg-transparent border-none focus:outline-none text-base font-medium text-gray-700 placeholder:text-gray-300 w-full resize-none outline-none ring-0 disabled:text-gray-500"
                                 />
                             </div>
                         </div>

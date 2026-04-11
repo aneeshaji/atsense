@@ -175,10 +175,10 @@ const Landing = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <FadeInSection className="space-y-8 text-center lg:text-left">
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight">
-                                #1 Zero-Cost <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#60efff] to-blue-400">Application Maker</span> & Profile Tester
+                                The Ultimate <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#60efff] to-blue-400">Career Cockpit</span> & AI Optimizer
                             </h1>
                             <p className="text-lg md:text-xl text-blue-100 max-w-xl mx-auto lg:mx-0 opacity-90 leading-relaxed">
-                                Build a professional CV that clears recruitment filters. Showcase your top skills and get seen by hiring teams faster.
+                                Upload your existing resume, instantly extract job requirements from any URL, and auto-tailor your application to bypass automated rejection filters.
                             </p>
                             
                             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
@@ -190,7 +190,7 @@ const Landing = () => {
                                 >
                                     <div className="absolute inset-0 bg-white/40 w-1/2 -skew-x-12 translate-x-[-250%] group-hover:animate-[shimmer_1.5s_infinite]"></div>
                                     <Upload size={24} className="shrink-0 group-hover:-translate-y-1 transition-transform" />
-                                    <span>{importing ? 'Processing...' : 'Upload & Fix My CV'}</span>
+                                    <span>{importing ? 'Authenticating...' : 'Upload & Enter Studio'}</span>
                                 </button>
                                 <input
                                     type="file"
