@@ -73,7 +73,7 @@ export default function AdminBlog() {
                 title: res.data.title || '',
                 slug: res.data.slug || '',
                 category: res.data.category || 'ATS Tips',
-                cover_image: '',
+                cover_image: res.data.cover_image || '',
                 content: res.data.content || '',
                 excerpt: res.data.excerpt || '',
                 meta_title: res.data.meta_title || res.data.title || '',

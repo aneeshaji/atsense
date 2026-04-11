@@ -15,12 +15,43 @@ class ParseService
             return $this->extractTextFromPDF($file);
         }
         
-        // TODO: Implement DOCX extraction
-        // if ($mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-        //     return $this->extractTextFromDOCX($file);
-        // }
+        if ($mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+            return $this->extractTextFromDOCX($file);
+        }
 
-        throw new \Exception('Unsupported file type. Please upload a PDF.');
+        throw new \Exception('Unsupported file type. Please upload a PDF or DOCX.');
+    }
+
+    protected function extractTextFromDOCX(UploadedFile $file)
+    {
+        $zip = new \ZipArchive();
+        $content = '';
+
+        if ($zip->open($file->getPathname()) === TRUE) {
+            $xml = $zip->getFromName('word/document.xml');
+            $zip->close();
+            
+            if ($xml !== false) {
+                $dom = new \DOMDocument();
+                $dom->loadXML($xml, LIBXML_NOENT | LIBXML_XINCLUDE | LIBXML_NOERROR | LIBXML_NOWARNING);
+                
+                // Replace paragraphs with newlines for better formatting
+                $paragraphs = $dom->getElementsByTagName('p');
+                foreach ($paragraphs as $p) {
+                    $content .= $p->textContent . "\n";
+                }
+                
+                $content = trim($content);
+            }
+        } else {
+            throw new \Exception('Failed to open DOCX file.');
+        }
+
+        if (empty($content)) {
+            throw new \Exception('No text could be extracted from the DOCX file.');
+        }
+
+        return $content;
     }
 
     protected function extractTextFromPDF(UploadedFile $file)

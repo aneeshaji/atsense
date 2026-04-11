@@ -41,6 +41,7 @@ class PostController extends Controller
             'excerpt' => 'nullable|string',
             'meta_title' => 'nullable|string',
             'meta_description' => 'nullable|string',
+            'cover_image' => 'nullable|string',
             'is_published' => 'boolean'
         ]);
 
@@ -68,6 +69,7 @@ class PostController extends Controller
             'excerpt' => 'nullable|string',
             'meta_title' => 'nullable|string',
             'meta_description' => 'nullable|string',
+            'cover_image' => 'nullable|string',
             'is_published' => 'boolean'
         ]);
 

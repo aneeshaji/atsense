@@ -204,17 +204,24 @@ TOPIC: {$topic}
 
 Return STRICT JSON containing:
 {
-  \"title\": \"A highly clickable, SEO optimized title (max 60 chars)\",
-  \"slug\": \"seo-optimized-url-slug-based-on-title\",
-  \"category\": \"Select best fit: 'ATS Tips', 'LinkedIn', 'Job Search', or 'Templates'\",
-  \"content\": \"The full markdown content of the post. Include headings (##), bullet points, and actionable advice.\",
-  \"excerpt\": \"A 2-sentence hook / meta summary.\",
-  \"meta_title\": \"SEO Meta Title\",
-  \"meta_description\": \"SEO Meta Description (max 160 chars)\"
+  "title": "A highly clickable, SEO optimized title (max 60 chars)",
+  "slug": "seo-optimized-url-slug-based-on-title",
+  "category": "Select best fit: 'ATS Tips', 'LinkedIn', 'Job Search', or 'Templates'",
+  "content": "The full markdown content of the post. Include headings (##), bullet points, and actionable advice.",
+  "excerpt": "A 2-sentence hook / meta summary.",
+  "meta_title": "SEO Meta Title",
+  "meta_description": "SEO Meta Description (max 160 chars)",
+  "image_prompt": "A vivid, descriptive prompt for an AI image generator to create the header graphic. Clean, modern, corporate aesthetic."
 }
 ";
         $response = $this->chat([['role' => 'user', 'content' => $prompt]], 0.7, true);
-        return json_decode($this->cleanJson($response), true);
+        $data = json_decode($this->cleanJson($response), true);
+        
+        if (isset($data['image_prompt'])) {
+            $data['cover_image'] = "https://image.pollinations.ai/prompt/" . urlencode($data['image_prompt']) . "?width=1200&height=630&nologo=true";
+        }
+
+        return $data;
     }
 
     protected function cleanJson($content)

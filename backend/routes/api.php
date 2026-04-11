@@ -14,6 +14,9 @@ use App\Http\Controllers\Api\Admin\PostController;
 use App\Http\Controllers\Api\Admin\DesignTemplateController;
 use App\Http\Controllers\Api\Admin\SiteSettingController;
 use App\Http\Controllers\Api\ActivityLogController;
+use App\Http\Controllers\Api\SitemapController;
+
+Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 
 // Authentication requirements removed
 

@@ -8,71 +8,51 @@ use Illuminate\Http\Response;
 
 class SitemapController extends Controller
 {
-    public function index(): Response
+    public function index()
     {
-        $baseUrl = 'https://atsense.online';
-        $now = now()->toAtomString();
-
-        $staticPages = [
-            '/',
-            '/builder',
-            '/templates',
-            '/blog',
-            '/about',
-            '/contact',
-            '/resume-grader',
-            '/linkedin-optimizer',
-            '/interview-prep',
-            '/cover-letters',
-            '/job-matcher',
-            '/privacy',
-            '/terms',
-            '/security',
+        $baseUrl = env('CLIENT_URL', 'https://atsense.online');
+        if ($baseUrl === 'http://localhost:3000') {
+            $baseUrl = 'https://atsense.online'; // Force production URL for sitemap SEO
+        }
+        $urls = [
+            ['loc' => $baseUrl . '/', 'changefreq' => 'daily', 'priority' => '1.0'],
+            ['loc' => $baseUrl . '/builder', 'changefreq' => 'weekly', 'priority' => '0.9'],
+            ['loc' => $baseUrl . '/resume-grader', 'changefreq' => 'weekly', 'priority' => '0.9'],
+            ['loc' => $baseUrl . '/interview-simulator', 'changefreq' => 'weekly', 'priority' => '0.8'],
+            ['loc' => $baseUrl . '/linkedin-optimizer', 'changefreq' => 'weekly', 'priority' => '0.8'],
+            ['loc' => $baseUrl . '/cover-letter-generator', 'changefreq' => 'weekly', 'priority' => '0.7'],
+            ['loc' => $baseUrl . '/blog', 'changefreq' => 'daily', 'priority' => '0.7'],
+            ['loc' => $baseUrl . '/about', 'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['loc' => $baseUrl . '/contact', 'changefreq' => 'monthly', 'priority' => '0.5'],
         ];
+
+        // Add Posts
+        $posts = Post::where('is_published', true)->orderBy('updated_at', 'desc')->get();
+        foreach ($posts as $post) {
+            $urls[] = [
+                'loc' => $baseUrl . '/blog/' . ($post->slug ?? $post->id),
+                'lastmod' => $post->updated_at->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.6'
+            ];
+        }
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-
-        foreach ($staticPages as $page) {
+        
+        foreach ($urls as $url) {
             $xml .= '<url>';
-            $xml .= '<loc>' . $baseUrl . $page . '</loc>';
-            $xml .= '<lastmod>' . $now . '</lastmod>';
-            $xml .= '<changefreq>weekly</changefreq>';
-            $xml .= '<priority>' . ($page === '/' ? '1.0' : '0.8') . '</priority>';
-            $xml .= '</url>';
-        }
-
-        // Dynamic Blog Posts
-        $posts = Post::where('is_published', true)->get();
-        foreach ($posts as $post) {
-            $xml .= '<url>';
-            $xml .= '<loc>' . $baseUrl . '/blog/' . $post->id . '</loc>';
-            $xml .= '<lastmod>' . $post->updated_at->toAtomString() . '</lastmod>';
-            $xml .= '<changefreq>monthly</changefreq>';
-            $xml .= '<priority>0.6</priority>';
-            $xml .= '</url>';
-        }
-
-        // Explicit Guides (if they follow a slug pattern)
-        $guides = [
-            'guide-ats',
-            'guide-linkedin',
-            'guide-resume',
-            'guide-cover-letter',
-            'guide-job-search',
-            'guide-interview',
-        ];
-        foreach ($guides as $guide) {
-            $xml .= '<url>';
-            $xml .= '<loc>' . $baseUrl . '/guides/' . $guide . '</loc>';
-            $xml .= '<lastmod>' . $now . '</lastmod>';
-            $xml .= '<changefreq>monthly</changefreq>';
-            $xml .= '<priority>0.7</priority>';
+            $xml .= '<loc>' . htmlspecialchars($url['loc']) . '</loc>';
+            if (isset($url['lastmod'])) {
+                $xml .= '<lastmod>' . $url['lastmod'] . '</lastmod>';
+            }
+            $xml .= '<changefreq>' . $url['changefreq'] . '</changefreq>';
+            $xml .= '<priority>' . $url['priority'] . '</priority>';
             $xml .= '</url>';
         }
 
         $xml .= '</urlset>';
 
-        return response($xml, 200, ['Content-Type' => 'application/xml']);
+        return response($xml, 200)->header('Content-Type', 'text/xml');
     }
 }
