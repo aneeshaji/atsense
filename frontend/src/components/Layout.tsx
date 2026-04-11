@@ -35,7 +35,7 @@ const Layout = () => {
         if (isAppTools) {
             return (
                 <main className="flex-1 py-6 mt-20">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-full mx-auto px-4 md:px-8 lg:px-12">
                         <Outlet />
                     </div>
                 </main>

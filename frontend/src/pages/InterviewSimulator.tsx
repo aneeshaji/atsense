@@ -225,7 +225,7 @@ const InterviewSimulator: React.FC = () => {
 
     if (showSetup) {
         return (
-            <div className="max-w-4xl mx-auto px-6 py-20 flex flex-col items-center">
+            <div className="max-w-full mx-auto px-6 py-20 flex flex-col items-center">
                 <div className="text-center mb-12">
                     <div className="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center text-indigo-600 mx-auto mb-6 shadow-sm border border-indigo-100/50">
                         <Sparkles size={40} />
@@ -307,7 +307,7 @@ const InterviewSimulator: React.FC = () => {
     }
 
     return (
-        <div className="max-w-4xl mx-auto px-6 py-12 pb-32 min-h-screen">
+        <div className="max-w-full mx-auto px-6 lg:px-12 py-12 pb-32 min-h-screen">
             
             {/* Nav */}
             <div className="flex items-center justify-between mb-8 print:hidden">

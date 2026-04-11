@@ -304,7 +304,7 @@ export default function Builder() {
 
             {/* ── PREMIUM HEADER BAR ── */}
             <header className="sticky top-16 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200/60 shadow-[0_1px_12px_rgba(0,0,0,0.06)]">
-                <div className="max-w-screen-2xl mx-auto px-6 py-4 flex flex-col gap-4">
+                <div className="max-w-full mx-auto px-6 py-4 flex flex-col gap-4">
                     
                     {/* ── ROW 1: App Header ── */}
                     <div className="flex items-center justify-between pl-1">
@@ -452,7 +452,7 @@ export default function Builder() {
         </header>
 
             {/* ── MAIN LAYOUT ── */}
-            <div className={`flex-1 max-w-screen-2xl mx-auto w-full p-5 lg:p-6 gap-5 ${showPreview ? 'grid grid-cols-1 xl:grid-cols-2 items-start' : 'flex flex-col'}`}>
+            <div className={`flex-1 max-w-full mx-auto w-full p-5 lg:p-8 gap-5 ${showPreview ? 'grid grid-cols-1 xl:grid-cols-2 items-start' : 'flex flex-col'}`}>
 
                 {/* ── LEFT: Accordion Editor ── */}
                 <div className="space-y-3 min-w-0">

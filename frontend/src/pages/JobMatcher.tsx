@@ -115,7 +115,7 @@ function JobMatcher() {
         <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
             <SEO title="Smart Job Matcher - ATSense" description="Compare your resume against any job description automatically." />
             
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-full mx-auto px-2 lg:px-8">
                 <div className="text-center mb-10">
                     <div className="inline-flex items-center justify-center p-3 sm:p-4 rounded-[1.5rem] bg-emerald-600 text-white shadow-xl shadow-emerald-500/30 mb-6">
                         <Search size={32} />

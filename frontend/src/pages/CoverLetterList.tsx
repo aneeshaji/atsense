@@ -63,7 +63,7 @@ function CoverLetterList() {
     }
 
     return (
-        <div>
+        <div className="max-w-full mx-auto px-2 lg:px-8">
             <div className="mb-10 text-center md:text-left">
                 <h1 className="text-4xl font-black text-gray-900 tracking-tight">Cover Letters</h1>
                 <p className="text-gray-500 mt-2 text-lg">AI-powered letters tailored to your target roles.</p>

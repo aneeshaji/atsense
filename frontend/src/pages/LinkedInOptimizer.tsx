@@ -131,7 +131,7 @@ const LinkedInOptimizer = () => {
         <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
             <SEO title="LinkedIn Profile Optimizer - ATSense" description="Transform your resume into a viral LinkedIn profile using AI." />
             
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="max-w-full mx-auto px-2 lg:px-12 space-y-8">
                 {/* Header */}
                 <div className="text-center mb-10">
                     <div className="inline-flex items-center justify-center p-3 sm:p-4 rounded-[1.5rem] bg-blue-600 text-white shadow-xl shadow-blue-500/30 mb-6">
