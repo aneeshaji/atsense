@@ -27,6 +27,7 @@ import {
     Zap,
     Globe,
     BrainCircuit,
+    Loader2,
 } from 'lucide-react';
 
 interface Resume {
@@ -78,6 +79,7 @@ export default function Builder() {
     const [importing, setImporting] = useState(false);
     const [optimizing, setOptimizing] = useState(false);
     const [analyzing, setAnalyzing] = useState(false);
+    const [extracting, setExtracting] = useState(false);
     const [atsBreakdown, setAtsBreakdown] = useState<any>(null);
     const [showAdvancedScore, setShowAdvancedScore] = useState(false);
     const [showTailorModal, setShowTailorModal] = useState(false);
@@ -207,6 +209,25 @@ export default function Builder() {
             showToast('AI tailoring failed.', 'error');
         } finally {
             setOptimizing(false);
+        }
+    };
+
+    const handleExtract = async () => {
+        if (!jobDescription) return;
+        setExtracting(true);
+        try {
+            const res = await api.post('/ai/jobs/extract', { url_or_text: jobDescription });
+            const data = res.data;
+            if (data.jobTitle) setJobTitle(data.jobTitle);
+            const cleanedDesc = `Job Title: ${data.jobTitle}\nCompany: ${data.companyName}\n\n${data.jobDescription}`;
+            setJobDescription(cleanedDesc);
+            showToast('Successfully extracted and cleaned job details!', 'success');
+        } catch (err: any) {
+            console.error(err);
+            const msg = err.response?.data?.suggestion || err.response?.data?.message || 'Extraction failed. Please paste the job description text manually.';
+            showToast(msg, 'error');
+        } finally {
+            setExtracting(false);
         }
     };
 
@@ -813,7 +834,17 @@ export default function Builder() {
                                 />
                             </div>
                             <div>
-                                <label className={labelCls + ' text-gray-500'}>Job Description</label>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className={labelCls + ' text-gray-500 mb-0'}>Job Description or URL</label>
+                                    <button 
+                                        onClick={handleExtract}
+                                        disabled={extracting || !jobDescription || optimizing}
+                                        className="flex items-center gap-1.5 px-3 py-1 bg-violet-50 hover:bg-violet-100 text-violet-700 text-[11px] font-bold rounded-lg transition-all border border-violet-200 shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {extracting ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                        {extracting ? 'Extracting...' : 'Magic Clean / Extract'}
+                                    </button>
+                                </div>
                                 <textarea
                                     rows={8}
                                     value={jobDescription}
