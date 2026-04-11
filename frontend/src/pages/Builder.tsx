@@ -6,6 +6,7 @@ import AdvancedScorecard from '../components/AdvancedScorecard';
 import { useToast } from '../context/ToastContext';
 import { useModal } from '../context/ModalContext';
 import { useReactToPrint } from 'react-to-print';
+import { trackEvent, ANALYTICS_EVENTS } from '../services/analytics';
 import HarvardTemplate from '../templates/HarvardTemplate';
 import ExecutiveTemplate from '../templates/ExecutiveTemplate';
 import ModernTechTemplate from '../templates/ModernTechTemplate';
