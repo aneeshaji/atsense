@@ -206,7 +206,7 @@ Return STRICT JSON containing:
 {
   "title": "A highly clickable, SEO optimized title (max 60 chars)",
   "slug": "seo-optimized-url-slug-based-on-title",
-  "category": "Select best fit: 'ATS Tips', 'LinkedIn', 'Job Search', or 'Templates'",
+  "category": "Select best fit: \'ATS Tips\', \'LinkedIn\', \'Job Search\', or \'Templates\'",
   "content": "The full markdown content of the post. Include headings (##), bullet points, and actionable advice.",
   "excerpt": "A 2-sentence hook / meta summary.",
   "meta_title": "SEO Meta Title",
