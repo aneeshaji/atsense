@@ -184,10 +184,17 @@ export default function Builder() {
         setImporting(true);
         try {
             const res = await api.post('/import', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-            const importedResume = { ...res.data, atsScore: 0 };
+            
+            const freshResume = res.data.resume || res.data;
+            const importedResume = { ...freshResume, atsScore: 0 };
+            
+            localStorage.setItem('atsense_current_resume', JSON.stringify(importedResume));
             setResume(importedResume);
             setAtsScore(0);
-            setOpenSections(new Set(['personal']));
+            
+            trackEvent(ANALYTICS_EVENTS.CONVERSION.RESUME_UPLOAD, 'Conversion', file.name);
+            
+            setOpenSections(new Set(['personal', 'summary', 'experience']));
             showToast('Resume imported successfully!', 'success');
             if (jobDescription) setTimeout(() => fetchBreakdown(importedResume), 800);
         } catch {

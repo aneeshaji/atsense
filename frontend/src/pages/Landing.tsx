@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import SEO from '../components/SEO';
 import api from '../services/api';
 import { useToast } from '../context/ToastContext';
+import { trackEvent, ANALYTICS_EVENTS } from '../services/analytics';
 
 // Scroll reveal component
 const FadeInSection = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => {
@@ -119,7 +120,13 @@ const Landing = () => {
             const res = await api.post('/import', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            localStorage.setItem('atsense_current_resume', JSON.stringify(res.data));
+
+            // Extract the core resume object from the response
+            const resumeData = res.data.resume || res.data;
+            localStorage.setItem('atsense_current_resume', JSON.stringify(resumeData));
+
+            trackEvent(ANALYTICS_EVENTS.CONVERSION.RESUME_UPLOAD, 'Conversion', file.name);
+
             showToast('Resume imported successfully!', 'success');
             navigate('/builder');
         } catch (err: any) {
