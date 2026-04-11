@@ -15,6 +15,22 @@ class PostController extends Controller
         return response()->json(Post::orderBy('created_at', 'desc')->paginate(15));
     }
 
+    // AI: Generate Post
+    public function generatePost(Request $request, \App\Services\AIService $aiService)
+    {
+        $validated = $request->validate([
+            'topic' => 'required|string|max:500'
+        ]);
+
+        try {
+            $data = $aiService->generateBlogPost($validated['topic']);
+            return response()->json($data);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('AI Blog Gen Error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to generate post. ' . $e->getMessage()], 500);
+        }
+    }
+
     // Admin: Create new post
     public function store(Request $request)
     {

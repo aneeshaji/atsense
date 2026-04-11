@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Globe, EyeOff, Save, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Globe, EyeOff, Save, X, Sparkles, Loader2 } from 'lucide-react';
 import api from '../../services/api';
 
 export default function AdminBlog() {
@@ -9,6 +9,10 @@ export default function AdminBlog() {
     const [editingPost, setEditingPost] = useState<any>(null);
     const [formData, setFormData] = useState({ title: '', slug: '', category: '', cover_image: '', content: '', excerpt: '', meta_title: '', meta_description: '', is_published: false });
     const [saving, setSaving] = useState(false);
+
+    const [generatingPost, setGeneratingPost] = useState(false);
+    const [aiTopic, setAiTopic] = useState('');
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
     useEffect(() => {
         fetchPosts();
@@ -57,6 +61,37 @@ export default function AdminBlog() {
         } catch (err) { console.error(err); }
     };
 
+    const handleAIGenerate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setGeneratingPost(true);
+        try {
+            const token = localStorage.getItem('admin_token');
+            const res = await api.post('/admin/posts/generate', { topic: aiTopic }, { headers: { Authorization: `Bearer ${token}` } });
+            
+            // Prefill standard form with generated metadata
+            setFormData({
+                title: res.data.title || '',
+                slug: res.data.slug || '',
+                category: res.data.category || 'ATS Tips',
+                cover_image: '',
+                content: res.data.content || '',
+                excerpt: res.data.excerpt || '',
+                meta_title: res.data.meta_title || res.data.title || '',
+                meta_description: res.data.meta_description || res.data.excerpt || '',
+                is_published: false
+            });
+            setIsAiModalOpen(false);
+            setAiTopic('');
+            setEditingPost(null); // It's a new post
+            setIsModalOpen(true); // Open the normal editor
+        } catch (err: any) {
+            console.error(err);
+            alert("AI Generation failed. " + (err.response?.data?.message || ''));
+        } finally {
+            setGeneratingPost(false);
+        }
+    };
+
     if (loading) return <div className="p-8 text-center text-sm text-gray-500 font-bold animate-pulse">Loading Content Engine...</div>;
 
     return (
@@ -66,9 +101,14 @@ export default function AdminBlog() {
                     <h2 className="text-lg font-bold text-gray-900 tracking-tight">Content Engine</h2>
                     <p className="text-xs text-gray-400 font-medium">Manage SEO blog posts and articles</p>
                 </div>
-                <button onClick={() => handleOpenModal()} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all active:scale-95">
-                    <Plus size={14} /> New Post
-                </button>
+                <div className="flex items-center gap-3">
+                    <button onClick={() => setIsAiModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all active:scale-95 shadow-indigo-200">
+                        <Sparkles size={14} /> Auto-Generate via AI
+                    </button>
+                    <button onClick={() => handleOpenModal()} className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg shadow-sm transition-all active:scale-95">
+                        <Plus size={14} /> Blank Draft
+                    </button>
+                </div>
             </div>
             
             <div className="overflow-x-auto border border-gray-100 rounded-xl">
@@ -186,6 +226,40 @@ export default function AdminBlog() {
                                     <Save size={16} /> {saving ? 'Saving...' : 'Save Post'}
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* AI Generator Modal */}
+            {isAiModalOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
+                            <h3 className="font-bold text-indigo-900 flex items-center gap-2">
+                                <Sparkles size={16} className="text-indigo-600" /> AI Blog Generator
+                            </h3>
+                            <button onClick={() => setIsAiModalOpen(false)} className="text-gray-400 hover:text-gray-700 hover:bg-white p-2 rounded-lg transition-colors"><X size={16} /></button>
+                        </div>
+                        <div className="p-6">
+                            <form onSubmit={handleAIGenerate} className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-widest mb-2">What should we write about?</label>
+                                    <textarea 
+                                        required 
+                                        rows={4} 
+                                        value={aiTopic} 
+                                        onChange={e => setAiTopic(e.target.value)} 
+                                        className="w-full px-4 py-3 text-sm font-medium border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 outline-none transition-all resize-none shadow-inner bg-gray-50/50" 
+                                        placeholder="e.g., 'How to optimize your resume for Workday ATS in 2026' or 'Best action verbs for Project Managers'" 
+                                    />
+                                    <p className="text-[11px] text-gray-500 mt-2 font-medium">The grok engine will craft a full markdown post, assign SEO metadata, and calculate a slug automatically.</p>
+                                </div>
+                                <button type="submit" disabled={generatingPost || !aiTopic.trim()} className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none">
+                                    {generatingPost ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />} 
+                                    {generatingPost ? 'Orchestrating AI Pipeline...' : 'Generate SEO Content'}
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

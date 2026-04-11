@@ -33,6 +33,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/admin/change-password', [AdminController::class, 'changePassword']);
 
     // Admin CMS Expansion
+    Route::post('admin/posts/generate', [PostController::class, 'generatePost']);
     Route::apiResource('admin/posts', PostController::class);
     Route::apiResource('admin/templates', DesignTemplateController::class);
     Route::post('admin/templates/{template}/toggle', [DesignTemplateController::class, 'toggleActive']);
