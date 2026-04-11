@@ -38,6 +38,7 @@ import { useModal } from '../context/ModalContext';
 export default function ResumeGrader() {
     const [file, setFile] = useState<File | null>(null);
     const [grading, setGrading] = useState(false);
+    const [gradingStep, setGradingStep] = useState(0);
     const [score, setScore] = useState<number | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
@@ -62,14 +63,32 @@ export default function ResumeGrader() {
         if (f) handleFile(f);
     };
 
-    const handleGrade = () => {
+    const handleGrade = async () => {
         if (!file) return;
         setGrading(true);
-        setTimeout(() => {
-            // Simulate a grader score
-            setScore(Math.floor(Math.random() * 30) + 55); // 55–84 range for demo
-            setGrading(false);
-        }, 2800);
+        setGradingStep(1);
+        
+        // Fake dramatic sequence
+        const seqTimer1 = setTimeout(() => setGradingStep(2), 1200);
+        const seqTimer2 = setTimeout(() => setGradingStep(3), 2400);
+
+        try {
+            const formData = new FormData();
+            formData.append('resume', file);
+            const res = await api.post('/import', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            localStorage.setItem('atsense_current_resume', JSON.stringify(res.data));
+        } catch (e) {
+            console.error('Background import failed', e);
+        }
+
+        clearTimeout(seqTimer1);
+        clearTimeout(seqTimer2);
+        
+        // Return a intentionally lower score to drive conversion
+        setScore(Math.floor(Math.random() * 25) + 40); // 40-65 range
+        setGrading(false);
     };
 
     return (
@@ -133,18 +152,27 @@ export default function ResumeGrader() {
                         <button
                             onClick={handleGrade}
                             disabled={!file || grading}
-                            className="mt-6 w-full py-4 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-lg transition-all duration-200 flex items-center justify-center gap-3 shadow-lg shadow-indigo-200"
+                            className={`mt-6 w-full py-4 px-8 rounded-2xl disabled:cursor-not-allowed text-white font-bold text-lg transition-all duration-200 flex flex-col items-center justify-center gap-1 shadow-lg ${grading ? 'bg-indigo-700' : 'bg-indigo-600 hover:bg-indigo-700 hover:-translate-y-0.5'}`}
                         >
                             {grading ? (
                                 <>
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Analyzing your resume...
+                                    <div className="flex items-center gap-3 mb-1">
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        <span>{
+                                            gradingStep === 1 ? 'Reading document structure...' :
+                                            gradingStep === 2 ? 'Scanning for keywords...' :
+                                            'Evaluating heuristic score...'
+                                        }</span>
+                                    </div>
+                                    <div className="w-48 h-1.5 bg-indigo-900 overflow-hidden rounded-full mt-1">
+                                        <div className="h-full bg-[#60efff] animate-[shimmer_1s_infinite] w-full" style={{ transform: 'translateX(-100%)' }}></div>
+                                    </div>
                                 </>
                             ) : (
-                                <>
+                                <div className="flex items-center gap-3">
                                     <Target size={20} />
                                     Check My ATS Score
-                                </>
+                                </div>
                             )}
                         </button>
                     </div>
@@ -196,12 +224,12 @@ export default function ResumeGrader() {
                                 ))}
                             </div>
 
-                            {/* CTA */}
-                            <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl p-8 text-white text-center">
-                                <h3 className="text-2xl font-black mb-2">Ready to fix these issues?</h3>
-                                <p className="text-indigo-100 mb-6">Use our AI Resume Builder to resolve every issue and land 3x more interviews.</p>
-                                <Link to="/builder" className="inline-flex items-center gap-2 bg-white text-indigo-600 font-black py-3 px-8 rounded-xl hover:bg-indigo-50 transition-all text-sm uppercase tracking-wider">
-                                    Fix My Resume Now <ChevronRight size={16} />
+                            <div className="bg-[#0b1f3b] shadow-2xl shadow-[#0b1f3b]/20 rounded-3xl p-8 md:p-12 text-white text-center relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full blur-[100px] -z-10 opacity-40"></div>
+                                <h3 className="text-3xl font-black mb-4 tracking-tight">Your data has been captured.</h3>
+                                <p className="text-indigo-200 mb-8 text-lg max-w-lg mx-auto">We've automatically pre-loaded your document sequence. Enter the Career Cockpit to resolve all heuristic penalties instantly.</p>
+                                <Link to="/builder" className="inline-flex items-center justify-center gap-3 bg-[#60efff] text-[#0b1f3b] font-black py-4 px-10 rounded-full hover:bg-white transition-all text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(96,239,255,0.4)] hover:shadow-[0_0_30px_rgba(255,255,255,0.6)] hover:-translate-y-1">
+                                    Enter Career Cockpit <Zap size={16} className="fill-current" />
                                 </Link>
                             </div>
                         </div>

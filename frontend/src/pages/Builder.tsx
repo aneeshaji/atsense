@@ -30,6 +30,8 @@ import {
     Globe,
     BrainCircuit,
     Loader2,
+    Share2,
+    CheckCircle,
 } from 'lucide-react';
 
 interface Resume {
@@ -85,6 +87,7 @@ export default function Builder() {
     const [atsBreakdown, setAtsBreakdown] = useState<any>(null);
     const [showAdvancedScore, setShowAdvancedScore] = useState(false);
     const [showTailorModal, setShowTailorModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [atsScore, setAtsScore] = useState<number>(0);
     const [jobDescription, setJobDescription] = useState('');
     const [jobTitle, setJobTitle] = useState('');
@@ -100,6 +103,7 @@ export default function Builder() {
     const handleDownload = useReactToPrint({
         contentRef: componentRef,
         documentTitle: `Resume-${resume?.personalInfo?.fullName || 'Untitled'}`,
+        onAfterPrint: () => setShowSuccessModal(true),
     });
 
     useEffect(() => {
@@ -887,6 +891,54 @@ export default function Builder() {
 
             {/* Advanced Score Modal */}
             {showAdvancedScore && <AdvancedScorecard data={atsBreakdown} onClose={() => setShowAdvancedScore(false)} />}
+
+            {/* Viral Success Modal */}
+            {showSuccessModal && (
+                <div className="fixed inset-0 z-[400] bg-gray-900/40 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-500 relative">
+                        {/* Confetti Background Effect */}
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none"></div>
+                        
+                        <div className="p-10 text-center relative z-10">
+                            <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ring-8 ring-green-50/50">
+                                <CheckCircle size={48} className="text-green-500" />
+                            </div>
+                            
+                            <h2 className="text-3xl font-black text-gray-900 mb-3 tracking-tight">Success! 🚀</h2>
+                            <p className="text-gray-500 font-medium mb-8 leading-relaxed">
+                                Your elite resume has been exported. You are now armed with an ATS-bypassing document.
+                            </p>
+                            
+                            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 mb-8 text-left relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full blur-[50px] opacity-20 -mr-10 -mt-10"></div>
+                                <h4 className="font-black text-indigo-900 mb-2 relative z-10 flex items-center gap-2 mt-1">
+                                    <Zap size={16} className="text-indigo-600" fill="currentColor"/> Pay It Forward
+                                </h4>
+                                <p className="text-sm text-indigo-700/80 leading-relaxed relative z-10 font-medium">
+                                    Did ATSense help you fix your resume? Share it with a friend who's struggling with the job hunt!
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col gap-3">
+                                <a 
+                                    href={`https://www.linkedin.com/sharing/share-offsite/?url=https://atsense.online&title=I just used ATSense to bypass hiring filters`}
+                                    target="_blank" rel="noopener noreferrer"
+                                    className="w-full py-4 bg-[#0a66c2] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#084e96] transition-colors shadow-lg shadow-[#0a66c2]/30"
+                                >
+                                    <Share2 size={18} />
+                                    Share on LinkedIn
+                                </a>
+                                <button 
+                                    onClick={() => setShowSuccessModal(false)}
+                                    className="w-full py-4 text-gray-400 font-bold hover:text-gray-600 transition-colors"
+                                >
+                                    Back to Workspace
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
