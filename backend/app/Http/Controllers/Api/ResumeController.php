@@ -9,6 +9,7 @@ use App\Services\AIService;
 use App\Models\ResumeLead;
 use App\Models\Resume;
 use App\Models\ActivityLog;
+use App\Mail\ResumeImportedMail;
 use Illuminate\Support\Facades\Log;
 
 class ResumeController extends Controller
