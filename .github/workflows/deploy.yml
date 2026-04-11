@@ -130,7 +130,8 @@ jobs:
           server-dir: /atsense.online/
           dangerous-clean-slate: false
           log-level: verbose
-          timeout: 120000
+          timeout: 600000
+          state-name: .ftp-deploy-sync-state.json
           exclude: |
             **/.git*
             **/.DS_Store
