@@ -196,11 +196,11 @@ Return STRICT JSON:
 
     public function generateBlogPost($topic)
     {
-        $prompt = "
+        $prompt = '
 You are an expert SEO Content Marketer and Career Writer.
 Generate a highly engaging, SEO-optimized blog post for a career / resume-building SaaS called ATSense.
 
-TOPIC: {$topic}
+TOPIC: '.$topic.'
 
 Return STRICT JSON containing:
 {
@@ -213,7 +213,7 @@ Return STRICT JSON containing:
   "meta_description": "SEO Meta Description (max 160 chars)",
   "image_prompt": "A vivid, descriptive prompt for an AI image generator to create the header graphic. Clean, modern, corporate aesthetic."
 }
-";
+';
         $response = $this->chat([['role' => 'user', 'content' => $prompt]], 0.7, true);
         $data = json_decode($this->cleanJson($response), true);
         
