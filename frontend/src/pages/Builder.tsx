@@ -8,6 +8,8 @@ import { useModal } from '../context/ModalContext';
 import { useReactToPrint } from 'react-to-print';
 import HarvardTemplate from '../templates/HarvardTemplate';
 import ExecutiveTemplate from '../templates/ExecutiveTemplate';
+import ModernTechTemplate from '../templates/ModernTechTemplate';
+import ClassicTemplate from '../templates/ClassicTemplate';
 import {
     Download,
     Trash2,
@@ -778,6 +780,18 @@ export default function Builder() {
                                     >
                                         Clean
                                     </button>
+                                    <button
+                                        onClick={() => setTemplateId('modern')}
+                                        className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${templateId === 'modern' ? 'bg-white text-gray-950 shadow-sm' : 'text-white/50 hover:text-white'}`}
+                                    >
+                                        Modern
+                                    </button>
+                                    <button
+                                        onClick={() => setTemplateId('classic')}
+                                        className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${templateId === 'classic' ? 'bg-white text-gray-950 shadow-sm' : 'text-white/50 hover:text-white'}`}
+                                    >
+                                        Finance
+                                    </button>
                                 </div>
                             </div>
                             {/* Preview Content */}
@@ -785,6 +799,8 @@ export default function Builder() {
                                 <div className="scale-[0.72] origin-top-left w-[138.9%]">
                                     {templateId === 'harvard' && <HarvardTemplate ref={componentRef} resume={resume} />}
                                     {templateId === 'executive' && <ExecutiveTemplate ref={componentRef} resume={resume} />}
+                                    {templateId === 'modern' && <ModernTechTemplate ref={componentRef} resume={resume} />}
+                                    {templateId === 'classic' && <ClassicTemplate ref={componentRef} resume={resume} />}
                                 </div>
                             </div>
                         </div>
