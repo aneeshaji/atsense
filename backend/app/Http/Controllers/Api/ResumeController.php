@@ -120,16 +120,6 @@ class ResumeController extends Controller
                             's3_pdf_url'  => $publicUrl,
                         ]
                     );
-
-                    // ── Send Nurturing Email (Async) ─────────────────────────────────
-                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                        try {
-                            \Illuminate\Support\Facades\Mail::to($email)
-                                ->queue(new \App\Mail\ResumeImportedMail($name ?: 'Partner'));
-                        } catch (\Exception $mailEx) {
-                            Log::warning('Nurturing email failed: ' . $mailEx->getMessage());
-                        }
-                    }
                 }
             } catch (\Exception $leadEx) {
                 Log::warning('Lead capture failed: ' . $leadEx->getMessage());
