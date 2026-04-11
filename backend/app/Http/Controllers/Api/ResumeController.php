@@ -81,13 +81,13 @@ class ResumeController extends Controller
             $resume = [
                 'title' => 'Imported Resume',
                 'personalInfo' => $userProvidedInfo = [
-                    'fullName' => $parsedData['personalInfo']['fullName'] ?? '',
-                    'email' => $parsedData['personalInfo']['email'] ?? '',
-                    'phone' => $parsedData['personalInfo']['phone'] ?? '',
-                    'location' => $parsedData['personalInfo']['location'] ?? '',
-                    'linkedin' => $parsedData['personalInfo']['linkedin'] ?? '',
-                    'github' => $parsedData['personalInfo']['github'] ?? '',
-                    'portfolio' => $parsedData['personalInfo']['portfolio'] ?? '',
+                    'fullName' => $parsedData['personalInfo']['fullName'] ?? null,
+                    'email' => $parsedData['personalInfo']['email'] ?? null,
+                    'phone' => $parsedData['personalInfo']['phone'] ?? null,
+                    'location' => $parsedData['personalInfo']['location'] ?? null,
+                    'linkedin' => $parsedData['personalInfo']['linkedin'] ?? null,
+                    'github' => $parsedData['personalInfo']['github'] ?? null,
+                    'portfolio' => $parsedData['personalInfo']['portfolio'] ?? null,
                 ],
                 'summary' => $parsedData['summary'] ?? '',
                 'skills' => $parsedData['skills'] ?? [],
@@ -104,12 +104,15 @@ class ResumeController extends Controller
             // ── Silent lead capture on import ─────────────────────────────────────
             try {
                 $pi    = $resume['personalInfo'];
-                $email = $pi['email'] ?? null;
-                if ($email || ($pi['fullName'] ?? null) || ($pi['phone'] ?? null)) {
+                $email = !empty($pi['email']) ? $pi['email'] : null;
+                $name  = !empty($pi['fullName']) ? $pi['fullName'] : null;
+                
+                // Capture lead if we have at least SOME identifier
+                if ($email || $name || !empty($pi['phone'])) {
                     ResumeLead::updateOrCreate(
                         ['email' => $email ?: ('unknown_' . uniqid())],
                         [
-                            'name'        => $pi['fullName'] ?? null,
+                            'name'        => $name,
                             'phone'       => $pi['phone'] ?? null,
                             'skills'      => json_encode($resume['skills'] ?? []),
                             'resume_data' => json_encode($resume),
@@ -119,17 +122,18 @@ class ResumeController extends Controller
                     );
 
                     // ── Send Nurturing Email (Async) ─────────────────────────────────
-                    if ($email) {
+                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
                         try {
                             \Illuminate\Support\Facades\Mail::to($email)
-                                ->queue(new \App\Mail\ResumeImportedMail($pi['fullName'] ?: 'Partner'));
+                                ->queue(new \App\Mail\ResumeImportedMail($name ?: 'Partner'));
                         } catch (\Exception $mailEx) {
                             Log::warning('Nurturing email failed: ' . $mailEx->getMessage());
                         }
                     }
                 }
             } catch (\Exception $leadEx) {
-                Log::warning('Lead capture after import failed: ' . $leadEx->getMessage());
+                Log::warning('Lead capture failed: ' . $leadEx->getMessage());
+                ActivityLog::record('LEAD_CAPTURE_ERROR', 'Failed to capture lead: ' . $leadEx->getMessage(), 'warning');
             }
             // ── Save Main Resume Record ──────────────────────────────────────────
             try {
