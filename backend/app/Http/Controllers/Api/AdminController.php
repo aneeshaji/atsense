@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 use App\Models\ResumeLead;
 use App\Models\ActivityLog;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\LeadContactEmail;
 
 class AdminController extends Controller
 {
@@ -201,6 +203,50 @@ class AdminController extends Controller
         );
 
         return response()->json(['message' => 'Password updated successfully.']);
+    }
+
+    public function sendEmail(Request $request, $id)
+    {
+        $request->validate([
+            'subject' => 'required|string',
+            'body' => 'required|string',
+        ]);
+
+        $lead = ResumeLead::findOrFail($id);
+
+        if (!$lead->email) {
+            return response()->json(['message' => 'Lead has no email address.'], 400);
+        }
+
+        try {
+            Mail::to($lead->email)->send(new LeadContactEmail($request->subject, $request->body));
+
+            ActivityLog::record(
+                'EMAIL_SENT',
+                "Email sent to {$lead->email}: {$request->subject}",
+                'info',
+                ['lead_id' => $lead->id, 'subject' => $request->subject],
+                $request,
+                $request->user()->id
+            );
+
+            // Update lead status to contacted automatically if not already further along
+            if (in_array($lead->status, ['new', 'reviewed'])) {
+                $lead->update(['status' => 'contacted']);
+            }
+
+            return response()->json(['message' => 'Email sent successfully.']);
+        } catch (\Exception $e) {
+            ActivityLog::record(
+                'EMAIL_FAILED',
+                "Failed to send email to {$lead->email}: " . $e->getMessage(),
+                'error',
+                ['lead_id' => $lead->id, 'error' => $e->getMessage()],
+                $request,
+                $request->user()->id
+            );
+            return response()->json(['message' => 'Failed to send email.', 'error' => $e->getMessage()], 500);
+        }
     }
 
     /**

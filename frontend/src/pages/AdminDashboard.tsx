@@ -153,6 +153,7 @@ function AdminDashboard() {
     // CRM state
     const [updatingLead, setUpdatingLead] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState(EMAIL_TEMPLATES[0]);
+    const [sendingEmail, setSendingEmail] = useState(false);
 
     // Activity Log state
     const [logs, setLogs] = useState<PaginatedLogs | null>(null);
@@ -356,10 +357,22 @@ function AdminDashboard() {
         }
     };
 
-    const handleSendEmail = (lead: Lead) => {
-        const subject = encodeURIComponent(selectedTemplate.subject);
-        const body = encodeURIComponent(selectedTemplate.body(lead.name || 'Candidate'));
-        window.location.href = `mailto:${lead.email}?subject=${subject}&body=${body}`;
+    const handleSendEmail = async (lead: Lead) => {
+        const token = getToken(); if (!token) return;
+        setSendingEmail(true);
+        const subject = selectedTemplate.subject;
+        const body = selectedTemplate.body(lead.name || 'Candidate');
+        try {
+            await api.post(`/admin/leads/${lead.id}/email`, { subject, body }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            window.alert('Email sent successfully via Brevo/SMTP!');
+        } catch (err: any) {
+            console.error(err);
+            window.alert(err.response?.data?.message || 'Failed to send email. Ensure SMTP is configured in .env.');
+        } finally {
+            setSendingEmail(false);
+        }
     };
 
     const clearFilters = () => { setSearch(''); setSource('all'); setDateFrom(''); setDateTo(''); };
@@ -1314,9 +1327,10 @@ function AdminDashboard() {
                                     
                                     <button
                                         onClick={() => handleSendEmail(selectedLead)}
-                                        className="w-full py-3 bg-white text-indigo-600 hover:bg-blue-50 transition-all rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg active:scale-95"
+                                        disabled={sendingEmail}
+                                        className="w-full py-3 bg-white text-indigo-600 hover:bg-blue-50 transition-all rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
                                     >
-                                        Send {selectedTemplate.label} <Zap size={14} className="fill-current" />
+                                        {sendingEmail ? 'Sending...' : `Send ${selectedTemplate.label}`} <Zap size={14} className="fill-current" />
                                     </button>
                                 </div>
                             </div>

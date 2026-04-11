@@ -29,6 +29,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/admin/stats', [AdminController::class, 'getStats']);
     Route::put('/admin/leads/{id}', [AdminController::class, 'updateLead']);
     Route::delete('/admin/leads/{id}', [AdminController::class, 'deleteLead']);
+    Route::post('/admin/leads/{id}/email', [AdminController::class, 'sendEmail']);
     Route::post('/admin/change-password', [AdminController::class, 'changePassword']);
 
     // Admin CMS Expansion
