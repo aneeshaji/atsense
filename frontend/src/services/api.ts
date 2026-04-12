@@ -71,7 +71,7 @@ api.interceptors.response.use(
 				} else {
 					localStorage.removeItem('token');
 					localStorage.removeItem('user');
-					window.location.href = '/login';
+					window.location.href = '/';
 				}
 			}
 		}

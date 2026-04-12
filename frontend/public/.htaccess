@@ -7,6 +7,9 @@
   RewriteCond %{HTTPS} off
   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+  # 0.5 Redirect old /login to Home (prevents it showing in Google)
+  RewriteRule ^login/?$ / [R=301,L]
+
   # 1. Pass through real static files (JS, CSS, images, fonts)
   #    but NOT /api files — those must be routed to PHP below
   RewriteCond %{REQUEST_FILENAME} -f
