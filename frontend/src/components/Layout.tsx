@@ -34,7 +34,7 @@ const Layout = () => {
     const renderContent = () => {
         if (isAppTools) {
             return (
-                <main className="flex-1 py-6 mt-20">
+                <main className="flex-1 py-6 mt-16">
                     <div className="max-w-full mx-auto px-4 md:px-8 lg:px-12">
                         <Outlet />
                     </div>
@@ -44,7 +44,7 @@ const Layout = () => {
 
         if (isFullWidthPage) {
             return (
-                <main className="flex-1 mt-20 w-full">
+                <main className="flex-1 mt-16 w-full">
                     <Outlet />
                 </main>
             );
@@ -52,7 +52,7 @@ const Layout = () => {
 
         // Standard content pages (privacy, terms, security, guides, etc.)
         return (
-            <main className="flex-1 mt-20 container mx-auto px-4 py-8 max-w-7xl">
+            <main className="flex-1 mt-16 container mx-auto px-4 py-8 max-w-7xl">
                 <Outlet />
             </main>
         );

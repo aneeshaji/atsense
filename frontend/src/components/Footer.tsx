@@ -4,6 +4,7 @@ import { Send, CheckCircle2, Sparkles } from 'lucide-react';
 import Logo from './Logo';
 
 
+
 const Footer = () => {
     const currentYear = new Date().getFullYear();
     const [email, setEmail] = useState('');
@@ -21,35 +22,35 @@ const Footer = () => {
     };
 
     return (
-        <footer className="relative bg-gradient-to-br from-gray-50 via-purple-50/30 to-gray-50 border-t border-purple-100 mt-auto overflow-hidden">
-            {/* Organic Background Blobs */}
-            <div className="absolute inset-0 overflow-hidden opacity-30">
-                <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-200 rounded-full blur-[100px] animate-float-slow"></div>
-                <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-pink-200 rounded-full blur-[120px] animate-float"></div>
+        <footer className="relative bg-slate-50 border-t border-slate-200 mt-auto overflow-hidden">
+            {/* Subtle background pattern */}
+            <div className="absolute inset-0 overflow-hidden opacity-20">
+                <div className="absolute -top-40 -left-40 w-96 h-96 bg-indigo-100 rounded-full blur-[100px]"></div>
+                <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-violet-100 rounded-full blur-[120px]"></div>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
                 {/* Newsletter Section */}
-                <div className="mb-8 p-10 rounded-[3rem] bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 relative overflow-hidden shadow-2xl">
-                    {/* Animated Background Blobs */}
-                    <div className="absolute inset-0 overflow-hidden opacity-20">
-                        <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl animate-float"></div>
-                        <div className="absolute bottom-0 right-0 w-80 h-80 bg-white rounded-full blur-3xl animate-float-slow"></div>
+                <div className="mb-8 p-8 sm:p-10 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 relative overflow-hidden shadow-2xl">
+                    {/* Animated accent orbs */}
+                    <div className="absolute inset-0 overflow-hidden">
+                        <div className="absolute top-0 left-1/4 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl animate-float"></div>
+                        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-violet-500/10 rounded-full blur-3xl animate-float-slow"></div>
                     </div>
 
                     <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
                         <div className="text-center lg:text-left">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white font-bold text-sm mb-4">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-indigo-300 font-bold text-sm mb-4">
                                 <Sparkles className="w-4 h-4 animate-pulse" />
                                 <span>Weekly AI Insights</span>
                             </div>
-                            <h3 className="text-3xl font-black text-white mb-2">Get Job Search Tips</h3>
-                            <p className="text-white/90 font-medium">Join 100+ job seekers getting our weekly AI career insights.</p>
+                            <h3 className="text-2xl sm:text-3xl font-black text-white mb-2">Get Job Search Tips</h3>
+                            <p className="text-slate-400 font-medium">Join 100+ job seekers getting our weekly AI career insights.</p>
                         </div>
 
                         {status === 'success' ? (
-                            <div className="flex items-center gap-3 bg-white/20 backdrop-blur-xl px-6 py-4 rounded-full border border-white/30 animate-fade-in shadow-lg">
-                                <CheckCircle2 className="text-green-300" size={24} />
+                            <div className="flex items-center gap-3 bg-emerald-500/15 backdrop-blur-xl px-6 py-4 rounded-full border border-emerald-500/30 animate-fade-in shadow-lg">
+                                <CheckCircle2 className="text-emerald-400" size={24} />
                                 <span className="text-white font-bold">You're on the list! Check your inbox soon.</span>
                             </div>
                         ) : (
@@ -61,7 +62,7 @@ const Footer = () => {
                                     required
                                     placeholder="Enter your email"
                                     aria-label="Newsletter email address"
-                                    className="flex-1 px-6 py-4 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all font-medium shadow-lg"
+                                    className="flex-1 px-6 py-3.5 rounded-xl bg-white/10 backdrop-blur-xl border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all font-medium"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     disabled={status === 'loading'}
@@ -69,14 +70,14 @@ const Footer = () => {
                                 <button
                                     type="submit"
                                     disabled={status === 'loading'}
-                                    className="px-8 py-4 bg-white text-purple-600 font-bold rounded-full hover:bg-gray-50 transition-all shadow-xl hover:shadow-2xl active:scale-95 disabled:opacity-50 flex items-center gap-2 hover:scale-105 duration-300"
+                                    className="px-6 py-3.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 active:scale-95 disabled:opacity-50 flex items-center gap-2 duration-200"
                                 >
                                     {status === 'loading' ? (
-                                        <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                     ) : (
                                         <>
                                             Subscribe
-                                            <Send size={18} />
+                                            <Send size={16} />
                                         </>
                                     )}
                                 </button>
@@ -88,16 +89,11 @@ const Footer = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-8">
                     {/* Brand Section */}
                     <div className="col-span-2 lg:col-span-2">
-                        <Link to="/" className="flex items-center gap-3 mb-6 group">
-                            <Logo />
-                            <div className="flex flex-col">
-                                <span className="font-black text-xl text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-indigo-900 to-gray-900 tracking-tighter leading-none group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-500">
-                                    ATSense
-                                </span>
-                                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mt-0.5 opacity-80">
-                                    Resume Intelligence
-                                </span>
-                            </div>
+                        <Link to="/" className="flex items-center gap-2.5 mb-6 group">
+                            <Logo className="w-9 h-9" />
+                            <span className="font-extrabold text-xl tracking-tight leading-none text-slate-900 group-hover:text-indigo-600 transition-colors duration-200">
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">AT</span>Sense
+                            </span>
                         </Link>
 
                         <p className="text-gray-600 leading-relaxed max-w-sm mb-8 font-medium">

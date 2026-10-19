@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
-import { Loader2, Linkedin, Copy, CheckCircle, Sparkles, User, Briefcase, FileText } from 'lucide-react';
+import { 
+    Loader2, Linkedin, Copy, CheckCircle2, Sparkles, User, 
+    Briefcase, FileText, ArrowRight, Zap, Target, Layers 
+} from 'lucide-react';
 import SEO from '../components/SEO';
 import type { Resume } from '../types';
 
@@ -41,41 +44,6 @@ const LinkedInOptimizer = () => {
         setInitialLoading(false);
     }, []);
 
-    if (initialLoading) {
-        return (
-            <div className="min-h-[60vh] flex flex-col items-center justify-center bg-gray-50 p-6">
-                <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
-                <h2 className="text-xl font-bold text-gray-900">Configuring Optimizer...</h2>
-            </div>
-        );
-    }
-
-    if (!hasResume) {
-        return (
-            <div className="min-h-[80vh] flex flex-col items-center justify-center text-center bg-gray-50/50 px-4">
-                <div className="max-w-md">
-                    <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-6 border-2 border-dashed border-blue-200">
-                        <Linkedin size={36} className="text-blue-400" />
-                    </div>
-                    <h2 className="text-2xl font-black text-gray-900 mb-3">Resume Required First</h2>
-                    <p className="text-gray-500 text-base leading-relaxed mb-8">
-                        To optimize your LinkedIn profile, you need a completed resume in your workspace. 
-                        Please fill in your details in the Builder first.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <Link
-                            to="/builder"
-                            className="btn-premium"
-                        >
-                            <Sparkles size={18} />
-                            Go to Builder
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     const handleOptimize = async () => {
         if (!resume) {
             setError('Please load your resume in the Workspace Builder first.');
@@ -88,7 +56,7 @@ const LinkedInOptimizer = () => {
 
         try {
             const res = await api.post('/ai/linkedin-optimize', {
-                resume: resume, // Send raw resume payload securely
+                resume: resume,
                 targetRole
             });
             setResult(res.data);
@@ -127,50 +95,109 @@ const LinkedInOptimizer = () => {
         setTimeout(() => setCopiedSection(''), 2000);
     };
 
-    return (
-        <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
-            <SEO title="LinkedIn Profile Optimizer - ATSense" description="Transform your resume into a viral LinkedIn profile using AI." />
-            
-            <div className="max-w-full mx-auto px-2 lg:px-12 space-y-8">
-                {/* Header */}
-                <div className="text-center mb-10">
-                    <div className="inline-flex items-center justify-center p-3 sm:p-4 rounded-[1.5rem] bg-blue-600 text-white shadow-xl shadow-blue-500/30 mb-6">
+    if (initialLoading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 text-white">
+                <Loader2 className="animate-spin text-cyan-400 mb-4" size={32} />
+                <h2 className="text-lg font-bold text-slate-300">Calibrating Profile Intelligence...</h2>
+            </div>
+        );
+    }
+
+    if (!hasResume) {
+        return (
+            <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+                <div className="absolute inset-0 tech-grid-dark opacity-30"></div>
+                <div className="max-w-md text-center relative z-10 p-8 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl">
+                    <div className="w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-400">
                         <Linkedin size={32} />
                     </div>
-                    <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-4">LinkedIn Optimizer</h1>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        Transform the resume from your Workspace into a high-converting LinkedIn profile. Generate a viral headline, professional summary, and optimized skills instantly.
+                    <h2 className="text-2xl font-black text-white mb-2">Resume Required First</h2>
+                    <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                        The LinkedIn Optimizer extracts experience, metrics, and skill clusters from your active workspace resume.
+                    </p>
+                    <Link
+                        to="/builder"
+                        className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-extrabold text-sm uppercase tracking-wider shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                    >
+                        <span>Open Resume Cockpit</span>
+                        <ArrowRight size={16} />
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-slate-900 text-slate-100 font-sans relative overflow-hidden">
+            <SEO 
+                title="LinkedIn Profile Optimizer & Headline Generator — ATSense" 
+                description="Transform your resume into a recruiter-magnet LinkedIn profile. AI viral headlines, persuasive About section, and optimized skills." 
+            />
+
+            {/* Ambient Background Aura */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute -top-40 left-1/3 w-[800px] h-[500px] bg-indigo-600/15 rounded-full blur-[140px]"></div>
+                <div className="absolute top-[35%] -right-40 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[140px]"></div>
+                <div className="absolute bottom-10 -left-40 w-[600px] h-[500px] bg-cyan-500/10 rounded-full blur-[150px]"></div>
+                <div className="absolute inset-0 tech-grid-dark opacity-30"></div>
+            </div>
+
+            <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24">
+                
+                {/* Header */}
+                <div className="text-center max-w-3xl mx-auto mb-10">
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 font-semibold text-xs uppercase tracking-wider mb-4 backdrop-blur-md">
+                        <Linkedin size={13} className="text-blue-400" />
+                        <span>Recruiter Magnet AI Engine</span>
+                    </div>
+
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-3">
+                        Transform Your Resume into a{' '}
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300">
+                            High-Converting Profile
+                        </span>
+                    </h1>
+
+                    <p className="text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                        Convert your raw resume bullet points into algorithmic LinkedIn headlines, an executive summary, and high-visibility recruiter keywords.
                     </p>
                 </div>
 
-                {/* Input Section */}
-                <div className="bg-white/80 backdrop-blur-md rounded-[2.5rem] p-8 shadow-xl border border-gray-100">
+                {/* Input Card */}
+                <div className="bg-slate-950/80 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl mb-8">
                     
-                    {/* Resume Source Indicator */}
-                    <div className="mb-8 p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between">
+                    {/* Active Source Banner */}
+                    <div className="mb-6 p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
-                                <Briefcase size={20} />
+                            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                                <Briefcase size={18} />
                             </div>
                             <div>
-                                <span className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Active Source</span>
-                                <span className="block text-sm font-semibold text-gray-900">
-                                    {resume?.personalInfo?.fullName ? `${resume.personalInfo.fullName}'s Workspace Resume` : 'No Resume Loaded'}
+                                <span className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Active Resume Source</span>
+                                <span className="block text-sm font-bold text-white">
+                                    {resume?.personalInfo?.fullName ? `${resume.personalInfo.fullName}'s Document` : 'Connected'}
                                 </span>
                             </div>
                         </div>
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-extrabold uppercase tracking-wider">
+                            Ready
+                        </span>
                     </div>
 
-                    <div className="mb-6">
-                        <div className="flex items-center justify-between mb-2">
-                            <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">Target Role or job url (Optional)</label>
-                            <button 
+                    {/* Role Input */}
+                    <div className="space-y-2 mb-6">
+                        <div className="flex items-center justify-between">
+                            <label className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
+                                Target Role or Job URL (Optional)
+                            </label>
+                            <button
                                 onClick={handleExtract}
                                 disabled={extracting || !targetRole}
-                                className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-lg transition-colors disabled:opacity-50 border border-blue-100 shadow-sm"
+                                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/30 text-blue-300 text-xs font-bold transition-all disabled:opacity-40"
                             >
-                                {extracting ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                                {extracting ? 'Extracting...' : 'Magic Extract'}
+                                {extracting ? <Loader2 size={13} className="animate-spin text-cyan-400" /> : <Sparkles size={13} className="text-cyan-400" />}
+                                <span>{extracting ? 'Extracting...' : 'Clean Job URL'}</span>
                             </button>
                         </div>
                         <input
@@ -178,114 +205,168 @@ const LinkedInOptimizer = () => {
                             value={targetRole}
                             onChange={(e) => setTargetRole(e.target.value)}
                             disabled={extracting}
-                            placeholder="e.g. Senior Product Manager OR paste a linkedin.com/jobs/ URL"
-                            className="w-full text-lg p-4 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 focus:bg-white transition-all outline-none disabled:opacity-50"
+                            placeholder="e.g. Senior Product Designer, Lead Software Architect, or paste a LinkedIn job URL"
+                            className="w-full p-4 bg-slate-900 border border-slate-800 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 text-sm font-medium"
                         />
                     </div>
 
-                    <button 
+                    <button
                         onClick={handleOptimize}
                         disabled={loading || !hasResume}
-                        className={`w-fit mx-auto flex items-center justify-center gap-2 px-10 py-3.5 rounded-2xl font-black transition-all duration-200 mt-6 ${loading || !hasResume ? 'bg-gray-100 text-gray-300 cursor-not-allowed border border-gray-100' : 'btn-premium'}`}
+                        className={`w-full py-4 px-6 rounded-2xl font-extrabold text-sm uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2.5 shadow-xl ${
+                            loading || !hasResume
+                                ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 text-white hover:shadow-blue-500/25 hover:scale-[1.01] active:scale-[0.99]'
+                        }`}
                     >
-                        {loading ? <Loader2 className="animate-spin" size={20} /> : <Sparkles size={20} />}
-                        <span>{loading ? 'Optimizing Profile...' : 'Transform LinkedIn Profile'}</span>
+                        {loading ? (
+                            <>
+                                <Loader2 size={18} className="animate-spin text-cyan-400" />
+                                <span>Engineering High-Converting Profile...</span>
+                            </>
+                        ) : (
+                            <>
+                                <Sparkles size={18} />
+                                <span>Generate Optimized Profile Assets</span>
+                            </>
+                        )}
                     </button>
 
                     {error && (
-                        <div className="mt-4 p-4 rounded-xl bg-red-50 text-red-700 text-sm font-bold flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                            {error}
+                        <div className="mt-4 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-bold flex items-center gap-2">
+                            <span>{error}</span>
                         </div>
                     )}
                 </div>
 
-                {/* Results Section */}
+                {/* Results View */}
                 {result && (
-                    <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500 pt-6">
-
+                    <div className="space-y-8 animate-fade-in">
+                        
                         {/* Headlines */}
-                        <div className="bg-white rounded-[2.5rem] shadow-xl border border-blue-100 overflow-hidden">
-                            <div className="bg-blue-50/50 px-8 py-5 border-b border-blue-100 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <User className="text-blue-600" size={24} />
-                                    <h3 className="font-black text-blue-900 text-lg uppercase tracking-wider">Viral Headlines</h3>
+                        <div className="p-6 sm:p-8 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl">
+                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800">
+                                <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                                    <User size={18} />
+                                </div>
+                                <div>
+                                    <h3 className="font-extrabold text-white text-base">Viral Recruiter Headlines</h3>
+                                    <p className="text-slate-400 text-xs">A/B test these formats to boost profile click-through rates.</p>
                                 </div>
                             </div>
-                            <div className="p-8 space-y-4">
-                                {result.headlines.map((headline, index) => (
-                                    <div key={index} className="flex items-center gap-4 p-5 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-blue-50/30 hover:border-blue-200 transition-colors group">
-                                        <div className="flex-1 font-medium text-gray-800 leading-relaxed text-[15px]">{headline}</div>
+
+                            <div className="space-y-3">
+                                {result.headlines.map((headline, idx) => (
+                                    <div 
+                                        key={idx}
+                                        className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-4 hover:border-slate-700 transition-colors"
+                                    >
+                                        <p className="text-sm text-slate-200 font-medium leading-relaxed flex-1">
+                                            {headline}
+                                        </p>
                                         <button
-                                            onClick={() => copyToClipboard(headline, `headline-${index}`)}
-                                            className="text-gray-400 hover:text-blue-600 hover:bg-blue-100 p-2 rounded-xl transition-all"
+                                            onClick={() => copyToClipboard(headline, `hl-${idx}`)}
+                                            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 shrink-0"
                                         >
-                                            {copiedSection === `headline-${index}` ? <CheckCircle size={22} className="text-green-500" /> : <Copy size={22} />}
+                                            {copiedSection === `hl-${idx}` ? (
+                                                <>
+                                                    <CheckCircle2 size={14} className="text-emerald-400" />
+                                                    <span className="text-emerald-400">Copied</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Copy size={14} />
+                                                    <span>Copy</span>
+                                                </>
+                                            )}
                                         </button>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        {/* About Section */}
-                        <div className="bg-white rounded-[2.5rem] shadow-xl border border-purple-100 overflow-hidden">
-                            <div className="bg-purple-50/50 px-8 py-5 border-b border-purple-100 flex items-center justify-between">
+                        {/* About Me Section */}
+                        <div className="p-6 sm:p-8 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl">
+                            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
                                 <div className="flex items-center gap-3">
-                                    <FileText size={24} className="text-purple-600" />
-                                    <h3 className="font-black text-purple-900 text-lg uppercase tracking-wider">About Me</h3>
+                                    <div className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+                                        <FileText size={18} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-extrabold text-white text-base">Persuasive About Summary</h3>
+                                        <p className="text-slate-400 text-xs">Optimized for first-line preview before the "see more" cutoff.</p>
+                                    </div>
                                 </div>
+
+                                <button
+                                    onClick={() => copyToClipboard(result.about, 'about')}
+                                    className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5"
+                                >
+                                    {copiedSection === 'about' ? (
+                                        <>
+                                            <CheckCircle2 size={14} className="text-emerald-400" />
+                                            <span className="text-emerald-400">Copied</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Copy size={14} />
+                                            <span>Copy All</span>
+                                        </>
+                                    )}
+                                </button>
                             </div>
-                            <div className="p-8">
-                                <div className="relative bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-100 font-medium text-gray-700 leading-loose text-[15px] whitespace-pre-wrap">
-                                    {result.about}
-                                    <button
-                                        onClick={() => copyToClipboard(result.about, 'about')}
-                                        className="absolute top-4 right-4 text-gray-400 hover:text-purple-600 hover:bg-purple-100 transition-all bg-white p-2.5 rounded-xl shadow-sm border border-gray-100"
-                                    >
-                                        {copiedSection === 'about' ? <CheckCircle size={22} className="text-green-500" /> : <Copy size={22} />}
-                                    </button>
-                                </div>
+
+                            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap font-sans">
+                                {result.about}
                             </div>
                         </div>
 
-                        {/* Experience Improvements */}
+                        {/* Skills and Experience Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-white rounded-[2.5rem] shadow-xl border border-emerald-100 overflow-hidden flex flex-col">
-                                <div className="bg-emerald-50/50 px-8 py-5 border-b border-emerald-100 flex items-center gap-3">
-                                    <Briefcase size={24} className="text-emerald-600" />
-                                    <h3 className="font-black text-emerald-900 text-lg uppercase tracking-wider">Experience Formatting</h3>
+                            
+                            {/* Featured Skills */}
+                            <div className="p-6 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <Sparkles size={18} className="text-amber-400" />
+                                    <h3 className="font-extrabold text-white text-sm uppercase tracking-wider">
+                                        Algorithmic Skill Keywords
+                                    </h3>
                                 </div>
-                                <div className="p-8 flex-1 bg-white">
-                                    <ul className="space-y-4">
-                                        {result.experienceImprovements.map((bullet, i) => (
-                                            <li key={i} className="flex items-start gap-4 text-[15px] text-gray-700 bg-emerald-50/30 p-4 rounded-2xl border border-emerald-50">
-                                                <div className="mt-1.5 min-w-[8px] h-2 rounded-full bg-emerald-500"></div>
-                                                <span className="leading-relaxed font-medium">{bullet}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
+                                <div className="flex flex-wrap gap-2">
+                                    {result.featuredSkills.map((skill, idx) => (
+                                        <span 
+                                            key={idx}
+                                            className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-bold hover:border-slate-700 transition-colors"
+                                        >
+                                            {skill}
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-[2.5rem] shadow-xl border border-amber-100 overflow-hidden flex flex-col">
-                                <div className="bg-amber-50/50 px-8 py-5 border-b border-amber-100 flex items-center gap-3">
-                                    <Sparkles size={24} className="text-amber-600" />
-                                    <h3 className="font-black text-amber-900 text-lg uppercase tracking-wider">Featured Skills</h3>
+                            {/* Quantified Bullet Points */}
+                            <div className="p-6 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <Zap size={18} className="text-emerald-400" />
+                                    <h3 className="font-extrabold text-white text-sm uppercase tracking-wider">
+                                        Experience Enhancements
+                                    </h3>
                                 </div>
-                                <div className="p-8 flex-1 bg-white">
-                                    <div className="flex flex-wrap gap-2.5">
-                                        {result.featuredSkills.map((skill, i) => (
-                                            <span key={i} className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[14px] font-bold text-gray-700 shadow-sm hover:border-amber-300 transition-colors">
-                                                {skill}
-                                            </span>
-                                        ))}
-                                    </div>
+                                <div className="space-y-3">
+                                    {result.experienceImprovements.map((bullet, idx) => (
+                                        <div key={idx} className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 leading-relaxed flex items-start gap-2.5">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0"></div>
+                                            <span>{bullet}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
+
                         </div>
 
                     </div>
                 )}
+
             </div>
         </div>
     );

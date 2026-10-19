@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import SEO from '../components/SEO';
 import { useModal } from '../context/ModalContext';
-import { Mail, MessageSquare, Clock, Globe, Send, Sparkles, ShieldCheck } from 'lucide-react';
+import { Mail, MessageSquare, Clock, Globe, Send, Sparkles, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
 
 const Contact = () => {
     const { showAlert } = useModal();
@@ -15,81 +15,90 @@ const Contact = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        // Simulate sending
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        showAlert('Message Received', "Thanks for reaching out! Our career excellence team will review your inquiry and get back to you within 24 hours.", 'success');
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        showAlert('Inquiry Dispatched', "Thank you for reaching out. The ATSense engineering & support team will respond within 24 hours.", 'success');
         setFormData({ name: '', email: '', message: '' });
         setIsSubmitting(false);
     };
 
     return (
-        <main className="font-sans bg-white overflow-hidden">
+        <main className="font-sans bg-slate-900 text-slate-100 overflow-hidden relative min-h-screen">
             <SEO
-                title="Contact Our Team - Support & Business Inquiries"
-                description="Have questions about our AI resume optimizer? Get in touch with the ATSense team for premium support, feedback, or business collaborations."
+                title="Contact ATSense — Support & Enterprise Inquiries"
+                description="Have questions regarding our AI resume optimizer or API integrations? Reach out to the ATSense team for dedicated career assistance."
                 url="https://atsense.online/contact"
             />
 
-            {/* Premium Contact Hero */}
-            <section className="relative bg-[#0b1f3b] pt-24 pb-48 overflow-hidden text-white">
-                <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[80%] bg-indigo-500/10 blur-[120px] rounded-full mix-blend-screen opacity-50 pointer-events-none"></div>
-                <div className="absolute top-0 right-0 w-[40%] h-[50%] bg-blue-600/15 blur-[100px] rounded-full mix-blend-screen opacity-60 pointer-events-none"></div>
+            {/* Ambient Background Aura */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-indigo-600/15 rounded-full blur-[140px]"></div>
+                <div className="absolute top-[35%] -right-40 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[140px]"></div>
+                <div className="absolute bottom-10 -left-40 w-[600px] h-[500px] bg-cyan-500/10 rounded-full blur-[150px]"></div>
+                <div className="absolute inset-0 tech-grid-dark opacity-35"></div>
+            </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 text-[#60efff] font-black text-xs uppercase tracking-[0.2em] mb-8">
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        <span>Support Excellence Hub</span>
-                    </div>
-                    <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight leading-tight">
-                        How can we <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#60efff] to-blue-400">help you excel?</span>
-                    </h1>
-                    <p className="text-lg md:text-xl text-blue-100/80 max-w-2xl mx-auto font-medium leading-relaxed">
-                        Whether you're a job seeker needing help or a partner looking to collaborate, our team is ready to talk.
-                    </p>
+            {/* Hero Header */}
+            <section className="relative z-10 pt-16 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 font-semibold text-xs uppercase tracking-wider mb-6 backdrop-blur-md">
+                    <MessageSquare className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Support & Partnership Channels</span>
                 </div>
+
+                <h1 className="text-4xl sm:text-6xl font-black text-white mb-4 tracking-tight leading-tight">
+                    How Can We Help You{' '}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-violet-300 to-cyan-300">
+                        Excel?
+                    </span>
+                </h1>
+
+                <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto font-medium leading-relaxed">
+                    Whether you have questions about our ATS heuristic models, need template support, or want to collaborate, our team is ready to connect.
+                </p>
             </section>
 
-            {/* Split Contact Section */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 pb-32 relative z-20">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                    {/* Left Info Column */}
-                    <div className="lg:col-span-5 space-y-8">
-                        <div className="bg-white p-10 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-100 h-full">
-                            <h2 className="text-2xl font-black text-gray-900 mb-8">Channel your inquiry</h2>
-                            
-                            <div className="space-y-8">
-                                <div className="flex items-start gap-5">
-                                    <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 shrink-0 shadow-sm shadow-blue-500/10 transition-transform hover:scale-110">
-                                        <Mail className="w-6 h-6" />
+            {/* Split Contact Workspace */}
+            <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    {/* Left Channels Column */}
+                    <div className="lg:col-span-5 space-y-4">
+                        <div className="p-8 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800/80 shadow-2xl space-y-6">
+                            <h2 className="text-xl font-black text-white">Direct Channels</h2>
+
+                            <div className="space-y-4">
+                                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-start gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-cyan-400 shrink-0 mt-0.5">
+                                        <Mail className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <h3 className="font-black text-gray-900 mb-1">Direct Outreach</h3>
-                                        <p className="text-gray-500 font-bold text-sm mb-1">support@atsense.online</p>
-                                        <p className="text-xs text-gray-400 font-medium leading-relaxed">Primary channel for technical support and bug reporting.</p>
+                                        <h3 className="font-bold text-white text-sm">Direct Support</h3>
+                                        <p className="text-cyan-400 font-mono text-xs font-semibold my-0.5">support@atsense.online</p>
+                                        <p className="text-xs text-slate-400 leading-relaxed">Primary channel for account queries, bug reports, and feedback.</p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-start gap-5">
-                                    <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm shadow-emerald-500/10 transition-transform hover:scale-110">
-                                        <Globe className="w-6 h-6" />
+                                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-start gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 shrink-0 mt-0.5">
+                                        <Clock className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <h3 className="font-black text-gray-900 mb-1">Global Response</h3>
-                                        <div className="flex items-center gap-2 text-indigo-600 font-black text-xs uppercase tracking-widest px-3 py-1 bg-indigo-50 rounded-full w-fit mb-2">
-                                            <Clock className="w-3.5 h-3.5" />
-                                            <span>24/7 Monitoring</span>
+                                        <h3 className="font-bold text-white text-sm">Global Response Time</h3>
+                                        <div className="inline-block px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider my-0.5">
+                                            Under 24 Hours
                                         </div>
-                                        <p className="text-xs text-gray-400 font-medium leading-relaxed">Our AI-assisted support monitors incoming tickets across all timezones.</p>
+                                        <p className="text-xs text-slate-400 leading-relaxed">Support operates continuously across North America, Europe, and Asia timezones.</p>
                                     </div>
                                 </div>
 
-                                <div className="pt-8 border-t border-gray-100">
-                                    <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <ShieldCheck className="w-5 h-5 text-indigo-600" />
-                                            <span className="font-black text-gray-900 text-sm">Secure Communication</span>
-                                        </div>
-                                        <p className="text-xs text-gray-500 font-medium leading-relaxed">All messages are encrypted and handled following our strict Privacy Policy. We never share your resume data with third parties.</p>
+                                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-start gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0 mt-0.5">
+                                        <ShieldCheck className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-white text-sm">Encrypted Communications</h3>
+                                        <p className="text-xs text-slate-400 leading-relaxed mt-0.5">
+                                            All submitted inquiries and files are encrypted end-to-end. We never share or sell personal candidate data.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -98,75 +107,69 @@ const Contact = () => {
 
                     {/* Right Form Column */}
                     <div className="lg:col-span-7">
-                        <div className="bg-white p-8 md:p-12 rounded-[3.5rem] shadow-2xl shadow-indigo-100/30 border border-indigo-50 relative overflow-hidden group">
-                            {/* Decorative Blobs */}
-                            <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-50 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                            
-                            <form onSubmit={handleSubmit} className="relative z-10 space-y-7">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Identity</label>
+                        <div className="p-8 sm:p-10 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800/80 shadow-2xl">
+                            <h2 className="text-2xl font-black text-white mb-2">Send us a message</h2>
+                            <p className="text-slate-400 text-sm mb-6">Fill in the fields below and our engineering team will get back to you promptly.</p>
+
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label htmlFor="name" className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Your Name</label>
                                         <input
                                             type="text"
                                             id="name"
-                                            className="w-full px-6 py-4 rounded-2xl bg-gray-50 border border-gray-100 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:border-transparent transition-all font-bold shadow-sm"
-                                            placeholder="Full Name"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm font-medium"
+                                            placeholder="Sarah Jenkins"
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             required
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Communication</label>
+                                    <div className="space-y-1.5">
+                                        <label htmlFor="email" className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Email Address</label>
                                         <input
                                             type="email"
                                             id="email"
-                                            className="w-full px-6 py-4 rounded-2xl bg-gray-50 border border-gray-100 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:border-transparent transition-all font-bold shadow-sm"
-                                            placeholder="Email Address"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm font-medium"
+                                            placeholder="sarah@example.com"
                                             value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                             required
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label htmlFor="message" className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Description</label>
+
+                                <div className="space-y-1.5">
+                                    <label htmlFor="message" className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Message Description</label>
                                     <textarea
                                         id="message"
                                         rows={5}
-                                        className="w-full px-6 py-4 rounded-[2rem] bg-gray-50 border border-gray-100 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:border-transparent transition-all font-bold shadow-sm resize-none"
-                                        placeholder="Tell us how we can help..."
+                                        className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm font-medium resize-none leading-relaxed"
+                                        placeholder="Tell us about your resume goals, questions, or feedback..."
                                         value={formData.message}
                                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                         required
                                     ></textarea>
                                 </div>
-                                
+
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full group px-8 py-5 bg-[#0b1f3b] text-white font-black rounded-2xl hover:bg-indigo-600 transition-all shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-1 active:scale-95 disabled:opacity-50 overflow-hidden relative"
+                                    className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 text-white font-extrabold text-sm uppercase tracking-wider hover:shadow-lg hover:shadow-indigo-500/25 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
-                                    <div className="absolute inset-0 bg-white/10 w-1/2 -skew-x-12 translate-x-[-250%] group-hover:animate-[shimmer_1.5s_infinite]"></div>
-                                    <div className="flex items-center justify-center gap-3">
-                                        {isSubmitting ? (
-                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                        ) : (
-                                            <>
-                                                <span>Deploy Message</span>
-                                                <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                            </>
-                                        )}
-                                    </div>
+                                    {isSubmitting ? (
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    ) : (
+                                        <>
+                                            <span>Send Inquiry</span>
+                                            <Send size={15} />
+                                        </>
+                                    )}
                                 </button>
-
-                                <div className="flex items-center justify-center gap-2 pt-2">
-                                    <Sparkles className="w-4 h-4 text-[#60efff]" />
-                                    <p className="text-[11px] text-gray-400 font-bold uppercase tracking-wider italic">Powered by ATSense Support Excellence AI</p>
-                                </div>
                             </form>
                         </div>
                     </div>
+
                 </div>
             </section>
         </main>
@@ -174,4 +177,3 @@ const Contact = () => {
 };
 
 export default Contact;
-

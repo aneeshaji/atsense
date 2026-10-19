@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { useToast } from '../context/ToastContext';
-import { Sparkles, FileText, ChevronRight, Briefcase, Activity, CheckCircle2 as CheckCircle, XCircle as AlertCircle, Loader2, Search, XCircle } from 'lucide-react';
+import { 
+    Sparkles, FileText, ChevronRight, Briefcase, Activity, 
+    CheckCircle2, XCircle, Loader2, Search, ArrowRight, Zap, Target, Layers 
+} from 'lucide-react';
 import SEO from '../components/SEO';
 import type { Resume, JobMatchResult } from '../types';
 
@@ -34,57 +37,20 @@ function JobMatcher() {
         setInitialLoading(false);
     }, []);
 
-    if (initialLoading) {
-        return (
-            <div className="min-h-[60vh] flex flex-col items-center justify-center bg-gray-50 p-6">
-                <Activity className="animate-spin text-emerald-600 mb-4" size={32} />
-                <h2 className="text-xl font-bold text-gray-900">Configuring Matcher...</h2>
-            </div>
-        );
-    }
-
-    if (!hasResume) {
-        return (
-            <div className="min-h-[80vh] flex flex-col items-center justify-center text-center bg-gray-50/50 px-4">
-                <div className="max-w-md">
-                    <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-6 border-2 border-dashed border-emerald-200">
-                        <Search size={36} className="text-emerald-400" />
-                    </div>
-                    <h2 className="text-2xl font-black text-gray-900 mb-3">Resume Required First</h2>
-                    <p className="text-gray-500 text-base leading-relaxed mb-8">
-                        To use the Smart Matcher, you need a completed resume in your workspace. 
-                        Please fill in your details in the Builder first.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <Link
-                            to="/builder"
-                            className="btn-premium"
-                        >
-                            <Search size={18} />
-                            Go to Builder
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
     const handleAnalyze = async () => {
         if (!resume || !jobDescription) {
-            showToast('Please load a resume in the Builder and enter a Job Description here.', 'warning');
+            showToast('Please load a resume in the Builder and enter a Job Description.', 'warning');
             return;
         }
 
         setLoading(true);
         try {
-            // Note: Update stateless backend or rely on existing /ai/match if it expects raw data. 
-            // In a fully stateless world, we send 'resume' instead of 'resumeId'.
             const res = await api.post('/ai/match', {
-                resume: resume, // Sent as raw object for stateless processing
+                resume: resume,
                 jobDescription
             });
             setResult(res.data);
-            showToast('Analysis complete!', 'success');
+            showToast('Match audit completed!', 'success');
         } catch (err: any) {
             console.error(err);
             showToast(err.response?.data?.message || 'Analysis failed. Please try again.', 'error');
@@ -101,7 +67,7 @@ function JobMatcher() {
             const data = res.data;
             const cleanedDesc = `Job Title: ${data.jobTitle}\nCompany: ${data.companyName}\n\n${data.jobDescription}`;
             setJobDescription(cleanedDesc);
-            showToast('Successfully extracted and cleaned job details!', 'success');
+            showToast('Extracted and cleaned job specifications!', 'success');
         } catch (err: any) {
             console.error(err);
             const msg = err.response?.data?.suggestion || err.response?.data?.message || 'Extraction failed. Please paste the job description text manually.';
@@ -111,147 +77,259 @@ function JobMatcher() {
         }
     };
 
-    return (
-        <div className="min-h-screen bg-gray-50/50 py-12 px-4 sm:px-6 lg:px-8">
-            <SEO title="Smart Job Matcher - ATSense" description="Compare your resume against any job description automatically." />
-            
-            <div className="max-w-full mx-auto px-2 lg:px-8">
-                <div className="text-center mb-10">
-                    <div className="inline-flex items-center justify-center p-3 sm:p-4 rounded-[1.5rem] bg-emerald-600 text-white shadow-xl shadow-emerald-500/30 mb-6">
-                        <Search size={32} />
+    if (initialLoading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 text-white">
+                <Activity className="animate-spin text-cyan-400 mb-4" size={32} />
+                <h2 className="text-lg font-bold text-slate-300">Synchronizing AI Telemetry...</h2>
+            </div>
+        );
+    }
+
+    if (!hasResume) {
+        return (
+            <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+                <div className="absolute inset-0 tech-grid-dark opacity-30"></div>
+                <div className="max-w-md text-center relative z-10 p-8 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl">
+                    <div className="w-16 h-16 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-400">
+                        <FileText size={32} />
                     </div>
-                    <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-4">Smart Job Matcher</h1>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        Paste any Job Description below. We'll instantly compare it against the active resume currently loaded in your Workspace.
+                    <h2 className="text-2xl font-black text-white mb-2">Resume Required First</h2>
+                    <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                        The Smart Matcher compares a specific job description against your active resume. Build or upload your resume in the Cockpit to continue.
+                    </p>
+                    <Link
+                        to="/builder"
+                        className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-extrabold text-sm uppercase tracking-wider shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                    >
+                        <span>Open Resume Cockpit</span>
+                        <ArrowRight size={16} />
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-slate-900 text-slate-100 font-sans relative overflow-hidden">
+            <SEO 
+                title="Smart ATS Job Matcher — Cross-Reference Resume to JD" 
+                description="Compare your resume against any job description. Instant keyword gap analysis, semantic match score, and tailored recommendations." 
+            />
+
+            {/* Ambient Background Aura */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute -top-40 left-1/3 w-[800px] h-[500px] bg-indigo-600/15 rounded-full blur-[140px]"></div>
+                <div className="absolute top-[35%] -right-40 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[140px]"></div>
+                <div className="absolute bottom-10 -left-40 w-[600px] h-[500px] bg-cyan-500/10 rounded-full blur-[150px]"></div>
+                <div className="absolute inset-0 tech-grid-dark opacity-30"></div>
+            </div>
+
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24">
+                
+                {/* Header */}
+                <div className="text-center max-w-3xl mx-auto mb-10">
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 font-semibold text-xs uppercase tracking-wider mb-4 backdrop-blur-md">
+                        <Target size={13} className="text-cyan-400" />
+                        <span>Semantic ATS Match Engine</span>
+                    </div>
+
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-3">
+                        Targeted Job Fit &{' '}
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-violet-300 to-cyan-300">
+                            Keyword Gap Audit
+                        </span>
+                    </h1>
+
+                    <p className="text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                        Cross-reference your active resume directly against recruiter job specs. Identify missing hard skills before submitting.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Left Column - Input */}
-                    <div className="space-y-6">
-                        <div className="bg-white/80 backdrop-blur-md rounded-[2.5rem] p-8 shadow-xl border border-gray-100 flex flex-col h-full">
-                            
-                            {/* Resume Source Indicator */}
-                            <div className="mb-8 p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
-                                        <Briefcase size={20} />
-                                    </div>
-                                    <div>
-                                        <span className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Active Source</span>
-                                        <span className="block text-sm font-semibold text-gray-900">
-                                            {resume?.personalInfo?.fullName ? `${resume.personalInfo.fullName}'s Workspace Resume` : 'No Resume Loaded'}
-                                        </span>
-                                    </div>
+                {/* Main Split Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    
+                    {/* Left Panel: Input & Active Resume Info */}
+                    <div className="bg-slate-950/80 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col">
+                        
+                        {/* Active Source Chip */}
+                        <div className="mb-6 p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-cyan-400">
+                                    <Briefcase size={18} />
                                 </div>
-                                {!resume && (
-                                    <span className="px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold">Missing</span>
-                                )}
+                                <div>
+                                    <span className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Active Workspace Resume</span>
+                                    <span className="block text-sm font-bold text-white">
+                                        {resume?.personalInfo?.fullName ? `${resume.personalInfo.fullName}'s Document` : 'Active Resume Loaded'}
+                                    </span>
+                                </div>
                             </div>
+                            <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-extrabold uppercase tracking-wider">
+                                Connected
+                            </span>
+                        </div>
 
-                            <div className="flex items-center justify-between mb-3">
-                                <label className="block text-sm font-bold text-gray-700 uppercase tracking-wider">Paste JD or URL</label>
-                                <button 
-                                    onClick={handleExtract}
-                                    disabled={extracting || !jobDescription || loading}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg transition-all border border-indigo-200 shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {extracting ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                                    {extracting ? 'Extracting...' : 'Magic Clean / Extract URL'}
-                                </button>
-                            </div>
-                            <textarea
-                                className="w-full flex-grow p-5 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all resize-none min-h-[350px] font-medium text-gray-700 placeholder:text-gray-400"
-                                value={jobDescription}
-                                onChange={e => setJobDescription(e.target.value)}
-                                placeholder="Paste a Job Link (e.g. Lever, Greenhouse) OR paste the messy text from LinkedIn and we'll clean it automatically..."
-                            />
+                        {/* Textarea Header */}
+                        <div className="flex items-center justify-between mb-3">
+                            <label className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
+                                Job Description or Link
+                            </label>
+                            <button
+                                onClick={handleExtract}
+                                disabled={extracting || !jobDescription || loading}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-400/30 text-indigo-300 text-xs font-bold transition-all disabled:opacity-40"
+                            >
+                                {extracting ? <Loader2 size={13} className="animate-spin text-cyan-400" /> : <Sparkles size={13} className="text-cyan-400" />}
+                                <span>{extracting ? 'Extracting Clean Text...' : 'Clean / Extract from URL'}</span>
+                            </button>
+                        </div>
 
+                        <textarea
+                            className="w-full p-4 bg-slate-900/90 border border-slate-800 rounded-2xl focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-200 text-sm leading-relaxed placeholder:text-slate-600 resize-none min-h-[380px] font-mono"
+                            value={jobDescription}
+                            onChange={(e) => setJobDescription(e.target.value)}
+                            placeholder="Paste full job description text or posting URL (e.g. LinkedIn, Greenhouse, Lever, Workday)..."
+                        />
+
+                        {/* Action CTA */}
+                        <div className="mt-6">
                             <button
                                 onClick={handleAnalyze}
                                 disabled={loading || !jobDescription}
-                                className={`w-fit mx-auto flex items-center justify-center gap-2 px-10 py-3.5 rounded-2xl font-black transition-all duration-200 mt-6 ${loading || !jobDescription ? 'bg-gray-100 text-gray-300 cursor-not-allowed border border-gray-100' : 'btn-premium'}`}
+                                className={`w-full py-4 px-6 rounded-2xl font-extrabold text-sm uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2.5 shadow-xl ${
+                                    loading || !jobDescription
+                                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                                        : 'bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 text-white hover:shadow-indigo-500/25 hover:scale-[1.01] active:scale-[0.99]'
+                                }`}
                             >
-                                {loading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-                                <span>{loading ? 'Analyzing Match...' : 'Analyze Match'}</span>
+                                {loading ? (
+                                    <>
+                                        <Loader2 size={18} className="animate-spin text-cyan-400" />
+                                        <span>Computing Heuristic Match...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Zap size={18} />
+                                        <span>Analyze Match & Extract Gaps</span>
+                                        <ChevronRight size={18} />
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>
 
-                    {/* Right Column - Results */}
-                    <div className="h-full">
+                    {/* Right Panel: Telemetry & Gaps */}
+                    <div className="space-y-6">
                         {!result ? (
-                            <div className="h-full min-h-[500px] flex flex-col items-center justify-center text-center p-8 bg-white/50 border-2 border-dashed border-gray-200 rounded-[2.5rem]">
-                                <div className="p-6 bg-white rounded-full shadow-sm text-gray-300 mb-6">
-                                    <Search size={48} />
+                            <div className="h-full min-h-[500px] flex flex-col items-center justify-center text-center p-8 bg-slate-950/60 border-2 border-dashed border-slate-800/80 rounded-3xl">
+                                <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600 mb-4">
+                                    <Search size={32} />
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-500 mb-2">Awaiting Analysis</h3>
-                                <p className="text-gray-400">Paste your job description and run the analyzer to see your compatibility score.</p>
+                                <h3 className="text-lg font-bold text-slate-300 mb-1">Awaiting Job Specifications</h3>
+                                <p className="text-slate-500 text-xs max-w-sm leading-relaxed">
+                                    Paste a job description on the left and run analysis to unlock compatibility scores, keyword flags, and tailored fixes.
+                                </p>
                             </div>
                         ) : (
-                            <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-                                {/* Score Card */}
-                                <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100 relative overflow-hidden">
-                                    <div className={`absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-20 rounded-full ${
-                                        result.score >= 75 ? 'bg-emerald-500' : result.score >= 50 ? 'bg-amber-500' : 'bg-red-500'
-                                    }`}></div>
-                                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Overall Match</h3>
-                                    <div className="flex items-end gap-3">
-                                        <div className={`text-6xl font-black leading-none tracking-tighter ${
-                                            result.score >= 75 ? 'text-emerald-600' : result.score >= 50 ? 'text-amber-500' : 'text-red-600'
-                                        }`}>
-                                            {result.score}%
+                            <div className="space-y-6 animate-fade-in">
+                                
+                                {/* Score Banner */}
+                                <div className="p-8 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl relative overflow-hidden">
+                                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                                        <div>
+                                            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">
+                                                Semantic ATS Score
+                                            </span>
+                                            <div className="flex items-baseline gap-3">
+                                                <span className={`text-6xl font-black tracking-tight ${
+                                                    result.score >= 75 ? 'text-emerald-400' : result.score >= 55 ? 'text-amber-400' : 'text-rose-400'
+                                                }`}>
+                                                    {result.score}%
+                                                </span>
+                                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                                    {result.score >= 75 ? 'High Interview Fit' : result.score >= 55 ? 'Moderate Match' : 'High Rejection Risk'}
+                                                </span>
+                                            </div>
                                         </div>
+
+                                        <Link
+                                            to="/builder"
+                                            className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-extrabold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shrink-0"
+                                        >
+                                            <span>Tailor in Builder</span>
+                                            <ChevronRight size={14} />
+                                        </Link>
                                     </div>
-                                    {/* Summary from AI */}
-                                    <div className="mt-6 p-5 bg-gray-50 rounded-2xl border border-gray-100">
-                                        <p className="text-gray-700 text-sm font-medium leading-relaxed">
-                                            {result.summary}
-                                        </p>
+
+                                    {/* AI Summary */}
+                                    <div className="mt-6 p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-300 text-xs leading-relaxed font-medium">
+                                        {result.summary}
                                     </div>
                                 </div>
 
-                                {/* Missing Keywords */}
-                                <div className="bg-white rounded-[2rem] p-8 shadow-lg border border-red-50 relative overflow-hidden group">
-                                    <div className="flex items-center gap-2 mb-5">
-                                        <XCircle className="text-red-500" size={20} />
-                                        <h3 className="font-bold text-gray-900 text-lg">Missing Keywords</h3>
+                                {/* Missing Keywords (Red Flag) */}
+                                <div className="p-6 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-rose-500/20 shadow-xl">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <XCircle size={18} className="text-rose-400" />
+                                        <h3 className="font-extrabold text-white text-sm uppercase tracking-wider">
+                                            Missing ATS Keywords
+                                        </h3>
+                                        <span className="ml-auto text-[11px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">
+                                            {result.missingKeywords?.length || 0} gaps
+                                        </span>
                                     </div>
+
                                     <div className="flex flex-wrap gap-2">
                                         {result.missingKeywords?.map((k: string) => (
-                                            <span key={k} className="px-3 py-1.5 bg-red-50 text-red-700 rounded-xl text-sm font-bold border border-red-100">
-                                                {k}
+                                            <span 
+                                                key={k} 
+                                                className="px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-bold"
+                                            >
+                                                + {k}
                                             </span>
                                         ))}
                                         {(!result.missingKeywords || result.missingKeywords.length === 0) && (
-                                            <span className="text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl text-sm font-bold w-full text-center">
-                                                Perfect match! No core keywords missing.
+                                            <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl text-xs font-bold w-full text-center">
+                                                Zero critical keyword gaps detected!
                                             </span>
                                         )}
                                     </div>
                                 </div>
 
-                                {/* Matching Keywords */}
-                                <div className="bg-white rounded-[2rem] p-8 shadow-lg border border-emerald-50">
-                                    <div className="flex items-center gap-2 mb-5">
-                                        <CheckCircle className="text-emerald-500" size={20} />
-                                        <h3 className="font-bold text-gray-900 text-lg">Matching Keywords</h3>
+                                {/* Matching Keywords (Strengths) */}
+                                <div className="p-6 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-emerald-500/20 shadow-xl">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <CheckCircle2 size={18} className="text-emerald-400" />
+                                        <h3 className="font-extrabold text-white text-sm uppercase tracking-wider">
+                                            Matched Core Keywords
+                                        </h3>
+                                        <span className="ml-auto text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                                            {result.matchingKeywords?.length || 0} matched
+                                        </span>
                                     </div>
+
                                     <div className="flex flex-wrap gap-2">
                                         {result.matchingKeywords?.map((k: string) => (
-                                            <span key={k} className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-xl text-sm font-bold border border-emerald-100">
-                                                {k}
+                                            <span 
+                                                key={k} 
+                                                className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-bold"
+                                            >
+                                                ✓ {k}
                                             </span>
                                         ))}
                                         {(!result.matchingKeywords || result.matchingKeywords.length === 0) && (
-                                            <span className="text-gray-500 text-sm">No significant matching keywords found.</span>
+                                            <span className="text-slate-500 text-xs">No significant overlapping terms detected.</span>
                                         )}
                                     </div>
                                 </div>
+
                             </div>
                         )}
                     </div>
+
                 </div>
+
             </div>
         </div>
     );

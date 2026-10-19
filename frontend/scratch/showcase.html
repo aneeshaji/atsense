@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ATSense Logo Showcase</title>
+<style>
+  body {
+    margin: 0;
+    padding: 60px 40px;
+    background: #090d16;
+    color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  h1 { text-align: center; font-size: 28px; margin-bottom: 8px; font-weight: 800; }
+  p.sub { text-align: center; color: #94a3b8; margin-bottom: 48px; font-size: 15px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .card {
+    background: #111827;
+    border: 1px solid #1e293b;
+    border-radius: 20px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.4), transparent);
+  }
+  .preview-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    background: radial-gradient(circle at center, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+  }
+  .preview-box.light {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+  }
+  .navbar-mock {
+    width: 100%;
+    padding: 12px 18px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .navbar-mock.light-nav {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #e2e8f0;
+    color: #0f172a;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  }
+  .navbar-mock.dark-nav {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+  .brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-name {
+    font-weight: 800;
+    font-size: 19px;
+    letter-spacing: -0.03em;
+  }
+  .tag {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: #818cf8;
+    background: rgba(99, 102, 241, 0.15);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+</style>
+</head>
+<body>
+  <h1>ATSense Logo System Redesign</h1>
+  <p class="sub">High-craft geometric vectors designed to replace the ordinary square-box logo</p>
+
+  <div class="grid">
+
+    <!-- DESIGN 1: THE PRISM DELTA / APEX SCANNER (World-class standalone emblem) -->
+    <div class="card">
+      <div class="tag">Design 1 • The Prism Apex</div>
+      <div class="preview-box">
+        <svg width="72" height="72" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="d1-grad-left" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8" />
+              <stop offset="60%" stop-color="#4f46e5" />
+              <stop offset="100%" stop-color="#312e81" />
+            </linearGradient>
+            <linearGradient id="d1-grad-right" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#c084fc" />
+              <stop offset="50%" stop-color="#9333ea" />
+              <stop offset="100%" stop-color="#4f46e5" />
+            </linearGradient>
+            <linearGradient id="d1-grad-beam" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#06b6d4" />
+              <stop offset="50%" stop-color="#818cf8" />
+              <stop offset="100%" stop-color="#ec4899" />
+            </linearGradient>
+            <filter id="d1-glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2.5" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <radialGradient id="d1-ambient" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#6366f1" stop-opacity="0.35" />
+              <stop offset="100%" stop-color="#6366f1" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+          <!-- Ambient backlight -->
+          <circle cx="24" cy="24" r="22" fill="url(#d1-ambient)" />
+          
+          <!-- Left Facet Ribbon -->
+          <path d="M24 6L9 39H16.5L24 22.5L31.5 39H39L24 6Z" fill="#1e1b4b" opacity="0.3" />
+          <path d="M24 6L9 39H16.8L24 22L24 6Z" fill="url(#d1-grad-left)" />
+          
+          <!-- Right Facet Ribbon -->
+          <path d="M24 6L39 39H31.2L24 22L24 6Z" fill="url(#d1-grad-right)" />
+          
+          <!-- Holographic Scanning Core / Crossbeam -->
+          <path d="M14.5 28.5H33.5L30.5 33.5H17.5L14.5 28.5Z" fill="url(#d1-grad-beam)" filter="url(#d1-glow)" />
+          
+          <!-- Pulsing Radar Eye / Focal Node -->
+          <circle cx="24" cy="31" r="2.8" fill="#ffffff" filter="url(#d1-glow)" />
+          <circle cx="24" cy="31" r="5" stroke="#38bdf8" stroke-width="0.75" stroke-dasharray="2 2" opacity="0.85" />
+          
+          <!-- Apex Precision Pip -->
+          <circle cx="24" cy="6" r="1.5" fill="#38bdf8" />
+        </svg>
+      </div>
+
+      <!-- Preview in light navbar -->
+      <div class="navbar-mock light-nav">
+        <div class="brand-lockup">
+          <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+            <use href="#d1-ambient"/>
+            <path d="M24 6L9 39H16.8L24 22L24 6Z" fill="url(#d1-grad-left)" />
+            <path d="M24 6L39 39H31.2L24 22L24 6Z" fill="url(#d1-grad-right)" />
+            <path d="M14.5 28.5H33.5L30.5 33.5H17.5L14.5 28.5Z" fill="url(#d1-grad-beam)" />
+            <circle cx="24" cy="31" r="2.8" fill="#ffffff" />
+            <circle cx="24" cy="31" r="5" stroke="#38bdf8" stroke-width="0.75" />
+            <circle cx="24" cy="6" r="1.5" fill="#38bdf8" />
+          </svg>
+          <span class="brand-name" style="color: #0f172a;"><span style="color: #4f46e5;">AT</span>Sense</span>
+        </div>
+        <span style="font-size: 13px; font-weight: 600; color: #64748b;">Navbar Preview</span>
+      </div>
+    </div>
+
+    <!-- DESIGN 2: THE INTERLOCKING MONOGRAM A+S (Dual Infinity Loop) -->
+    <div class="card">
+      <div class="tag">Design 2 • The Möbius Flow (A+S)</div>
+      <div class="preview-box">
+        <svg width="72" height="72" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="d2-grad-main" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#06b6d4" />
+              <stop offset="35%" stop-color="#6366f1" />
+              <stop offset="70%" stop-color="#a855f7" />
+              <stop offset="100%" stop-color="#ec4899" />
+            </linearGradient>
+            <linearGradient id="d2-grad-accent" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8" />
+              <stop offset="100%" stop-color="#6366f1" />
+            </linearGradient>
+            <filter id="d2-glow">
+              <feGaussianBlur stdDeviation="3" result="b" />
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Ambient -->
+          <circle cx="24" cy="24" r="20" fill="#6366f1" opacity="0.15" filter="blur(8px)" />
+          
+          <!-- Continuous interlocking ribbon path forming A + S -->
+          <!-- Left ascend to apex, loop around, form S curve through center -->
+          <path d="M10 38C10 38 18 24 24 9C27 16 30 22 34 29C37 34 38 38 38 38" stroke="url(#d2-grad-main)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M15 28C19 25 29 25 33 28C37 31 35 37 30 38C24 39 18 36 21 30" stroke="url(#d2-grad-accent)" stroke-width="4" stroke-linecap="round" />
+          <circle cx="24" cy="9" r="3" fill="#38bdf8" filter="url(#d2-glow)" />
+          <circle cx="24" cy="26" r="2.5" fill="#ffffff" filter="url(#d2-glow)" />
+        </svg>
+      </div>
+
+      <!-- Preview in light navbar -->
+      <div class="navbar-mock light-nav">
+        <div class="brand-lockup">
+          <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+            <path d="M10 38C10 38 18 24 24 9C27 16 30 22 34 29C37 34 38 38 38 38" stroke="url(#d2-grad-main)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M15 28C19 25 29 25 33 28C37 31 35 37 30 38C24 39 18 36 21 30" stroke="url(#d2-grad-accent)" stroke-width="4" stroke-linecap="round" />
+            <circle cx="24" cy="9" r="3" fill="#38bdf8" />
+            <circle cx="24" cy="26" r="2.5" fill="#ffffff" />
+          </svg>
+          <span class="brand-name" style="color: #0f172a;"><span style="color: #4f46e5;">AT</span>Sense</span>
+        </div>
+        <span style="font-size: 13px; font-weight: 600; color: #64748b;">Navbar Preview</span>
+      </div>
+    </div>
+
+    <!-- DESIGN 3: THE CYBERNETIC RADAR SHIELD (Ultra-premium 3D Badge) -->
+    <div class="card">
+      <div class="tag">Design 3 • The Cyber Shield Prism</div>
+      <div class="preview-box">
+        <svg width="72" height="72" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="d3-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1e1b4b" />
+              <stop offset="100%" stop-color="#0f172a" />
+            </linearGradient>
+            <linearGradient id="d3-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8" />
+              <stop offset="50%" stop-color="#818cf8" />
+              <stop offset="100%" stop-color="#c084fc" />
+            </linearGradient>
+            <linearGradient id="d3-glyph" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="100%" stop-color="#a5b4fc" />
+            </linearGradient>
+            <linearGradient id="d3-radar" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="#06b6d4" />
+              <stop offset="100%" stop-color="#8b5cf6" />
+            </linearGradient>
+            <filter id="d3-glow">
+              <feGaussianBlur stdDeviation="2" result="b" />
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Hexagonal shield with subtle rounded vertices -->
+          <polygon points="24,4 42,14 42,34 24,44 6,34 6,14" fill="url(#d3-bg)" stroke="url(#d3-stroke)" stroke-width="2" stroke-linejoin="round" />
+          
+          <!-- Inner geometric chevron A -->
+          <path d="M24 13L15 31H20.5L24 23.5L27.5 31H33L24 13Z" fill="url(#d3-glyph)" filter="url(#d3-glow)" />
+          
+          <!-- Radar Scanning Arc -->
+          <path d="M12 25A12 12 0 0 1 36 25" stroke="url(#d3-radar)" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 3" opacity="0.9" />
+          
+          <!-- Central Pulse Point -->
+          <circle cx="24" cy="25" r="2.2" fill="#06b6d4" filter="url(#d3-glow)" />
+        </svg>
+      </div>
+
+      <!-- Preview in light navbar -->
+      <div class="navbar-mock light-nav">
+        <div class="brand-lockup">
+          <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+            <polygon points="24,4 42,14 42,34 24,44 6,34 6,14" fill="url(#d3-bg)" stroke="url(#d3-stroke)" stroke-width="2" stroke-linejoin="round" />
+            <path d="M24 13L15 31H20.5L24 23.5L27.5 31H33L24 13Z" fill="url(#d3-glyph)" />
+            <path d="M12 25A12 12 0 0 1 36 25" stroke="url(#d3-radar)" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 3" />
+            <circle cx="24" cy="25" r="2.2" fill="#06b6d4" />
+          </svg>
+          <span class="brand-name" style="color: #0f172a;"><span style="color: #4f46e5;">AT</span>Sense</span>
+        </div>
+        <span style="font-size: 13px; font-weight: 600; color: #64748b;">Navbar Preview</span>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

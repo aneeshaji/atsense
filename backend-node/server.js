@@ -26,7 +26,7 @@ app.use(express.json());
 app.use('/api', apiLimiter);
 
 app.get('/health', (req, res) => {
-	res.json({ status: 'OK', message: 'Backend running' });
+	res.json({ status: 'OK', message: 'Node Backend running' });
 });
 
 app.use('/api/auth', authLimiter, require('./src/routes/authRoutes'));

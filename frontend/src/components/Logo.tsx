@@ -1,45 +1,164 @@
-export default function Logo({ className = "w-11 h-11" }: { className?: string }) {
+export default function Logo({ 
+    className = "w-9 h-9", 
+    animate = true 
+}: { 
+    className?: string; 
+    animate?: boolean; 
+}) {
     return (
-        <div 
-            className={`relative flex items-center justify-center ${className} group shrink-0`}
+        <svg
+            viewBox="0 0 44 44"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className={`${className} group-hover:scale-105 transition-all duration-300 drop-shadow-[0_2px_10px_rgba(99,102,241,0.25)]`}
             role="img"
             aria-label="ATSense Logo"
         >
-            {/* Glowing Aura shadow (pulsing) */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl blur-md opacity-40 group-hover:opacity-70 transition-opacity duration-700 animate-pulse"></div>
-            
-            {/* Main Icon Box */}
-            <div className="relative w-full h-full bg-gradient-to-br from-gray-900 via-indigo-950 to-slate-900 rounded-xl border border-indigo-400/30 flex items-center justify-center overflow-hidden shadow-[0_8px_16px_rgb(0_0_0/0.2)]">
-                
-                {/* Diagonal Glass Reflection */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/5 to-transparent h-[150%] w-[150%] -rotate-45 -translate-y-1/2 -translate-x-1/2 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-1000 ease-out"></div>
-                
-                {/* Document & AI Sparkle SVG */}
-                <svg viewBox="0 0 24 24" className="w-[60%] h-[60%] z-10 transform group-hover:scale-110 transition-transform duration-500" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    {/* Back document outline */}
-                    <path d="M8 4V3C8 2.44772 8.44772 2 9 2H16.5L21 6.5V16C21 16.5523 20.5523 17 20 17H19" stroke="#818CF8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-80"/>
-                    
-                    {/* Front document filled */}
-                    <path d="M4 8C4 7.44772 4.44772 7 5 7H12.5L17 11.5V20C17 20.5523 16.5523 21 16 21H5C4.44772 21 4 20.5523 4 20V8Z" fill="url(#frontGrad)" stroke="#E0E7FF" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
-                    
-                    {/* Skeleton Text Lines inside front document */}
-                    <path d="M7 12H11" stroke="#E0E7FF" strokeWidth="1.5" strokeLinecap="round"/>
-                    <path d="M7 16H14" stroke="#E0E7FF" strokeWidth="1.5" strokeLinecap="round"/>
-                    
-                    {/* Primary AI Sparkle */}
-                    <path d="M19 5L19.5 6.5L21 7L19.5 7.5L19 9L18.5 7.5L17 7L18.5 6.5L19 5Z" fill="#38BDF8" className="animate-[pulse_2s_ease-in-out_infinite]"/>
-                    
-                    {/* Secondary AI Sparkle */}
-                    <path d="M14 2.5L14.5 3.5L15.5 4L14.5 4.5L14 5.5L13.5 4.5L12.5 4L13.5 3.5L14 2.5Z" fill="#F472B6" className="animate-[pulse_2s_ease-in-out_infinite]" style={{ animationDelay: '1s' }}/>
+            <defs>
+                {/* Left wing gradient: Electric Cyan to Deep Indigo */}
+                <linearGradient id="ats-grad-left" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#38bdf8" />
+                    <stop offset="45%" stopColor="#6366f1" />
+                    <stop offset="100%" stopColor="#312e81" />
+                </linearGradient>
 
-                    <defs>
-                        <linearGradient id="frontGrad" x1="4" y1="7" x2="17" y2="21" gradientUnits="userSpaceOnUse">
-                            <stop stopColor="#4F46E5" stopOpacity="0.85"/>
-                            <stop offset="1" stopColor="#9333EA" stopOpacity="0.95"/>
-                        </linearGradient>
-                    </defs>
-                </svg>
-            </div>
-        </div>
+                {/* Right wing gradient: Ultraviolet to Fuchsia to Indigo */}
+                <linearGradient id="ats-grad-right" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#c084fc" />
+                    <stop offset="50%" stopColor="#9333ea" />
+                    <stop offset="100%" stopColor="#4338ca" />
+                </linearGradient>
+
+                {/* Scanning laser beam gradient */}
+                <linearGradient id="ats-grad-beam" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#06b6d4" />
+                    <stop offset="50%" stopColor="#818cf8" />
+                    <stop offset="100%" stopColor="#ec4899" />
+                </linearGradient>
+
+                {/* Specular ridge gradient */}
+                <linearGradient id="ats-specular" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+                </linearGradient>
+
+                {/* Ambient glow */}
+                <radialGradient id="ats-ambient" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#6366f1" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                </radialGradient>
+
+                {/* Optical glow filter */}
+                <filter id="ats-glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="1.8" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            </defs>
+
+            {/* Ambient Backlight Glow */}
+            <circle cx="22" cy="22" r="18" fill="url(#ats-ambient)" />
+
+            {/* Left Facet Ribbon (Ascending Pillar) */}
+            <path
+                d="M 22 4 L 5.5 36.5 C 5 37.4 5.7 38.5 6.8 38.5 H 14.2 C 15.1 38.5 15.9 38 16.3 37.2 L 22 23 L 22 4 Z"
+                fill="url(#ats-grad-left)"
+            />
+
+            {/* Right Facet Ribbon (Descending Pillar) */}
+            <path
+                d="M 22 4 L 38.5 36.5 C 39 37.4 38.3 38.5 37.2 38.5 H 29.8 C 28.9 38.5 28.1 38 27.7 37.2 L 22 23 L 22 4 Z"
+                fill="url(#ats-grad-right)"
+            />
+
+            {/* Central Spine Specular Highlight */}
+            <line
+                x1="22"
+                y1="4"
+                x2="22"
+                y2="23"
+                stroke="url(#ats-specular)"
+                strokeWidth="0.8"
+                strokeLinecap="round"
+                opacity="0.75"
+            />
+
+            {/* Left Leading Edge Highlight */}
+            <path
+                d="M 22 4 L 5.5 36.5"
+                stroke="url(#ats-specular)"
+                strokeWidth="0.75"
+                strokeLinecap="round"
+                opacity="0.6"
+            />
+
+            {/* Holographic Scanning Bridge (The ATS Filter Bypass Beam) */}
+            <path
+                d="M 12 26.5 H 32 L 29.5 31.5 H 14.5 L 12 26.5 Z"
+                fill="url(#ats-grad-beam)"
+                filter="url(#ats-glow)"
+                opacity="0.95"
+            >
+                {animate && (
+                    <animate
+                        attributeName="opacity"
+                        values="0.8;1;0.8"
+                        dur="2.5s"
+                        repeatCount="indefinite"
+                    />
+                )}
+            </path>
+
+            {/* AI Radar Reticle / Scanning Lens */}
+            <circle
+                cx="22"
+                cy="29"
+                r="4.8"
+                stroke="#38bdf8"
+                strokeWidth="0.8"
+                strokeDasharray="2 1.5"
+                opacity="0.85"
+            >
+                {animate && (
+                    <animateTransform
+                        attributeName="transform"
+                        type="rotate"
+                        from="0 22 29"
+                        to="360 22 29"
+                        dur="8s"
+                        repeatCount="indefinite"
+                    />
+                )}
+            </circle>
+
+            {/* Central Optical Core (Light Pulse) */}
+            <circle
+                cx="22"
+                cy="29"
+                r="2.4"
+                fill="#ffffff"
+                filter="url(#ats-glow)"
+            >
+                {animate && (
+                    <animate
+                        attributeName="r"
+                        values="2.2;2.8;2.2"
+                        dur="2s"
+                        repeatCount="indefinite"
+                    />
+                )}
+            </circle>
+
+            {/* Apex Signal Node */}
+            <circle
+                cx="22"
+                cy="4"
+                r="1.6"
+                fill="#38bdf8"
+                filter="url(#ats-glow)"
+            />
+        </svg>
     );
 }

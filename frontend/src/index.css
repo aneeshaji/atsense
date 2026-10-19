@@ -296,4 +296,64 @@
   @apply border-l-4 border-indigo-500 bg-slate-50 p-8 rounded-r-3xl my-12 text-slate-700 italic text-xl shadow-sm;
 }
 
+/* Modern Tech Grid & Scanner Effects */
+.tech-grid {
+  background-image: radial-gradient(rgba(99, 102, 241, 0.12) 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+}
+
+.tech-grid-dark {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+}
+
+@keyframes scanline {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+.animate-scanline {
+  animation: scanline 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes auraGlow {
+  0%, 100% {
+    transform: scale(1) translate(0px, 0px);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.15) translate(10px, -10px);
+    opacity: 0.75;
+  }
+}
+
+.animate-aura {
+  animation: auraGlow 7s ease-in-out infinite;
+}
+
+.glass-pill {
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.glass-card-dark {
+  backdrop-filter: blur(16px);
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
 

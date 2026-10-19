@@ -10,7 +10,7 @@ import {
     BrainCircuit
 } from 'lucide-react';
 import { useState } from 'react';
-import Logo from './Logo';
+
 
 const Sidebar = () => {
     const location = useLocation();
@@ -42,9 +42,13 @@ const Sidebar = () => {
 
             {/* Brand Area */}
             <div className={`p-8 mb-4 transition-all duration-300 ${isCollapsed ? 'opacity-0' : 'opacity-100'}`}>
-                <Link to="/" className="flex items-center gap-3">
-                    <Logo />
-                    <span className="font-black text-2xl text-gray-900 tracking-tight">ATSense</span>
+                <Link to="/" className="flex items-center gap-2">
+                    <span className="font-black text-2xl text-gray-900 tracking-tight">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">AT</span>Sense
+                    </span>
+                    <span className="text-[10px] font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-200/80 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        AI
+                    </span>
                 </Link>
             </div>
 
