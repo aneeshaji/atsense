@@ -15,8 +15,14 @@ use App\Http\Controllers\Api\Admin\DesignTemplateController;
 use App\Http\Controllers\Api\Admin\SiteSettingController;
 use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\SitemapController;
+use App\Http\Controllers\Api\ContactController;
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
+
+// Contact & Inquiry Endpoints
+Route::post('/contact', [ContactController::class, 'send']);
+Route::post('/contact.php', [ContactController::class, 'send']);
+Route::post('/newsletter', [ContactController::class, 'send']);
 
 // Authentication requirements removed
 

@@ -9,40 +9,54 @@ class AIService
 {
     protected $apiKey;
     protected $baseUrl = 'https://api.groq.com/openai/v1';
-    protected $model = 'llama-3.3-70b-versatile';
+    protected $model;
 
     public function __construct()
     {
         $this->apiKey = env('GROQ_API_KEY');
+        $this->model  = env('GROQ_MODEL', 'openai/gpt-oss-120b');
     }
 
     /**
-     * Send chat completion request to Groq
+     * Send chat completion request to Groq with automatic model fallback
      */
     protected function chat($messages, $temperature = 0.7, $json = false)
     {
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json',
-            ])->post($this->baseUrl . '/chat/completions', [
-                'model' => $this->model,
-                'messages' => $messages,
-                'temperature' => $temperature,
-                'response_format' => $json ? ['type' => 'json_object'] : null,
-            ]);
+        $modelsToTry = array_unique([
+            $this->model,
+            'openai/gpt-oss-120b',
+            'openai/gpt-oss-20b',
+            'qwen/qwen3.8-27b'
+        ]);
 
-            if ($response->failed()) {
-                Log::error('Groq API Error: ' . $response->body());
-                throw new \Exception('AI Service failure: ' . $response->status());
+        $lastException = null;
+
+        foreach ($modelsToTry as $candidateModel) {
+            try {
+                $response = Http::timeout(60)->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json',
+                ])->post($this->baseUrl . '/chat/completions', [
+                    'model' => $candidateModel,
+                    'messages' => $messages,
+                    'temperature' => $temperature,
+                    'response_format' => $json ? ['type' => 'json_object'] : null,
+                ]);
+
+                if ($response->successful()) {
+                    return $response->json()['choices'][0]['message']['content'];
+                }
+
+                Log::warning("Groq API error on model {$candidateModel} (status {$response->status()}): " . $response->body());
+                $lastException = new \Exception('AI Service failure: ' . $response->status());
+            } catch (\Exception $e) {
+                Log::warning("Groq exception on model {$candidateModel}: " . $e->getMessage());
+                $lastException = $e;
             }
-
-            return $response->json()['choices'][0]['message']['content'];
-
-        } catch (\Exception $e) {
-            Log::error('Interview Evaluation Failed: ' . $e->getMessage());
-            throw $e;
         }
+
+        Log::error('All Groq AI models failed. Last error: ' . ($lastException ? $lastException->getMessage() : 'unknown'));
+        throw $lastException ?: new \Exception('AI Service failure: 500');
     }
 
     /**
@@ -382,7 +396,7 @@ Required Format:
         $url = "https://api.groq.com/openai/v1/chat/completions";
 
         $payload = [
-            'model' => 'meta-llama/llama-4-scout-17b-16e-instruct',
+            'model' => env('GROQ_VISION_MODEL', 'qwen/qwen3.8-27b'),
             'messages' => [
                 [
                     'role' => 'user',

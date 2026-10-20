@@ -1,24 +1,60 @@
 import { useState } from 'react';
 import SEO from '../components/SEO';
 import { useModal } from '../context/ModalContext';
-import { Mail, MessageSquare, Clock, Globe, Send, Sparkles, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Mail, MessageSquare, Clock, Send, ShieldCheck, AlertCircle, ExternalLink } from 'lucide-react';
+import { sendInquiry } from '../services/contact';
 
 const Contact = () => {
     const { showAlert } = useModal();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        message: ''
+        subject: '',
+        type: 'general' as 'general' | 'partnership' | 'support',
+        message: '',
+        botcheck: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [fallbackMailto, setFallbackMailto] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        await new Promise(resolve => setTimeout(resolve, 1200));
-        showAlert('Inquiry Dispatched', "Thank you for reaching out. The ATSense engineering & support team will respond within 24 hours.", 'success');
-        setFormData({ name: '', email: '', message: '' });
-        setIsSubmitting(false);
+        setErrorMessage(null);
+        setFallbackMailto(null);
+
+        try {
+            const result = await sendInquiry(formData);
+
+            if (result.ok) {
+                showAlert(
+                    'Inquiry Dispatched',
+                    result.message || "Thank you for reaching out. The ATSense engineering & support team will respond within 24 hours.",
+                    'success'
+                );
+                setFormData({
+                    name: '',
+                    email: '',
+                    subject: '',
+                    type: 'general',
+                    message: '',
+                    botcheck: ''
+                });
+            } else {
+                setErrorMessage(result.message);
+                if (result.mailto) {
+                    setFallbackMailto(result.mailto);
+                }
+                showAlert('Delivery Notice', result.message, 'warning');
+            }
+        } catch {
+            const mailto = `mailto:support@atsense.online?subject=${encodeURIComponent('[Inquiry] ' + (formData.subject || formData.name))}&body=${encodeURIComponent(formData.message)}`;
+            setErrorMessage('Could not establish connection to the mail server. You can click below to send via your local email client.');
+            setFallbackMailto(mailto);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -72,7 +108,9 @@ const Contact = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-white text-sm">Direct Support</h3>
-                                        <p className="text-cyan-400 font-mono text-xs font-semibold my-0.5">support@atsense.online</p>
+                                        <a href="mailto:support@atsense.online" className="text-cyan-400 font-mono text-xs font-semibold my-0.5 block hover:underline">
+                                            support@atsense.online
+                                        </a>
                                         <p className="text-xs text-slate-400 leading-relaxed">Primary channel for account queries, bug reports, and feedback.</p>
                                     </div>
                                 </div>
@@ -111,7 +149,38 @@ const Contact = () => {
                             <h2 className="text-2xl font-black text-white mb-2">Send us a message</h2>
                             <p className="text-slate-400 text-sm mb-6">Fill in the fields below and our engineering team will get back to you promptly.</p>
 
+                            {errorMessage && (
+                                <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm flex items-start gap-3">
+                                    <AlertCircle className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
+                                    <div className="flex-1">
+                                        <p className="font-medium">{errorMessage}</p>
+                                        {fallbackMailto && (
+                                            <a
+                                                href={fallbackMailto}
+                                                className="inline-flex items-center gap-1.5 mt-2.5 px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-white font-bold text-xs transition-colors"
+                                            >
+                                                <span>Open in Email Client</span>
+                                                <ExternalLink size={13} />
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
                             <form onSubmit={handleSubmit} className="space-y-5">
+                                {/* Honeypot field for bot protection */}
+                                <input
+                                    type="text"
+                                    name="botcheck"
+                                    id="botcheck"
+                                    value={formData.botcheck}
+                                    onChange={(e) => setFormData({ ...formData, botcheck: e.target.value })}
+                                    tabIndex={-1}
+                                    autoComplete="off"
+                                    style={{ display: 'none' }}
+                                    aria-hidden="true"
+                                />
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <label htmlFor="name" className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Your Name</label>
@@ -135,6 +204,33 @@ const Contact = () => {
                                             value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                             required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label htmlFor="type" className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Inquiry Type</label>
+                                        <select
+                                            id="type"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm font-medium"
+                                            value={formData.type}
+                                            onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                                        >
+                                            <option value="general">General Inquiry</option>
+                                            <option value="support">Technical & ATS Scoring Support</option>
+                                            <option value="partnership">Partnership & Creator Inquiries</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label htmlFor="subject" className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Subject</label>
+                                        <input
+                                            type="text"
+                                            id="subject"
+                                            className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm font-medium"
+                                            placeholder="e.g. Question about ATS compatibility"
+                                            value={formData.subject}
+                                            onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                                         />
                                     </div>
                                 </div>

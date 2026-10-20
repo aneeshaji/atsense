@@ -67,7 +67,7 @@ class GenerateSeoPosts extends Command
             - 'category': A short category name (e.g. 'ATS Tips', 'Job Search', 'Templates')";
 
             $response = Http::withToken($apiKey)->timeout(120)->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model' => 'llama3-8b-8192',
+                'model' => env('GROQ_MODEL', 'openai/gpt-oss-120b'),
                 'messages' => [
                     ['role' => 'system', 'content' => 'Output ONLY valid JSON. No markdown wrappers like ```json.'],
                     ['role' => 'user', 'content' => $prompt]
