@@ -286,15 +286,33 @@ function AdminDashboard() {
         }
     };
 
-    const downloadResume = async (url: string, name: string) => {
+    const downloadResume = async (leadId: number, name: string) => {
+        const token = getToken();
+        if (!token) return;
+
         try {
-            const res = await fetch(url);
+            const res = await fetch(
+                `${getApiBase()}/admin/leads/${leadId}/pdf?download=1&token=${encodeURIComponent(token)}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
             const blob = await res.blob();
+            const header = await blob.slice(0, 5).text();
+            if (!header.includes('%PDF')) throw new Error('Response was not a valid PDF');
+
+            const objectUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
             const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
+            a.href = objectUrl;
             a.download = `${(name || 'resume').replace(/\s+/g, '_')}_resume.pdf`;
+            document.body.appendChild(a);
             a.click();
-        } catch { window.open(url, '_blank'); }
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+        } catch (err) {
+            console.error('Resume download failed', err);
+            window.alert('Unable to download this resume PDF. Use Preview to confirm the file, then try again.');
+        }
     };
 
     const exportCsv = () => {
@@ -792,9 +810,8 @@ function AdminDashboard() {
                                                             title="Inspect Payload">
                                                             <Eye size={14} />
                                                         </button>
-                                                        <button onClick={() => downloadResume(lead.s3_pdf_url || '', lead.name)}
-                                                            disabled={!lead.s3_pdf_url}
-                                                            className={`flex items-center justify-center w-8 h-8 rounded-lg shadow-sm transition-all active:scale-90 border ${lead.s3_pdf_url ? 'text-emerald-600 bg-white border-emerald-100 hover:bg-emerald-600 hover:text-white' : 'text-gray-200 bg-gray-50 border-gray-100 cursor-not-allowed'}`}
+                                                        <button onClick={() => downloadResume(lead.id, lead.name)}
+                                                            className="flex items-center justify-center w-8 h-8 rounded-lg shadow-sm transition-all active:scale-90 border text-emerald-600 bg-white border-emerald-100 hover:bg-emerald-600 hover:text-white"
                                                             title="Download Deliverable">
                                                             <Download size={14} />
                                                         </button>
@@ -1345,13 +1362,11 @@ function AdminDashboard() {
                                         className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-slate-700 border border-gray-100 rounded-2xl text-sm font-bold transition-all active:scale-[0.98]">
                                         <Eye size={14} className="text-gray-400" /> Preview Snapshot
                                     </button>
-                                    {selectedLead.s3_pdf_url && (
-                                        <button onClick={() => downloadResume(selectedLead.s3_pdf_url!, selectedLead.name)}
-                                            className="flex items-center gap-2 px-4 py-2.5 text-white rounded-2xl text-sm font-black shadow-lg shadow-indigo-100 hover:shadow-indigo-200 transition-all active:scale-[0.98]"
-                                            style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
-                                            <Download size={14} /> Download PDF Document
-                                        </button>
-                                    )}
+                                    <button onClick={() => downloadResume(selectedLead.id, selectedLead.name)}
+                                        className="flex items-center gap-2 px-4 py-2.5 text-white rounded-2xl text-sm font-black shadow-lg shadow-indigo-100 hover:shadow-indigo-200 transition-all active:scale-[0.98]"
+                                        style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}>
+                                        <Download size={14} /> Download PDF Document
+                                    </button>
                                 </div>
                             </div>
                         </div>

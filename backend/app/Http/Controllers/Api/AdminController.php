@@ -11,6 +11,9 @@ use App\Models\ResumeLead;
 use App\Models\ActivityLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Mail\LeadContactEmail;
 
 class AdminController extends Controller
@@ -250,13 +253,12 @@ class AdminController extends Controller
     }
 
     /**
-     * Generate and serve a PDF preview for a specific lead.
-     * Returns an inline PDF so it renders inside an iframe.
+     * Serve a PDF for a lead (iframe preview or download).
+     * Prefers the original stored file; falls back to generating from resume_data.
      */
     public function previewPdf(Request $request, $id)
     {
-        // Authenticate via query token (iframes can't send auth headers)
-        $token = $request->query('token');
+        $token = $request->query('token') ?: $request->bearerToken();
         if (!$token) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
@@ -266,20 +268,113 @@ class AdminController extends Controller
         }
 
         $lead = ResumeLead::findOrFail($id);
+        $asDownload = $request->boolean('download');
+        $filename = \Illuminate\Support\Str::slug($lead->name ?: 'resume') . '.pdf';
 
-        // Build resume object for the Blade template
+        $pdf = $this->resolveLeadPdf($lead);
+        if (!$pdf) {
+            return response()->json(['message' => 'Failed to load PDF document.'], 422);
+        }
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => ($asDownload ? 'attachment' : 'inline') . '; filename="' . $filename . '"',
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    private function resolveLeadPdf(ResumeLead $lead): ?string
+    {
+        $stored = $this->fetchStoredPdf($lead);
+        if ($stored) {
+            return $stored;
+        }
+
+        try {
+            return $this->renderLeadPdf($lead);
+        } catch (\Exception $e) {
+            Log::error('Lead PDF render failed: ' . $e->getMessage(), ['lead_id' => $lead->id]);
+            return null;
+        }
+    }
+
+    private function fetchStoredPdf(ResumeLead $lead): ?string
+    {
+        if (!$lead->s3_pdf_url) {
+            return null;
+        }
+
+        $url = $lead->s3_pdf_url;
+        $key = $this->storageKeyFromUrl($url);
+
+        if ($key) {
+            foreach (['s3', 'public'] as $diskName) {
+                try {
+                    $disk = Storage::disk($diskName);
+                    if ($disk->exists($key)) {
+                        $contents = $disk->get($key);
+                        if ($this->isPdf($contents)) {
+                            return $contents;
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::warning("Lead PDF {$diskName} read failed: " . $e->getMessage(), [
+                        'lead_id' => $lead->id,
+                        'key' => $key,
+                    ]);
+                }
+            }
+        }
+
+        try {
+            $response = Http::timeout(20)->withHeaders(['Accept' => 'application/pdf'])->get($url);
+            if ($response->successful() && $this->isPdf($response->body())) {
+                return $response->body();
+            }
+        } catch (\Exception $e) {
+            Log::warning('Lead PDF URL fetch failed: ' . $e->getMessage(), ['lead_id' => $lead->id]);
+        }
+
+        return null;
+    }
+
+    private function storageKeyFromUrl(string $url): ?string
+    {
+        $path = parse_url($url, PHP_URL_PATH);
+        if (!is_string($path) || $path === '') {
+            return null;
+        }
+
+        $path = rawurldecode($path);
+        if (preg_match('#/(?:storage/)?(resumes/.+)$#', $path, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
+    }
+
+    private function isPdf(?string $contents): bool
+    {
+        if (!$contents) {
+            return false;
+        }
+
+        return str_contains(substr($contents, 0, 8), '%PDF');
+    }
+
+    private function renderLeadPdf(ResumeLead $lead): string
+    {
         $resume = new \stdClass();
 
         if ($lead->resume_data) {
-            // Use stored full resume data — same format the frontend sends
-            $resumeData = json_decode($lead->resume_data, true);
+            $resumeData = json_decode($lead->resume_data, true) ?: [];
             $resume->personal_info = $resumeData['personalInfo'] ?? [];
             $resume->summary = $resumeData['summary'] ?? '';
             $resume->skills = $resumeData['skills'] ?? [];
             $resume->experience = $resumeData['experience'] ?? [];
             $resume->education = $resumeData['education'] ?? [];
         } else {
-            // Fallback: build from basic lead fields
             $skills = [];
             try { $skills = json_decode($lead->skills, true) ?? []; } catch (\Exception $e) {}
 
@@ -294,7 +389,6 @@ class AdminController extends Controller
             $resume->education = [];
         }
 
-        // Render using the same Blade template the frontend preview uses
         $html = view('pdf.resume', ['resume' => $resume])->render();
 
         $options = new \Dompdf\Options();
@@ -304,9 +398,6 @@ class AdminController extends Controller
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        return response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . \Illuminate\Support\Str::slug($lead->name ?: 'resume') . '.pdf"',
-        ]);
+        return $dompdf->output();
     }
 }
