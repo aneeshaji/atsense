@@ -3,39 +3,89 @@
   <!-- Core Tools -->
   <url>
     <loc>https://atsense.online/</loc>
-    <lastmod>2026-04-08</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://atsense.online/resume-grader</loc>
-    <lastmod>2026-04-08</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://atsense.online/builder</loc>
-    <lastmod>2026-04-08</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Company ATS Tailor Pages (Programmatic SEO) -->
+  <url>
+    <loc>https://atsense.online/tailor/google</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://atsense.online/tailor/amazon</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://atsense.online/tailor/microsoft</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://atsense.online/tailor/meta</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://atsense.online/tailor/deloitte</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  
+  <url>
+    <loc>https://atsense.online/tailor/goldman-sachs</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://atsense.online/tailor/software-engineer</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://atsense.online/tailor/product-manager</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- Optimization Tools -->
   <url>
     <loc>https://atsense.online/job-matcher</loc>
-    <lastmod>2026-04-08</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://atsense.online/linkedin-optimizer</loc>
-    <lastmod>2026-04-08</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://atsense.online/interview-prep</loc>
-    <lastmod>2026-04-08</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -43,13 +93,13 @@
   <!-- Resources -->
   <url>
     <loc>https://atsense.online/templates</loc>
-    <lastmod>2026-04-08</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://atsense.online/blog</loc>
-    <lastmod>2026-04-08</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -57,19 +107,19 @@
   <!-- Informational -->
   <url>
     <loc>https://atsense.online/about</loc>
-    <lastmod>2026-04-08</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://atsense.online/contact</loc>
-    <lastmod>2026-04-08</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://atsense.online/community</loc>
-    <lastmod>2026-04-09</lastmod>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>

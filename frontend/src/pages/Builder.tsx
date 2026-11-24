@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import ATSScoreBreakdown from '../components/ATSScoreBreakdown';
 import AdvancedScorecard from '../components/AdvancedScorecard';
+import ShareableScoreCard from '../components/ShareableScoreCard';
+import { COMPANY_PRESETS } from '../data/companyPresets';
 import { useToast } from '../context/ToastContext';
 import { useModal } from '../context/ModalContext';
 import { useReactToPrint } from 'react-to-print';
@@ -88,6 +90,7 @@ export default function Builder() {
     const [atsBreakdown, setAtsBreakdown] = useState<any>(null);
     const [showAdvancedScore, setShowAdvancedScore] = useState(false);
     const [showTailorModal, setShowTailorModal] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [atsScore, setAtsScore] = useState<number>(0);
     const [jobDescription, setJobDescription] = useState('');
@@ -122,6 +125,14 @@ export default function Builder() {
         if (savedTitle) setJobTitle(savedTitle);
         const templateParam = searchParams.get('template');
         if (templateParam) setTemplateId(templateParam);
+
+        const targetParam = searchParams.get('target');
+        if (targetParam && COMPANY_PRESETS[targetParam.toLowerCase()]) {
+            const preset = COMPANY_PRESETS[targetParam.toLowerCase()];
+            setJobTitle(prev => prev || `${preset.name} Role`);
+            setJobDescription(prev => prev || `Target Company: ${preset.name} (${preset.atsPlatform})\nRequired ATS Formula: ${preset.atsFormula}\nTarget Keywords: ${preset.mustHaveKeywords.join(', ')}\n\n`);
+            setShowTailorModal(true);
+        }
     }, [searchParams]);
 
     useEffect(() => {
@@ -180,11 +191,20 @@ export default function Builder() {
             showToast('Please upload a PDF or DOCX file.', 'error');
             return;
         }
+
+        await doImport(file);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const doImport = useCallback(async (file: File) => {
         const formData = new FormData();
         formData.append('resume', file);
         setImporting(true);
         try {
-            const res = await api.post('/import', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            const res = await api.post('/import', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                timeout: 120000,
+            });
             
             const freshResume = res.data.resume || res.data;
             const importedResume = { ...freshResume, atsScore: 0 };
@@ -197,14 +217,12 @@ export default function Builder() {
             
             setOpenSections(new Set(['personal', 'summary', 'experience']));
             showToast('Resume imported successfully!', 'success');
-            if (jobDescription) setTimeout(() => fetchBreakdown(importedResume), 800);
         } catch {
             showToast('Failed to import resume.', 'error');
         } finally {
             setImporting(false);
-            if (fileInputRef.current) fileInputRef.current.value = '';
         }
-    };
+    }, [jobDescription, fetchBreakdown]);
 
     const performOptimization = async () => {
         if (!jobDescription || !jobTitle) {
@@ -308,6 +326,7 @@ export default function Builder() {
     if (!resume) return null;
 
     return (
+        <>
         <div className="min-h-screen bg-[#f4f5f7] flex flex-col">
 
             {/* ── PREMIUM HEADER BAR ── */}
@@ -358,66 +377,113 @@ export default function Builder() {
                     <div className="flex items-center w-full bg-slate-50/80 border border-slate-200/80 rounded-2xl px-3 py-2.5 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] overflow-x-auto scrollbar-hide mt-1">
                         
                         {/* Pipeline Container */}
-                        <div className="flex items-center w-full min-w-[850px] justify-between">
+                        <div className="flex items-center w-full min-w-[700px] justify-between">
                             
                             {/* Step 1: IMPORT ROOT ACTION */}
                             <button
                                 onClick={() => fileInputRef.current?.click()}
-                                className="flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-[13px] font-black hover:bg-indigo-700 transition-all duration-200 shadow-[0_4px_12px_rgba(79,70,229,0.25)] hover:shadow-[0_4px_16px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 shrink-0"
+                                disabled={importing}
+                                className="flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-[13px] font-black hover:bg-indigo-700 transition-all duration-200 shadow-[0_4px_12px_rgba(79,70,229,0.25)] hover:shadow-[0_4px_16px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 shrink-0 disabled:opacity-75 disabled:cursor-not-allowed"
                             >
-                                <Upload size={15} strokeWidth={3} />
-                                {importing ? 'Scanning CV...' : 'Import Target CV'}
+                                {importing ? (
+                                    <>
+                                        <Loader2 size={15} className="animate-spin" />
+                                        <span>Scanning CV...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Upload size={15} strokeWidth={3} />
+                                        <span>Import Target CV</span>
+                                    </>
+                                )}
                             </button>
 
                             {/* Connector */}
                             <div className="flex-1 mx-2 sm:mx-4 h-[1.5px] bg-[repeating-linear-gradient(90deg,#cbd5e1_0px,#cbd5e1_4px,transparent_4px,transparent_8px)] opacity-60 min-w-[20px]" />
 
-                            {/* Step 2: ATS Score */}
-                            <div
-                                className={`flex items-center gap-3 px-3 py-1.5 rounded-xl transition-all select-none shrink-0 border border-transparent ${
-                                    !isResumePopulated
-                                        ? 'opacity-40 cursor-not-allowed'
-                                        : 'cursor-pointer hover:bg-white hover:border-slate-200 hover:shadow-sm'
-                                }`}
-                                onClick={() => isResumePopulated && fetchBreakdown(undefined, true)}
-                            >
-                                <div className="relative w-9 h-9 flex items-center justify-center">
-                                    <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#e2e8f0" strokeWidth="4" />
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke={atsScore > 0 ? scoreColor : '#cbd5e1'} strokeWidth="4" strokeDasharray={`${(atsScore / 100) * 87.96} 87.96`} strokeLinecap="round" className="transition-all duration-1000" />
-                                    </svg>
-                                    {analyzing ? (
-                                        <Activity size={12} className="animate-spin text-slate-500" />
-                                    ) : (
-                                        <span className="text-[10px] font-black text-slate-800 tabular-nums">{atsScore > 0 ? `${atsScore}%` : '--'}</span>
-                                    )}
-                                </div>
-                                <div className="hidden lg:block">
-                                    <p className="text-[10px] font-bold text-slate-800 leading-none mb-0.5">{atsScore > 0 ? 'ATS Score' : 'Analyzer'}</p>
-                                    <div className="flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: scoreStatusColor }} />
-                                        <p className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">{scoreStatusLabel}</p>
+                            {/* Step 2: ATS Analyzer */}
+                            <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                    type="button"
+                                    disabled={!isResumePopulated}
+                                    onClick={() => isResumePopulated && fetchBreakdown(undefined, true)}
+                                    className={`relative flex items-center gap-2 px-3 py-2 rounded-xl border font-bold transition-all duration-200 select-none shrink-0 ${
+                                        !isResumePopulated
+                                            ? 'opacity-40 cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400'
+                                            : atsScore > 0
+                                                ? 'bg-white border-emerald-300 text-slate-800 shadow-sm hover:shadow-md hover:border-emerald-400 hover:-translate-y-0.5'
+                                                : 'bg-gradient-to-r from-emerald-500 to-teal-500 border-emerald-400 text-white shadow-[0_3px_14px_rgba(16,185,129,0.4)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.55)] hover:-translate-y-0.5 hover:scale-[1.02]'
+                                    }`}
+                                >
+                                    {/* Gauge ring */}
+                                    <div className="relative w-7 h-7 flex items-center justify-center shrink-0">
+                                        <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                            <circle cx="18" cy="18" r="14" fill="none" stroke={atsScore > 0 ? '#d1fae5' : 'rgba(255,255,255,0.3)'} strokeWidth="4" />
+                                            <circle cx="18" cy="18" r="14" fill="none" stroke={atsScore > 0 ? scoreColor : 'rgba(255,255,255,0.9)'} strokeWidth="4" strokeDasharray={`${(atsScore / 100) * 87.96} 87.96`} strokeLinecap="round" className="transition-all duration-1000" />
+                                        </svg>
+                                        {analyzing ? (
+                                            <Activity size={10} className={`animate-spin ${atsScore > 0 ? 'text-slate-500' : 'text-white'}`} />
+                                        ) : (
+                                            <span className={`text-[8px] font-black tabular-nums ${atsScore > 0 ? 'text-slate-800' : 'text-white'}`}>{atsScore > 0 ? `${atsScore}%` : '?'}</span>
+                                        )}
                                     </div>
-                                </div>
+                                    {/* Label */}
+                                    <div className="text-left leading-none">
+                                        <p className={`text-[11px] font-extrabold leading-none mb-0.5 ${atsScore > 0 ? 'text-slate-800' : 'text-white'}`}>
+                                            {analyzing ? 'Analyzing…' : atsScore > 0 ? 'ATS Score' : 'ATS Check'}
+                                        </p>
+                                        <div className="flex items-center gap-1">
+                                            {atsScore > 0 && <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: scoreStatusColor }} />}
+                                            <p className={`text-[8px] font-semibold uppercase tracking-wide ${atsScore > 0 ? 'text-slate-500' : 'text-white/80'}`}>
+                                                {analyzing ? 'Please wait' : atsScore > 0 ? scoreStatusLabel : 'Run Now'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </button>
+
+                                {atsScore > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowShareModal(true)}
+                                        title="Share Verified Scorecard"
+                                        className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-[0_2px_8px_rgba(139,92,246,0.4)] hover:shadow-[0_4px_14px_rgba(139,92,246,0.55)] hover:-translate-y-0.5 transition-all shrink-0"
+                                    >
+                                        <Share2 size={13} />
+                                    </button>
+                                )}
                             </div>
 
                             {/* Connector */}
                             <div className="flex-1 mx-2 sm:mx-4 h-[1.5px] bg-[repeating-linear-gradient(90deg,#cbd5e1_0px,#cbd5e1_4px,transparent_4px,transparent_8px)] opacity-60 min-w-[20px]" />
 
-                            {/* Step 3: DEEP TAILOR (PROMINENT MAIN FUNCTIONALITY) */}
-                            <button
-                                disabled={!isResumePopulated}
-                                onClick={() => setShowTailorModal(true)}
-                                className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl text-[13px] sm:text-[14px] font-black tracking-wide transition-all duration-300 border relative overflow-hidden group shrink-0 ${
-                                    !isResumePopulated
-                                        ? 'opacity-40 cursor-not-allowed bg-slate-200 border-slate-300 text-slate-500'
-                                        : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-[0_4px_16px_rgba(139,92,246,0.35)] border-violet-500 hover:shadow-[0_6px_24px_rgba(139,92,246,0.5)] hover:-translate-y-0.5 hover:rotate-[0.5deg]'
-                                }`}
-                            >
-                                <Sparkles size={16} className={isResumePopulated ? "absolute opacity-20 group-hover:animate-ping" : "hidden"} />
-                                <Sparkles size={16} className="relative z-10" />
-                                <span className="relative z-10">Deep Tailor</span>
-                            </button>
+                            {/* Step 3: DEEP TAILOR */}
+                            <div className="relative group shrink-0">
+                                <button
+                                    disabled={!isResumePopulated}
+                                    onClick={() => setShowTailorModal(true)}
+                                    className={`relative flex items-center gap-3 px-6 sm:px-7 py-2.5 sm:py-3 rounded-2xl text-[14px] font-black tracking-wide transition-all duration-300 overflow-hidden shrink-0 ${
+                                        !isResumePopulated
+                                            ? 'opacity-40 cursor-not-allowed bg-slate-200 border border-slate-300 text-slate-500'
+                                            : 'bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white shadow-[0_4px_20px_rgba(139,92,246,0.45)] border border-violet-400/50 hover:shadow-[0_8px_32px_rgba(139,92,246,0.65)] hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.99]'
+                                    }`}
+                                >
+                                    {isResumePopulated && (
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
+                                    )}
+                                    <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
+                                        <Sparkles size={18} className="text-white animate-pulse" />
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="flex items-center gap-1.5 leading-none">
+                                            <span className="text-[14px] font-black text-white">Deep Tailor</span>
+                                            <span className="px-1.5 py-0.5 rounded bg-white/25 text-[9px] font-extrabold uppercase tracking-wide text-white">AI</span>
+                                        </div>
+                                        <span className="block text-[10px] font-semibold text-purple-100/90 mt-1 leading-none">
+                                            Auto-Match to Any Job
+                                        </span>
+                                    </div>
+                                </button>
+                            </div>
 
                             {/* Connector */}
                             <div className="flex-1 mx-2 sm:mx-4 h-[1.5px] bg-[repeating-linear-gradient(90deg,#cbd5e1_0px,#cbd5e1_4px,transparent_4px,transparent_8px)] opacity-60 min-w-[20px]" />
@@ -468,7 +534,7 @@ export default function Builder() {
                     {/* ATS Breakdown Card */}
                     {atsBreakdown && (
                         <div className="animate-in slide-in-from-top-4 duration-500">
-                            <ATSScoreBreakdown breakdown={atsBreakdown} />
+                            <ATSScoreBreakdown breakdown={atsBreakdown} onShare={() => setShowShareModal(true)} />
                         </div>
                     )}
 
@@ -774,16 +840,20 @@ export default function Builder() {
 
                 </div>
 
-                {/* ── RIGHT: Live Preview Panel — only after import ── */}
-                {showPreview && isResumePopulated && (
+                {/* ── RIGHT: Live Preview Panel — shows during import and after population ── */}
+                {showPreview && (isResumePopulated || importing) && (
                     <div className="hidden xl:flex flex-col sticky top-24 h-[calc(100vh-7rem)]">
                         <div className="bg-gray-950 rounded-2xl h-full shadow-2xl flex flex-col overflow-hidden">
                             {/* Preview Header */}
                             <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 shrink-0">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Live Preview</span>
-                                    <span className="text-[10px] text-white/20 ml-1">• Real-time update</span>
+                                    <div className={`w-2 h-2 rounded-full ${importing ? 'bg-amber-400' : 'bg-emerald-400'} animate-pulse`} />
+                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">
+                                        {importing ? 'Parsing Resume...' : 'Live Preview'}
+                                    </span>
+                                    <span className="text-[10px] text-white/20 ml-1">
+                                        {importing ? '• Processing' : '• Real-time update'}
+                                    </span>
                                 </div>
                                 <div className="flex bg-white/10 rounded-lg p-0.5 gap-0.5">
                                     <button
@@ -813,14 +883,33 @@ export default function Builder() {
                                 </div>
                             </div>
                             {/* Preview Content */}
-                            <div className="flex-1 overflow-y-auto bg-gray-200 mx-4 my-4 rounded-xl">
-                                <div className="scale-[0.72] origin-top-left w-[138.9%]">
-                                    {templateId === 'harvard' && <HarvardTemplate ref={componentRef} resume={resume} />}
-                                    {templateId === 'executive' && <ExecutiveTemplate ref={componentRef} resume={resume} />}
-                                    {templateId === 'modern' && <ModernTechTemplate ref={componentRef} resume={resume} />}
-                                    {templateId === 'classic' && <ClassicTemplate ref={componentRef} resume={resume} />}
+                            {importing ? (
+                                <div className="flex-1 flex flex-col items-center justify-center p-8 bg-gray-900 mx-4 my-4 rounded-xl border border-white/5">
+                                    <div className="relative w-14 h-14 mb-4 flex items-center justify-center">
+                                        <div className="absolute inset-0 rounded-2xl bg-indigo-500/20 animate-ping" />
+                                        <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                                            <Sparkles className="text-white animate-pulse" size={22} />
+                                        </div>
+                                    </div>
+                                    <h4 className="text-sm font-bold text-white mb-1">Parsing Resume with AI...</h4>
+                                    <p className="text-xs text-white/40 text-center max-w-xs mb-6">Structuring your experience, skills, and details into the live preview template</p>
+                                    <div className="w-full max-w-xs space-y-2.5">
+                                        <div className="h-4 bg-white/10 rounded-md animate-pulse w-3/4 mx-auto" />
+                                        <div className="h-3 bg-white/5 rounded-md animate-pulse w-1/2 mx-auto" />
+                                        <div className="h-16 bg-white/5 rounded-lg animate-pulse mt-4" />
+                                        <div className="h-20 bg-white/5 rounded-lg animate-pulse" />
+                                    </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <div className="flex-1 overflow-y-auto bg-gray-200 mx-4 my-4 rounded-xl">
+                                    <div className="scale-[0.72] origin-top-left w-[138.9%]">
+                                        {templateId === 'harvard' && <HarvardTemplate ref={componentRef} resume={resume} />}
+                                        {templateId === 'executive' && <ExecutiveTemplate ref={componentRef} resume={resume} />}
+                                        {templateId === 'modern' && <ModernTechTemplate ref={componentRef} resume={resume} />}
+                                        {templateId === 'classic' && <ClassicTemplate ref={componentRef} resume={resume} />}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
@@ -857,6 +946,36 @@ export default function Builder() {
                         </div>
                         {/* Modal Body */}
                         <div className="p-8 space-y-5">
+                            <div>
+                                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+                                    Target Company Presets (1-Click Fill)
+                                </label>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {[
+                                        { name: 'Google', slug: 'google' },
+                                        { name: 'Amazon', slug: 'amazon' },
+                                        { name: 'Meta', slug: 'meta' },
+                                        { name: 'Microsoft', slug: 'microsoft' },
+                                        { name: 'Deloitte', slug: 'deloitte' },
+                                        { name: 'Goldman Sachs', slug: 'goldman-sachs' },
+                                    ].map((comp) => (
+                                        <button
+                                            key={comp.slug}
+                                            type="button"
+                                            onClick={() => {
+                                                const p = COMPANY_PRESETS[comp.slug];
+                                                if (p) {
+                                                    setJobTitle(`${p.name} Role`);
+                                                    setJobDescription(`Target Company: ${p.name} (${p.atsPlatform})\nRequired ATS Formula: ${p.atsFormula}\nTarget Keywords: ${p.mustHaveKeywords.join(', ')}\n\n`);
+                                                }
+                                            }}
+                                            className="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-violet-100 text-gray-700 hover:text-violet-700 text-xs font-semibold border border-gray-200 hover:border-violet-300 transition-colors"
+                                        >
+                                            ⚡ {comp.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                             <div>
                                 <label className={labelCls + ' text-gray-500'}>Job Title</label>
                                 <input
@@ -954,5 +1073,14 @@ export default function Builder() {
                 </div>
             )}
         </div>
+
+        <ShareableScoreCard
+            isOpen={showShareModal}
+            score={atsScore || 78}
+            userName={resume?.personalInfo?.fullName || 'Candidate'}
+            targetRole={jobTitle || resume?.title || 'Professional'}
+            onClose={() => setShowShareModal(false)}
+        />
+        </>
     );
 }

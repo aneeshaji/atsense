@@ -23,6 +23,7 @@ import InterviewSimulator from './pages/InterviewSimulator';
 import ResumeGrader from './pages/ResumeGrader';
 import GuideDetail from './pages/GuideDetail';
 import SharedSpace from './pages/SharedSpace';
+import CompanyTailorPage from './pages/CompanyTailorPage';
 import { ModalProvider } from './context/ModalContext';
 import Layout from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
@@ -57,6 +58,8 @@ export default function App() {
                                 <Route path="/templates/:slug" element={<TemplateDetail />} />
                                 <Route path="/template-builder" element={<TemplateBuilder />} />
                                 <Route path="/resume-grader" element={<ResumeGrader />} />
+                                <Route path="/tailor" element={<Navigate to="/tailor/google" replace />} />
+                                <Route path="/tailor/:companyOrRole" element={<CompanyTailorPage />} />
                                 <Route path="/community" element={<SharedSpace />} />
                             </Route>
 

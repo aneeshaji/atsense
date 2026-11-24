@@ -5,12 +5,13 @@ import {
     ArrowRight, Cpu, Layers, TrendingUp, RefreshCw, Check, X, ArrowUpRight, 
     Lock, FileCheck, Sliders, Play, Award
 } from 'lucide-react';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import SEO from '../components/SEO';
 import api from '../services/api';
 import { useToast } from '../context/ToastContext';
 import { trackEvent, ANALYTICS_EVENTS } from '../services/analytics';
 import Logo from '../components/Logo';
+import ExitIntentPopup from '../components/ExitIntentPopup';
 
 // Smooth Scroll Reveal Component
 const FadeInSection = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => {
@@ -525,6 +526,30 @@ const Landing = () => {
     const [importing, setImporting] = useState(false);
     const [dragActive, setDragActive] = useState(false);
 
+    const doUpload = useCallback(async (file: File) => {
+        const formData = new FormData();
+        formData.append('resume', file);
+        setImporting(true);
+        try {
+            const res = await api.post('/import', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                timeout: 120000,
+            });
+            const resumeData = res.data.resume || res.data;
+            localStorage.setItem('atsense_current_resume', JSON.stringify(resumeData));
+            trackEvent(ANALYTICS_EVENTS.CONVERSION.RESUME_UPLOAD, 'Conversion', file.name);
+            showToast('Resume imported and parsed successfully!', 'success');
+            navigate('/builder');
+        } catch (err: any) {
+            console.error(err);
+            showToast(err.response?.data?.message || 'Failed to import resume. Starting with fresh template.', 'error');
+            navigate('/builder');
+        } finally {
+            setImporting(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    }, [navigate, showToast]);
+
     const handleUploadProcess = async (file: File) => {
         const allowedTypes = [
             'application/pdf', 
@@ -537,30 +562,7 @@ const Landing = () => {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('resume', file);
-        setImporting(true);
-
-        try {
-            const res = await api.post('/import', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-
-            const resumeData = res.data.resume || res.data;
-            localStorage.setItem('atsense_current_resume', JSON.stringify(resumeData));
-
-            trackEvent(ANALYTICS_EVENTS.CONVERSION.RESUME_UPLOAD, 'Conversion', file.name);
-
-            showToast('Resume imported and parsed successfully!', 'success');
-            navigate('/builder');
-        } catch (err: any) {
-            console.error(err);
-            showToast(err.response?.data?.message || 'Failed to import resume. Starting with fresh template.', 'error');
-            navigate('/builder');
-        } finally {
-            setImporting(false);
-            if (fileInputRef.current) fileInputRef.current.value = '';
-        }
+        await doUpload(file);
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -615,6 +617,8 @@ const Landing = () => {
     ];
 
     return (
+        <>
+        <ExitIntentPopup />
         <main id="main-content" className="font-sans bg-slate-50 overflow-hidden text-slate-900">
             <SEO
                 title="ATSense — Next-Gen AI Resume Builder & ATS Intelligence"
@@ -1343,6 +1347,7 @@ const Landing = () => {
                 </div>
             </section>
         </main>
+        </>
     );
 };
 

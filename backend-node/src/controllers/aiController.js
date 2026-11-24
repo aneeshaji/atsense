@@ -99,37 +99,24 @@ exports.matchJob = async (req, res) => {
 
 exports.optimizeLinkedIn = async (req, res) => {
 	try {
-		const { resumeId, targetRole } = req.body;
-		if (!resumeId) {
-			return res.status(400).json({ message: 'Missing resumeId' });
+		const { resumeId, resume: directResume, targetRole } = req.body;
+		let resume = directResume;
+
+		if (!resume && resumeId) {
+			resume = await Resume.findOne({ _id: resumeId, user: req.user });
+			if (!resume) return res.status(404).json({ message: 'Resume not found' });
 		}
 
-		const resume = await Resume.findOne({ _id: resumeId, user: req.user });
-		if (!resume) return res.status(404).json({ message: 'Resume not found' });
+		if (!resume) {
+			return res.status(400).json({ message: 'Missing resume data' });
+		}
 
-		// We need to pass the resume data to the service
-		// Since the service expects a 'resumeData' object similar to what it parses,
-		// we might simply pass the resume document as is, provided it has the necessary fields.
-		// The service uses: personalInfo.fullName, summary, skills, experience (jobTitle, company).
-		// The Resume model likely has these. Let's verify:
-		// Resume Model likely has: user, personalInfo (embedded), experience (array), education etc.
-		// Assuming structure matches standard Resume model.
-
-		// Use the imported service logic (not yet imported in THIS file, need to check imports)
-		// Ah, looking at line 2: const { generateResumeContent, analyzeJobMatch } = require('../services/aiResumeService');
-		// I need to update the import line first or just import it here? 
-		// Better to update line 2. But I am in a replace_file_content block for the END of the file.
-		// I will use require inside the function for safety or do a separate edit.
-		// Actually, let's just use the `require` at the top. I'll need to do 2 edits.
-
-		const { optimizeLinkedIn } = require('../services/aiResumeService'); // Dynamic require to avoid top-level edit conflict if possible, but cleaner to edit top.
-		// Actually, I can just do a multi-replace.
-
+		const { optimizeLinkedIn } = require('../services/aiResumeService');
 		const result = await optimizeLinkedIn(resume, targetRole);
 		res.json(result);
 
 	} catch (err) {
 		logger.error('LinkedIn Optimization Error:', err);
-		res.status(500).json({ message: 'Error generating LinkedIn profile' });
+		res.status(500).json({ message: 'Error generating LinkedIn profile', error: err.message });
 	}
 };

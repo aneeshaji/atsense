@@ -222,7 +222,13 @@ class AdminController extends Controller
         }
 
         try {
-            Mail::to($lead->email)->send(new LeadContactEmail($request->subject, $request->body));
+            $mailer = app(\App\Services\PHPMailerService::class);
+            $res = $mailer->sendLeadEmail($lead->email, $lead->name ?? 'Candidate', $request->subject, $request->body);
+            
+            if (!$res['success']) {
+                // Fallback to Laravel Mail facade if PHPMailer encountered an error
+                Mail::to($lead->email)->send(new LeadContactEmail($request->subject, $request->body));
+            }
 
             ActivityLog::record(
                 'EMAIL_SENT',

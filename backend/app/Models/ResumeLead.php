@@ -18,5 +18,18 @@ class ResumeLead extends Model
         'notes',
         'job_title',
         'job_description',
+        'email_consent',
+        'welcome_email_sent_at',
+        'drip_day2_sent_at',
+        'drip_day5_sent_at',
+        'drip_day7_sent_at',
+    ];
+
+    protected $casts = [
+        'email_consent'        => 'boolean',
+        'welcome_email_sent_at' => 'datetime',
+        'drip_day2_sent_at'    => 'datetime',
+        'drip_day5_sent_at'    => 'datetime',
+        'drip_day7_sent_at'    => 'datetime',
     ];
 }

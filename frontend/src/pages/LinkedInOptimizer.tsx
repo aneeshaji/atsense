@@ -59,9 +59,16 @@ const LinkedInOptimizer = () => {
                 resume: resume,
                 targetRole
             });
-            setResult(res.data);
+            if (res.data) {
+                setResult({
+                    headlines: Array.isArray(res.data.headlines) ? res.data.headlines : [],
+                    about: typeof res.data.about === 'string' ? res.data.about : '',
+                    featuredSkills: Array.isArray(res.data.featuredSkills) ? res.data.featuredSkills : [],
+                    experienceImprovements: Array.isArray(res.data.experienceImprovements) ? res.data.experienceImprovements : []
+                });
+            }
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Optimization failed. Please try again.');
+            setError(err.response?.data?.message || err.response?.data?.error || err.message || 'Optimization failed. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -256,7 +263,7 @@ const LinkedInOptimizer = () => {
                             </div>
 
                             <div className="space-y-3">
-                                {result.headlines.map((headline, idx) => (
+                                {(result.headlines || []).map((headline, idx) => (
                                     <div 
                                         key={idx}
                                         className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-4 hover:border-slate-700 transition-colors"
@@ -333,7 +340,7 @@ const LinkedInOptimizer = () => {
                                     </h3>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
-                                    {result.featuredSkills.map((skill, idx) => (
+                                    {(result.featuredSkills || []).map((skill, idx) => (
                                         <span 
                                             key={idx}
                                             className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-bold hover:border-slate-700 transition-colors"
@@ -353,7 +360,7 @@ const LinkedInOptimizer = () => {
                                     </h3>
                                 </div>
                                 <div className="space-y-3">
-                                    {result.experienceImprovements.map((bullet, idx) => (
+                                    {(result.experienceImprovements || []).map((bullet, idx) => (
                                         <div key={idx} className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 leading-relaxed flex items-start gap-2.5">
                                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0"></div>
                                             <span>{bullet}</span>

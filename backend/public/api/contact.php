@@ -222,13 +222,69 @@ $headers[] = 'From: ' . $fromName . ' <' . $fromEmail . '>';
 $headers[] = 'Reply-To: ' . $cleanName . ' <' . $cleanEmail . '>';
 $headers[] = 'X-Mailer: PHP/' . phpversion() . ' (ATSense)';
 
-// 7. Send email via PHP native mail() with envelope sender (-f)
-$additionalParams = '-f ' . escapeshellarg($fromEmail);
-$sent = @mail($toEmail, $mailSubject, $body, implode("\r\n", $headers), $additionalParams);
+// 7. Send email via PHPMailer (with native mail() fallback)
+$sent = false;
 
+// Attempt sending via PHPMailer if composer autoload is present
+if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
+    require_once __DIR__ . '/../../vendor/autoload.php';
+    if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+        try {
+            $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+            $mail->CharSet = 'UTF-8';
+
+            $smtpHost = getenv('MAIL_HOST') ?: ($_ENV['MAIL_HOST'] ?? '');
+            $smtpUser = getenv('MAIL_USERNAME') ?: ($_ENV['MAIL_USERNAME'] ?? '');
+            $smtpPass = getenv('MAIL_PASSWORD') ?: ($_ENV['MAIL_PASSWORD'] ?? '');
+            $smtpPort = (int)(getenv('MAIL_PORT') ?: ($_ENV['MAIL_PORT'] ?? 587));
+            $smtpEnc  = strtolower((string)(getenv('MAIL_ENCRYPTION') ?: ($_ENV['MAIL_ENCRYPTION'] ?? 'tls')));
+
+            if (!empty($smtpHost)) {
+                $mail->isSMTP();
+                $mail->Host = $smtpHost;
+                $mail->Port = $smtpPort;
+                if (!empty($smtpUser) || !empty($smtpPass)) {
+                    $mail->SMTPAuth = true;
+                    $mail->Username = $smtpUser;
+                    $mail->Password = $smtpPass;
+                }
+                if ($smtpEnc === 'ssl' || $smtpPort === 465) {
+                    $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+                } elseif ($smtpEnc === 'tls' || $smtpPort === 587) {
+                    $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                }
+            } else {
+                $mail->isMail();
+            }
+
+            $mail->setFrom($fromEmail, $fromName);
+            $mail->addAddress($toEmail);
+            $mail->addReplyTo($cleanEmail, $cleanName);
+            $mail->isHTML(true);
+            $mail->Subject = $mailSubject;
+            $mail->Body    = $body;
+            $mail->AltBody = strip_tags(str_replace(['<br>', '<br/>', '<br />', '</p>'], "\n", $body));
+
+            $mail->send();
+            $sent = true;
+        } catch (\Throwable $pmEx) {
+            error_log("[ATSense Contact] PHPMailer attempt failed: " . $pmEx->getMessage());
+        }
+    }
+}
+
+// Fallback: PHP native mail() function with envelope sender (-f)
 if (!$sent) {
-    // Retry without additional parameter in case host restricts extra arguments
-    $sent = @mail($toEmail, $mailSubject, $body, implode("\r\n", $headers));
+    try {
+        $additionalParams = '-f ' . escapeshellarg($fromEmail);
+        $sent = @mail($toEmail, $mailSubject, $body, implode("\r\n", $headers), $additionalParams);
+
+        if (!$sent) {
+            $sent = @mail($toEmail, $mailSubject, $body, implode("\r\n", $headers));
+        }
+    } catch (\Throwable $e) {
+        error_log("[ATSense Contact] Native mail() threw exception: " . $e->getMessage());
+    }
 }
 
 if ($sent) {

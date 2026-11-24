@@ -8,9 +8,16 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\ResumeLead;
 use App\Models\ActivityLog;
+use App\Services\PHPMailerService;
 
 class ContactController extends Controller
 {
+    protected PHPMailerService $mailerService;
+
+    public function __construct(PHPMailerService $mailerService)
+    {
+        $this->mailerService = $mailerService;
+    }
     /**
      * Send contact/inquiry email.
      * Uses PHP mail() with envelope sender for cPanel/LiteSpeed hosting,
@@ -167,21 +174,34 @@ HTML;
 
         $sent = false;
 
-        // 5. Primary Sending Mechanism: PHP native mail() function with envelope sender
-        // This is the fastest, most reliable method on LiteSpeed / cPanel Exim
+        // 5. Primary Sending Mechanism: PHPMailer Service (Authenticated SMTP with failover)
         try {
-            $additionalParams = '-f ' . escapeshellarg($fromEmail);
-            $sent = @mail($toEmail, $mailSubject, $body, implode("\r\n", $headers), $additionalParams);
-
+            $mailResult = $this->mailerService->send($toEmail, $mailSubject, $body, '', [
+                'replyTo' => ['email' => $cleanEmail, 'name' => $cleanName],
+            ]);
+            $sent = $mailResult['success'];
             if (!$sent) {
-                // Retry without additional parameter if host restricts extra arguments
-                $sent = @mail($toEmail, $mailSubject, $body, implode("\r\n", $headers));
+                Log::warning('PHPMailer send failed, attempting native fallback: ' . ($mailResult['error'] ?? 'unknown'));
             }
-        } catch (\Throwable $e) {
-            Log::warning('Native mail() dispatch threw exception: ' . $e->getMessage());
+        } catch (\Throwable $pmEx) {
+            Log::warning('PHPMailer execution threw exception: ' . $pmEx->getMessage());
         }
 
-        // Fallback: If native mail returned false and Laravel mailer is configured (e.g. SMTP)
+        // Secondary Fallback: PHP native mail() function with envelope sender
+        if (!$sent) {
+            try {
+                $additionalParams = '-f ' . escapeshellarg($fromEmail);
+                $sent = @mail($toEmail, $mailSubject, $body, implode("\r\n", $headers), $additionalParams);
+
+                if (!$sent) {
+                    $sent = @mail($toEmail, $mailSubject, $body, implode("\r\n", $headers));
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Native mail() dispatch threw exception: ' . $e->getMessage());
+            }
+        }
+
+        // Tertiary Fallback: Laravel Mail facade
         if (!$sent && config('mail.default') !== 'log') {
             try {
                 Mail::html($body, function ($msg) use ($toEmail, $mailSubject, $fromEmail, $fromName, $cleanEmail, $cleanName) {

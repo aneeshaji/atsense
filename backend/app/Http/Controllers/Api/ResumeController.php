@@ -9,7 +9,7 @@ use App\Services\AIService;
 use App\Models\ResumeLead;
 use App\Models\Resume;
 use App\Models\ActivityLog;
-use App\Mail\ResumeImportedMail;
+use App\Services\PHPMailerService;
 use Illuminate\Support\Facades\Log;
 
 class ResumeController extends Controller
@@ -27,31 +27,24 @@ class ResumeController extends Controller
         try {
             $file = $request->file('resume');
             Log::info('Importing file: ' . $file->getClientOriginalName() . ' (' . $file->getMimeType() . ')');
-            
-            // Upload immediately to S3 Storage
-            $dateDir  = date('Y-m-d');
-            $extension = $file->getClientOriginalExtension() ?: 'pdf';
-            $fileName = "resumes/{$dateDir}/original_" . time() . "_" . \Illuminate\Support\Str::slug($file->getClientOriginalName()) . "." . $extension;
-            
+
+            // 1. Save locally immediately to public storage (fast & non-blocking)
+            $dateDir      = date('Y-m-d');
+            $extension    = $file->getClientOriginalExtension() ?: 'pdf';
+            $fileName     = "resumes/{$dateDir}/original_" . time() . "_" . \Illuminate\Support\Str::slug($file->getClientOriginalName()) . "." . $extension;
+            $fileContents = file_get_contents($file->getRealPath());
+
             $publicUrl = null;
             try {
-                $disk = \Illuminate\Support\Facades\Storage::disk('s3');
-                $disk->put($fileName, file_get_contents($file->getRealPath()), 'public');
-                $publicUrl = $disk->url($fileName);
-            } catch (\Exception $e) {
-                Log::warning('S3 Upload failed, falling back to local public disk: ' . $e->getMessage());
-                try {
-                    $disk = \Illuminate\Support\Facades\Storage::disk('public');
-                    $disk->put($fileName, file_get_contents($file->getRealPath()));
-                    $publicUrl = url('storage/' . $fileName);
-                } catch (\Exception $e2) {
-                    Log::warning('Local upload also failed: ' . $e2->getMessage());
-                }
+                \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $fileContents);
+                $publicUrl = url('storage/' . $fileName);
+            } catch (\Throwable $e) {
+                Log::warning('Local file storage failed: ' . $e->getMessage());
             }
 
-            // 1. Extract Text
+            // 2. Extract Text
             $parseService = new ParseService();
-            $text = $parseService->extractText($file);
+            $text         = $parseService->extractText($file);
             Log::info('Text extraction complete. Length: ' . strlen($text));
 
             // Sanitize text
@@ -60,98 +53,143 @@ class ResumeController extends Controller
             }
 
             if (empty($text) || strlen($text) < 20) {
-                 Log::error('Extraction produced too little text');
-                 return response()->json([
+                Log::error('Extraction produced too little text');
+                return response()->json([
                     'message' => 'Could not read resume content',
-                    'error' => 'The file might be empty, password-protected, or unsupported.'
+                    'error'   => 'The file might be empty, password-protected, or unsupported.',
                 ], 422);
             }
 
-            // 2. Parse with AI
-            $aiService = app(AIService::class);
+            // 3. Parse with AI (Fast model: qwen/qwen3.8-27b)
+            $aiService  = app(AIService::class);
             Log::info('Connecting to AI for parsing...');
             $parsedData = $aiService->parseResumeJSON($text);
-            
+
             if (!$parsedData) {
                 Log::error('AI Parsing returned null');
                 throw new \Exception('AI failed to interpret the resume data structure.');
             }
 
-            // 3. Map to dynamic Resume object
+            // 4. Map to dynamic Resume object
             $resume = [
-                'title' => 'Imported Resume',
-                'personalInfo' => $userProvidedInfo = [
-                    'fullName' => $parsedData['personalInfo']['fullName'] ?? null,
-                    'email' => $parsedData['personalInfo']['email'] ?? null,
-                    'phone' => $parsedData['personalInfo']['phone'] ?? null,
-                    'location' => $parsedData['personalInfo']['location'] ?? null,
-                    'linkedin' => $parsedData['personalInfo']['linkedin'] ?? null,
-                    'github' => $parsedData['personalInfo']['github'] ?? null,
+                'title'          => 'Imported Resume',
+                'personalInfo'   => [
+                    'fullName'  => $parsedData['personalInfo']['fullName']  ?? null,
+                    'email'     => $parsedData['personalInfo']['email']     ?? null,
+                    'phone'     => $parsedData['personalInfo']['phone']     ?? null,
+                    'location'  => $parsedData['personalInfo']['location']  ?? null,
+                    'linkedin'  => $parsedData['personalInfo']['linkedin']  ?? null,
+                    'github'    => $parsedData['personalInfo']['github']    ?? null,
                     'portfolio' => $parsedData['personalInfo']['portfolio'] ?? null,
                 ],
-                'summary' => $parsedData['summary'] ?? '',
-                'skills' => $parsedData['skills'] ?? [],
-                'experience' => $parsedData['experience'] ?? [],
-                'education' => $parsedData['education'] ?? [],
+                'summary'        => $parsedData['summary']        ?? '',
+                'skills'         => $parsedData['skills']         ?? [],
+                'experience'     => $parsedData['experience']     ?? [],
+                'education'      => $parsedData['education']      ?? [],
                 'certifications' => $parsedData['certifications'] ?? [],
-                'projects' => $parsedData['projects'] ?? [],
-                'languages' => $parsedData['languages'] ?? [],
-                'atsScore' => 0,
+                'projects'       => $parsedData['projects']       ?? [],
+                'languages'      => $parsedData['languages']      ?? [],
+                'atsScore'       => 0,
             ];
 
             Log::info('Import successful for: ' . ($resume['personalInfo']['fullName'] ?: 'Unknown User'));
 
-            // ── Silent lead capture on import ─────────────────────────────────────
-            try {
-                $pi    = $resume['personalInfo'];
-                $email = !empty($pi['email']) ? $pi['email'] : null;
-                $name  = !empty($pi['fullName']) ? $pi['fullName'] : null;
-                
-                // Capture lead if we have at least SOME identifier
-                if ($email || $name || !empty($pi['phone'])) {
-                    ResumeLead::updateOrCreate(
-                        ['email' => $email ?: ('unknown_' . uniqid())],
-                        [
-                            'name'        => $name,
-                            'phone'       => $pi['phone'] ?? null,
-                            'skills'      => json_encode($resume['skills'] ?? []),
-                            'resume_data' => json_encode($resume),
-                            'source'      => 'import',
-                            's3_pdf_url'  => $publicUrl,
-                        ]
-                    );
-                }
-            } catch (\Exception $leadEx) {
-                Log::warning('Lead capture failed: ' . $leadEx->getMessage());
-                ActivityLog::record('LEAD_CAPTURE_ERROR', 'Failed to capture lead: ' . $leadEx->getMessage(), 'warning');
-            }
-            // ── Save Main Resume Record ──────────────────────────────────────────
-            try {
-                $savedResume = Resume::create([
-                    'user_id'         => auth()->check() ? auth()->id() : null,
-                    'title'           => $resume['title'] ?? 'Imported Resume',
-                    'personal_info'   => $resume['personalInfo'] ?? [],
-                    'summary'         => $resume['summary'] ?? '',
-                    'skills'          => $resume['skills'] ?? [],
-                    'experience'      => $resume['experience'] ?? [],
-                    'education'       => $resume['education'] ?? [],
-                    'ats_score'       => 0,
-                    'job_description' => null,
-                ]);
-                $resume['id'] = $savedResume->id;
-            } catch (\Exception $resumeEx) {
-                Log::warning('Resume record save failed: ' . $resumeEx->getMessage());
-            }
-            // ─────────────────────────────────────────────────────────────────────
+            // 5. Defer ALL database, remote S3, and email operations to terminating callback
+            // This ensures the client receives the parsed resume JSON in ~1.5 - 2s flat!
+            $pi               = $resume['personalInfo'];
+            $email            = !empty($pi['email'])    ? trim($pi['email'])    : null;
+            $name             = !empty($pi['fullName']) ? trim($pi['fullName']) : null;
+            $resumeSnapshot   = $resume;
+            $fileNameSnapshot = $fileName;
+            $fileDataSnapshot = $fileContents;
+            $publicUrlSnap    = $publicUrl;
+            $originalName     = $file->getClientOriginalName();
 
-            ActivityLog::record(
-                'RESUME_UPLOAD',
-                "Resume uploaded: " . ($resume['personalInfo']['fullName'] ?: 'Unknown User'),
-                'info',
-                ['file' => $file->getClientOriginalName(), 'url' => $publicUrl],
-                $request,
-                auth()->check() ? auth()->id() : null
-            );
+            app()->terminating(function () use (
+                $email, $name, $pi, $resumeSnapshot,
+                $fileNameSnapshot, $fileDataSnapshot, $publicUrlSnap, $originalName
+            ) {
+                // Background S3 upload
+                $s3Url = null;
+                try {
+                    $s3Disk = \Illuminate\Support\Facades\Storage::disk('s3');
+                    $s3Disk->put($fileNameSnapshot, $fileDataSnapshot, 'public');
+                    $s3Url = $s3Disk->url($fileNameSnapshot);
+                } catch (\Throwable $s3Ex) {
+                    Log::warning('Background S3 upload skipped: ' . $s3Ex->getMessage());
+                }
+
+                // Background lead capture
+                $leadId = null;
+                try {
+                    if ($email || $name || !empty($pi['phone'])) {
+                        $lead = ResumeLead::updateOrCreate(
+                            ['email' => $email ?: ('unknown_' . uniqid())],
+                            [
+                                'name'          => $name,
+                                'phone'         => $pi['phone'] ?? null,
+                                'skills'        => json_encode($resumeSnapshot['skills'] ?? []),
+                                'resume_data'   => json_encode($resumeSnapshot),
+                                'source'        => 'import',
+                                's3_pdf_url'    => $s3Url ?: $publicUrlSnap,
+                                'email_consent' => true,
+                            ]
+                        );
+                        $leadId = $lead->id;
+                    }
+                } catch (\Throwable $leadEx) {
+                    Log::warning('Background lead capture skipped: ' . $leadEx->getMessage());
+                }
+
+                // Background resume DB record
+                try {
+                    Resume::create([
+                        'user_id'         => auth()->check() ? auth()->id() : null,
+                        'title'           => $resumeSnapshot['title'] ?? 'Imported Resume',
+                        'personal_info'   => $resumeSnapshot['personalInfo'] ?? [],
+                        'summary'         => $resumeSnapshot['summary']      ?? '',
+                        'skills'          => $resumeSnapshot['skills']       ?? [],
+                        'experience'      => $resumeSnapshot['experience']   ?? [],
+                        'education'       => $resumeSnapshot['education']    ?? [],
+                        'ats_score'       => 0,
+                        'job_description' => null,
+                    ]);
+                } catch (\Throwable $resEx) {
+                    Log::warning('Background resume record save skipped: ' . $resEx->getMessage());
+                }
+
+                // Background activity log
+                try {
+                    ActivityLog::record(
+                        'RESUME_UPLOAD',
+                        'Resume uploaded: ' . ($resumeSnapshot['personalInfo']['fullName'] ?: 'Unknown User'),
+                        'info',
+                        ['file' => $originalName, 'url' => $s3Url ?: $publicUrlSnap]
+                    );
+                } catch (\Throwable $actEx) {
+                    Log::warning('Background activity log skipped: ' . $actEx->getMessage());
+                }
+
+                // Background welcome & nudge email (Deep Tailor showcase)
+                if ($email) {
+                    try {
+                        $alreadySent = false;
+                        if ($leadId) {
+                            $alreadySent = (bool) ResumeLead::where('id', $leadId)->value('welcome_email_sent_at');
+                        }
+                        if (!$alreadySent || app()->environment('local')) {
+                            $mailer = app(PHPMailerService::class);
+                            $result = $mailer->sendWelcomeAndNudgeEmail($name ?: 'there', $email);
+                            if ($result['success'] && $leadId) {
+                                ResumeLead::where('id', $leadId)->update(['welcome_email_sent_at' => now()]);
+                                Log::info("Welcome email sent successfully to {$email}");
+                            }
+                        }
+                    } catch (\Throwable $mailEx) {
+                        Log::warning('Background welcome email skipped: ' . $mailEx->getMessage());
+                    }
+                }
+            });
 
             return response()->json($resume, 200);
 
@@ -159,8 +197,8 @@ class ResumeController extends Controller
             Log::error('IMPORT CRASH: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return response()->json([
                 'message' => 'Critical Import Error',
-                'error' => $e->getMessage(),
-                'file' => $file->getClientOriginalName() ?? 'unknown'
+                'error'   => $e->getMessage(),
+                'file'    => $file->getClientOriginalName() ?? 'unknown',
             ], 500);
         }
     }

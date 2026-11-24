@@ -14,7 +14,7 @@ class AIService
     public function __construct()
     {
         $this->apiKey = env('GROQ_API_KEY');
-        $this->model  = env('GROQ_MODEL', 'openai/gpt-oss-120b');
+        $this->model  = env('GROQ_MODEL', 'qwen/qwen3.8-27b');
     }
 
     /**
@@ -22,26 +22,32 @@ class AIService
      */
     protected function chat($messages, $temperature = 0.7, $json = false)
     {
-        $modelsToTry = array_unique([
+        $modelsToTry = array_values(array_unique(array_filter([
+            'qwen/qwen3.8-27b',
             $this->model,
-            'openai/gpt-oss-120b',
             'openai/gpt-oss-20b',
-            'qwen/qwen3.8-27b'
-        ]);
+            'openai/gpt-oss-120b',
+        ])));
 
         $lastException = null;
 
         foreach ($modelsToTry as $candidateModel) {
             try {
-                $response = Http::timeout(60)->withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type' => 'application/json',
-                ])->post($this->baseUrl . '/chat/completions', [
+                $payload = [
                     'model' => $candidateModel,
                     'messages' => $messages,
                     'temperature' => $temperature,
-                    'response_format' => $json ? ['type' => 'json_object'] : null,
-                ]);
+                    'max_tokens' => 3000,
+                ];
+
+                if ($json) {
+                    $payload['response_format'] = ['type' => 'json_object'];
+                }
+
+                $response = Http::timeout(45)->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json',
+                ])->post($this->baseUrl . '/chat/completions', $payload);
 
                 if ($response->successful()) {
                     return $response->json()['choices'][0]['message']['content'];
@@ -240,39 +246,124 @@ Return STRICT JSON containing:
 
     protected function cleanJson($content)
     {
+        $content = trim((string)$content);
         // Strip Triple Backticks if present
-        $content = preg_replace('/^```json\s*/i', '', $content);
-        $content = preg_replace('/^```\s*/i', '', $content);
+        $content = preg_replace('/^```(?:json)?\s*/i', '', $content);
         $content = preg_replace('/\s*```$/i', '', $content);
-        return trim($content);
+        $content = trim($content);
+
+        // If surrounding text is present, extract outermost JSON object
+        if (!empty($content) && $content[0] !== '{' && preg_match('/\{[\s\S]*\}/', $content, $matches)) {
+            $content = $matches[0];
+        }
+
+        return $content;
     }
 
     public function optimizeLinkedInProfile($resume, $targetRole)
     {
-        // Handle $resume as either object or array
-        $resumeData = is_array($resume) ? $resume : (array)$resume;
-        $skills = implode(', ', $resumeData['skills'] ?? []);
-        $experience = json_encode($resumeData['experience'] ?? []);
-        $roleContext = $targetRole ? "Targeting Role: $targetRole" : "General Professional Profile";
+        // Handle $resume as Eloquent model, array, stdClass, or JSON string
+        if (is_object($resume) && method_exists($resume, 'toArray')) {
+            $resumeData = $resume->toArray();
+        } elseif (is_string($resume)) {
+            $resumeData = json_decode($resume, true) ?: [];
+        } else {
+            $resumeData = json_decode(json_encode($resume), true) ?: [];
+        }
+
+        $personalInfo = $resumeData['personalInfo'] ?? $resumeData['personal_info'] ?? [];
+        $candidateName = $personalInfo['fullName'] ?? $personalInfo['full_name'] ?? ($resumeData['title'] ?? 'Candidate');
+        $summary = $resumeData['summary'] ?? '';
+
+        // Normalize skills into clean string and array
+        $skillsData = $resumeData['skills'] ?? [];
+        $skillsList = [];
+        if (is_string($skillsData)) {
+            $skillsList = array_values(array_filter(array_map('trim', explode(',', $skillsData))));
+            $skillsStr = $skillsData;
+        } elseif (is_array($skillsData)) {
+            foreach ($skillsData as $item) {
+                if (is_string($item)) {
+                    $skillsList[] = trim($item);
+                } elseif (is_array($item)) {
+                    $skillsList[] = implode(', ', array_filter(array_map('strval', $item)));
+                }
+            }
+            $skillsStr = implode(', ', $skillsList);
+        } else {
+            $skillsStr = '';
+        }
+
+        // Normalize experience
+        $experienceData = $resumeData['experience'] ?? [];
+        $experienceSummary = is_array($experienceData) ? json_encode(array_slice($experienceData, 0, 5)) : (string)$experienceData;
+
+        $roleContext = $targetRole ? "Targeting Role: {$targetRole}" : "General Professional Profile";
 
         $prompt = "
-You are a LinkedIn Viral Growth Expert. Transform this resume into a high-converting LinkedIn Profile.
+You are a LinkedIn Viral Growth Expert and Executive Career Coach. Transform this resume into a high-converting, recruiter-magnet LinkedIn Profile.
 {$roleContext}
 
-Resume Data:
-- Skills: {$skills}
-- Experience: {$experience}
+Candidate Context:
+- Name: {$candidateName}
+- Summary: {$summary}
+- Skills: {$skillsStr}
+- Experience: {$experienceSummary}
 
-Return STRICT JSON:
+Generate the following LinkedIn Profile sections in STRICT JSON:
+1. headlines: Array of 3 high-impact, keyword-rich headlines (different styles: executive, metric-focused, viral hook).
+2. about: A compelling 1st-person narrative (2-3 paragraphs, max 250 words) telling a cohesive career story with key achievements and a clear call to connect.
+3. featuredSkills: Array of 5 to 10 top relevant skills or technologies to pin.
+4. experienceImprovements: Array of 3 punchy, metric-driven, social-optimized bullet points for the latest role.
+
+Return STRICT JSON format with double quotes only:
 {
-  'headlines': ['Viral headline 1', 'Viral headline 2'],
-  'about': 'Engaging 1st-person professional story (max 200 words)',
-  'featuredSkills': ['Top Skill 1', 'Top Skill 2'],
-  'experienceImprovements': ['Action-oriented achievement bullet 1', 'Metric-driven bullet 2']
+  \"headlines\": [\"Viral Headline Option 1\", \"Viral Headline Option 2\", \"Viral Headline Option 3\"],
+  \"about\": \"First person career story...\",
+  \"featuredSkills\": [\"Skill 1\", \"Skill 2\", \"Skill 3\"],
+  \"experienceImprovements\": [\"Achievement bullet 1\", \"Achievement bullet 2\", \"Achievement bullet 3\"]
 }
 ";
+
         $response = $this->chat([['role' => 'user', 'content' => $prompt]], 0.7, true);
-        return json_decode($response, true);
+        $cleaned = $this->cleanJson($response);
+        $data = json_decode($cleaned, true);
+
+        if (!$data && preg_match('/\{[\s\S]*\}/', $cleaned, $matches)) {
+            $data = json_decode($matches[0], true);
+        }
+
+        // Guarantee all required fields for frontend
+        $headlines = (isset($data['headlines']) && is_array($data['headlines']) && !empty($data['headlines']))
+            ? array_values(array_filter($data['headlines'], 'is_string'))
+            : [
+                ($targetRole ?: 'Senior Professional') . ' | Driving Scale, Growth & Operational Excellence',
+                'Results-Driven Leader specializing in ' . (!empty($skillsList) ? $skillsList[0] : 'Strategic Execution'),
+                'Innovator & Problem Solver | Building High-Impact Solutions'
+            ];
+
+        $about = (isset($data['about']) && is_string($data['about']) && trim($data['about']) !== '')
+            ? $data['about']
+            : ($summary ?: "Dedicated {$targetRole} with a proven track record of architecting scalable solutions, optimizing performance, and delivering measurable results.");
+
+        $featuredSkills = (isset($data['featuredSkills']) && is_array($data['featuredSkills']) && !empty($data['featuredSkills']))
+            ? array_values(array_filter($data['featuredSkills'], 'is_string'))
+            : (!empty($skillsList) ? array_slice($skillsList, 0, 8) : ['Problem Solving', 'Strategic Leadership', 'Process Optimization', 'Project Management']);
+
+        $experienceImprovements = (isset($data['experienceImprovements']) && is_array($data['experienceImprovements']) && !empty($data['experienceImprovements']))
+            ? array_values(array_filter($data['experienceImprovements'], 'is_string'))
+            : [
+                'Spearheaded key initiatives driving measurable performance, efficiency, and revenue gains.',
+                'Designed and executed end-to-end solutions that streamlined team workflows and accelerated delivery timelines.',
+                'Collaborated with cross-functional stakeholders to align operational objectives with business strategy.'
+            ];
+
+        return [
+            'headlines' => $headlines,
+            'about' => $about,
+            'featuredSkills' => $featuredSkills,
+            'experienceImprovements' => $experienceImprovements,
+        ];
     }
 
     /**
@@ -380,7 +471,18 @@ Required Format:
   "languages": ["Language (Proficiency)"]
 }
 ';
-        $response = $this->chat([['role' => 'user', 'content' => $prompt]], 0.2, true);
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => 'You are an Expert Resume Parser. Output ONLY a valid JSON object matching the requested schema. No markdown formatting, no thinking tags, no commentary.'
+            ],
+            [
+                'role' => 'user',
+                'content' => $prompt
+            ]
+        ];
+
+        $response = $this->chat($messages, 0.1, true);
         return json_decode($this->cleanJson($response), true);
     }
 
