@@ -418,23 +418,23 @@ export default function Builder() {
                                     {/* Gauge ring */}
                                     <div className="relative w-7 h-7 flex items-center justify-center shrink-0">
                                         <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
-                                            <circle cx="18" cy="18" r="14" fill="none" stroke={atsScore > 0 ? '#d1fae5' : 'rgba(255,255,255,0.3)'} strokeWidth="4" />
-                                            <circle cx="18" cy="18" r="14" fill="none" stroke={atsScore > 0 ? scoreColor : 'rgba(255,255,255,0.9)'} strokeWidth="4" strokeDasharray={`${(atsScore / 100) * 87.96} 87.96`} strokeLinecap="round" className="transition-all duration-1000" />
+                                            <circle cx="18" cy="18" r="14" fill="none" stroke={!isResumePopulated ? '#cbd5e1' : atsScore > 0 ? '#d1fae5' : 'rgba(255,255,255,0.3)'} strokeWidth="4" />
+                                            <circle cx="18" cy="18" r="14" fill="none" stroke={!isResumePopulated ? '#94a3b8' : atsScore > 0 ? scoreColor : 'rgba(255,255,255,0.9)'} strokeWidth="4" strokeDasharray={`${(atsScore / 100) * 87.96} 87.96`} strokeLinecap="round" className="transition-all duration-1000" />
                                         </svg>
                                         {analyzing ? (
-                                            <Activity size={10} className={`animate-spin ${atsScore > 0 ? 'text-slate-500' : 'text-white'}`} />
+                                            <Activity size={10} className={`animate-spin ${!isResumePopulated || atsScore > 0 ? 'text-slate-500' : 'text-white'}`} />
                                         ) : (
-                                            <span className={`text-[8px] font-black tabular-nums ${atsScore > 0 ? 'text-slate-800' : 'text-white'}`}>{atsScore > 0 ? `${atsScore}%` : '?'}</span>
+                                            <span className={`text-[8px] font-black tabular-nums ${!isResumePopulated ? 'text-slate-500' : atsScore > 0 ? 'text-slate-800' : 'text-white'}`}>{atsScore > 0 ? `${atsScore}%` : '?'}</span>
                                         )}
                                     </div>
                                     {/* Label */}
                                     <div className="text-left leading-none">
-                                        <p className={`text-[11px] font-extrabold leading-none mb-0.5 ${atsScore > 0 ? 'text-slate-800' : 'text-white'}`}>
+                                        <p className={`text-[11px] font-extrabold leading-none mb-0.5 ${!isResumePopulated ? 'text-slate-500' : atsScore > 0 ? 'text-slate-800' : 'text-white'}`}>
                                             {analyzing ? 'Analyzing…' : atsScore > 0 ? 'ATS Score' : 'ATS Check'}
                                         </p>
                                         <div className="flex items-center gap-1">
                                             {atsScore > 0 && <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: scoreStatusColor }} />}
-                                            <p className={`text-[8px] font-semibold uppercase tracking-wide ${atsScore > 0 ? 'text-slate-500' : 'text-white/80'}`}>
+                                            <p className={`text-[8px] font-semibold uppercase tracking-wide ${!isResumePopulated || atsScore > 0 ? 'text-slate-500' : 'text-white/80'}`}>
                                                 {analyzing ? 'Please wait' : atsScore > 0 ? scoreStatusLabel : 'Run Now'}
                                             </p>
                                         </div>
@@ -470,15 +470,15 @@ export default function Builder() {
                                     {isResumePopulated && (
                                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
                                     )}
-                                    <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0 shadow-inner">
-                                        <Sparkles size={18} className="text-white animate-pulse" />
+                                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-inner ${isResumePopulated ? 'bg-white/20' : 'bg-slate-300/60'}`}>
+                                        <Sparkles size={18} className={isResumePopulated ? 'text-white animate-pulse' : 'text-slate-500'} />
                                     </div>
                                     <div className="text-left">
                                         <div className="flex items-center gap-1.5 leading-none">
-                                            <span className="text-[14px] font-black text-white">Deep Tailor</span>
-                                            <span className="px-1.5 py-0.5 rounded bg-white/25 text-[9px] font-extrabold uppercase tracking-wide text-white">AI</span>
+                                            <span className={`text-[14px] font-black ${isResumePopulated ? 'text-white' : 'text-slate-500'}`}>Deep Tailor</span>
+                                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wide ${isResumePopulated ? 'bg-white/25 text-white' : 'bg-slate-300 text-slate-600'}`}>AI</span>
                                         </div>
-                                        <span className="block text-[10px] font-semibold text-purple-100/90 mt-1 leading-none">
+                                        <span className={`block text-[10px] font-semibold mt-1 leading-none ${isResumePopulated ? 'text-purple-100/90' : 'text-slate-400'}`}>
                                             Auto-Match to Any Job
                                         </span>
                                     </div>
