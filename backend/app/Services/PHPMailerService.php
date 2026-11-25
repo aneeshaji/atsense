@@ -214,13 +214,13 @@ class PHPMailerService
                         </td>
                         <!-- Text & Button Column -->
                         <td valign="top" style="vertical-align:top;">
-                          <div style="margin:0 0 4px;">
-                            <span style="display:inline-block;background:#8b5cf6;color:#ffffff;font-size:10px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:4px;margin-right:6px;vertical-align:middle;">
-                              OUR MAIN FEATURE
+                          <div style="margin:0 0 6px;">
+                            <span style="display:inline-block;background:#8b5cf6;color:#ffffff;font-size:10px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;margin-bottom:6px;">
+                              FLAGSHIP AI TOOL
                             </span>
-                            <span style="color:#ffffff;font-size:17px;font-weight:800;vertical-align:middle;">
-                              1. Deep Tailor to Any Job
-                            </span>
+                            <div style="color:#ffffff;font-size:17px;font-weight:800;line-height:1.3;">
+                              Deep Tailor to Any Job
+                            </div>
                           </div>
                           <p style="margin:8px 0 16px;color:#cbd5e1;font-size:13.5px;line-height:1.6;">
                             Our flagship AI technology: paste any job description, and <strong>Deep Tailor</strong> rewrites your experience bullet points, injects exact role keywords, and mirrors qualification phrases to maximize your match score in one click.
@@ -263,7 +263,7 @@ class PHPMailerService
                         <!-- Text & Button Column -->
                         <td valign="top" style="vertical-align:top;">
                           <p style="margin:0 0 6px;color:#ffffff;font-size:15px;font-weight:700;">
-                            2. Check Your ATS Match Score
+                            Check Your ATS Match Score
                           </p>
                           <p style="margin:0 0 14px;color:#94a3b8;font-size:13px;line-height:1.55;">
                             Get an instant breakdown showing exactly where your resume loses points: missing skill keywords, formatting risks, and readability score.
@@ -306,7 +306,7 @@ class PHPMailerService
                         <!-- Text & Button Column -->
                         <td valign="top" style="vertical-align:top;">
                           <p style="margin:0 0 6px;color:#ffffff;font-size:15px;font-weight:700;">
-                            3. Optimize Your LinkedIn Profile
+                            Optimize Your LinkedIn Profile
                           </p>
                           <p style="margin:0 0 14px;color:#94a3b8;font-size:13px;line-height:1.55;">
                             Headhunters search LinkedIn daily. Let AI rewrite your headline, about section, and experience to rank at the top of recruiter searches.
@@ -372,13 +372,13 @@ HTML;
         $altBody = "Hi {$safeName},\n\n"
             . "Your resume is parsed & ready in ATSense Career Studio!\n\n"
             . "Next Step: Use Deep Tailor to beat applicant tracking bots.\n\n"
-            . "1. Deep Tailor to Any Job (OUR MAIN FEATURE):\n"
+            . "• Deep Tailor to Any Job (Flagship AI Tool):\n"
             . "Paste any job description and let AI tailor your resume, keywords, and bullet points to match the role:\n"
             . "{$builderUrl}\n\n"
-            . "2. Check Your ATS Match Score:\n"
+            . "• Check Your ATS Match Score:\n"
             . "Audit your resume for missing keywords and formatting traps:\n"
             . "{$graderUrl}\n\n"
-            . "3. Optimize Your LinkedIn Profile:\n"
+            . "• Optimize Your LinkedIn Profile:\n"
             . "Rewrite your headline and summary to attract recruiters:\n"
             . "{$linkedinUrl}\n\n"
             . "These tools are 100% free — no account required.\n\n"
