@@ -69,17 +69,23 @@ class AIController extends Controller
 
             // ── Silent lead update after optimization ──────────────────────────
             try {
-                $email = $resume['personalInfo']['email'] ?? null;
+                $email = !empty($resume['personalInfo']['email']) ? trim($resume['personalInfo']['email']) : null;
+                $name  = !empty($resume['personalInfo']['fullName']) ? trim($resume['personalInfo']['fullName']) : null;
+                $phone = !empty($resume['personalInfo']['phone']) ? trim($resume['personalInfo']['phone']) : null;
                 if ($email) {
+                    $leadData = [
+                        'source'          => 'optimized',
+                        'job_title'       => $jobTitle,
+                        'job_description' => $jobDescription,
+                        'skills'          => json_encode($resume['skills'] ?? []),
+                        'resume_data'     => json_encode($resume),
+                    ];
+                    if ($name)  $leadData['name']  = $name;
+                    if ($phone) $leadData['phone'] = $phone;
+
                     ResumeLead::updateOrCreate(
                         ['email' => $email],
-                        [
-                            'source'          => 'optimized',
-                            'job_title'       => $jobTitle,
-                            'job_description' => $jobDescription,
-                            'skills'          => json_encode($resume['skills'] ?? []),
-                            'resume_data'     => json_encode($resume),
-                        ]
+                        $leadData
                     );
                 }
             } catch (\Exception $leadEx) {
@@ -124,24 +130,33 @@ class AIController extends Controller
                     $dompdf->render();
                     $pdfOutput = $dompdf->output();
     
-                    // Upload to S3
-                    $dateDir  = date('Y-m-d');
-                    $safeName = Str::slug($name);
-                    $fileName = "resumes/{$dateDir}/optimized_{$safeName}_" . time() . ".pdf";
-                    
-                    $disk = \Illuminate\Support\Facades\Storage::disk('s3');
-                    $disk->put($fileName, $pdfOutput, 'public');
-                    $publicUrl = $disk->url($fileName);
-    
+                    // Upload to S3 (with local public disk fallback)
+                    $dateDir   = date('Y-m-d');
+                    $safeName  = Str::slug($name);
+                    $fileName  = "resumes/{$dateDir}/optimized_{$safeName}_" . time() . ".pdf";
+                    $publicUrl = null;
+
+                    try {
+                        $disk = \Illuminate\Support\Facades\Storage::disk('s3');
+                        $disk->put($fileName, $pdfOutput, 'public');
+                        $publicUrl = $disk->url($fileName);
+                    } catch (\Throwable $s3Ex) {
+                        Log::warning('S3 upload failed after optimize, using local public disk: ' . $s3Ex->getMessage());
+                        \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $pdfOutput);
+                        $publicUrl = url('storage/' . $fileName);
+                    }
+
                     // Update Lead with the optimized file URL
-                    if ($email) {
+                    if ($email && $publicUrl) {
                         ResumeLead::where('email', $email)->update([
                             's3_pdf_url' => $publicUrl,
                         ]);
                     }
-                    
+
                     // Also attach public URL to the response if needed
-                    $resume['s3_pdf_url'] = $publicUrl;
+                    if ($publicUrl) {
+                        $resume['s3_pdf_url'] = $publicUrl;
+                    }
                 }
             } catch (\Exception $storeEx) {
                 Log::error('Optimized storage update failed: ' . $storeEx->getMessage());

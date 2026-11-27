@@ -688,4 +688,131 @@ HTML;
             $altBody
         );
     }
+
+    /**
+     * Send confirmation email when a visitor subscribes to the ATSense Newsletter.
+     */
+    public function sendNewsletterWelcomeEmail(string $email): array
+    {
+        $builderUrl = 'https://atsense.online/builder';
+        $graderUrl  = 'https://atsense.online/resume-grader';
+
+        $html = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#0b0f19;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e2e8f0;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0b0f19;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background-color:#111827;border-radius:16px;border:1px solid #1e293b;overflow:hidden;">
+          <tr>
+            <td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:28px 32px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;">Welcome to ATSense Career Insights</h1>
+              <p style="margin:6px 0 0;color:#e0e7ff;font-size:13px;">Weekly ATS strategies, keyword trends &amp; job search tips</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 32px;">
+              <p style="margin:0 0 14px;font-size:15px;color:#f8fafc;font-weight:600;">You&rsquo;re subscribed!</p>
+              <p style="margin:0 0 22px;font-size:14px;color:#94a3b8;line-height:1.65;">
+                Thanks for joining the ATSense newsletter. While you&rsquo;re here, try our free AI tools to get your resume past automated recruiter filters today:
+              </p>
+              <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="padding-right:10px;">
+                    <a href="{$builderUrl}" style="display:inline-block;padding:11px 20px;background:#6366f1;color:#ffffff;text-decoration:none;font-size:13px;font-weight:700;border-radius:8px;">Open AI Builder &rarr;</a>
+                  </td>
+                  <td>
+                    <a href="{$graderUrl}" style="display:inline-block;padding:11px 20px;background:#1e293b;border:1px solid #334155;color:#e2e8f0;text-decoration:none;font-size:13px;font-weight:700;border-radius:8px;">Free ATS Check</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#0b0f19;border-top:1px solid #1e293b;padding:16px 24px;text-align:center;font-size:11px;color:#64748b;">
+              <a href="https://atsense.online" style="color:#818cf8;text-decoration:none;">ATSense.online</a> &middot; Intelligent Career Platform
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+HTML;
+
+        $altBody = "Welcome to ATSense Career Insights!\n\n"
+            . "You're subscribed to weekly ATS strategies and job search tips.\n"
+            . "Try our free AI Resume Builder: {$builderUrl}\n"
+            . "Free ATS Check: {$graderUrl}\n\n"
+            . "– The ATSense Team";
+
+        return $this->send(
+            $email,
+            "You're subscribed to ATSense Career Insights",
+            $html,
+            $altBody
+        );
+    }
+
+    /**
+     * Send confirmation auto-reply when a visitor submits a Contact Enquiry.
+     */
+    public function sendContactConfirmationEmail(string $name, string $email, string $subject = ''): array
+    {
+        $safeName    = htmlspecialchars($name ?: 'there', ENT_QUOTES, 'UTF-8');
+        $safeSubject = htmlspecialchars($subject ?: 'General Inquiry', ENT_QUOTES, 'UTF-8');
+
+        $html = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background-color:#0b0f19;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e2e8f0;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0b0f19;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background-color:#111827;border-radius:16px;border:1px solid #1e293b;overflow:hidden;">
+          <tr>
+            <td style="background:linear-gradient(135deg,#4f46e5,#06b6d4);padding:26px 32px;">
+              <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:800;">We received your message</h1>
+              <p style="margin:6px 0 0;color:#e0e7ff;font-size:13px;">Reference: {$safeSubject}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 32px;">
+              <p style="margin:0 0 14px;font-size:15px;color:#f8fafc;font-weight:600;">Hi {$safeName},</p>
+              <p style="margin:0 0 18px;font-size:14px;color:#94a3b8;line-height:1.65;">
+                Thank you for reaching out to ATSense. Our support team has received your inquiry and will reply within 24 hours.
+              </p>
+              <p style="margin:0;font-size:12px;color:#64748b;">
+                If you need to add more details, simply reply to this email.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#0b0f19;border-top:1px solid #1e293b;padding:16px 24px;text-align:center;font-size:11px;color:#64748b;">
+              <a href="https://atsense.online" style="color:#818cf8;text-decoration:none;">ATSense.online</a> &middot; Support Team
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+HTML;
+
+        $altBody = "Hi {$name},\n\n"
+            . "Thank you for reaching out to ATSense ({$subject}). Our team has received your message and will reply within 24 hours.\n\n"
+            . "– The ATSense Support Team";
+
+        return $this->send(
+            ['email' => $email, 'name' => $name],
+            "We received your message — ATSense Support",
+            $html,
+            $altBody
+        );
+    }
 }

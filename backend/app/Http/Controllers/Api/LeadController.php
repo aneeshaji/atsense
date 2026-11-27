@@ -12,8 +12,8 @@ class LeadController extends Controller
 {
     /**
      * Capture lead at import time.
-     * Called immediately after a resume is parsed — stores identity + resume data.
-     * Uses updateOrCreate on email to prevent duplicates.
+     * Always creates a NEW row — duplicate uploads are intentional and tracked.
+     * Dedup only happens for welcome emails (checked by email across all rows).
      */
     public function capture(Request $request)
     {
@@ -22,9 +22,9 @@ class LeadController extends Controller
             $skills       = $request->input('skills', []);
             $resumeData   = $request->input('resume', null);
 
-            $email = $personalInfo['email'] ?? null;
-            $name  = $personalInfo['fullName'] ?? null;
-            $phone = $personalInfo['phone'] ?? null;
+            $email = $request->input('email') ?? ($personalInfo['email'] ?? null);
+            $name  = $request->input('name') ?? ($personalInfo['fullName'] ?? null);
+            $phone = $request->input('phone') ?? ($personalInfo['phone'] ?? null);
 
             // Only capture if we have at least one identifying field
             if (!$email && !$name && !$phone) {
@@ -46,10 +46,8 @@ class LeadController extends Controller
 
             $leadEmail = $email ?: ('unknown_' . uniqid());
 
-            ResumeLead::updateOrCreate(
-                ['email' => $leadEmail],
-                $data
-            );
+            // Always create new — retries/duplicates are intentional and shown in Admin
+            ResumeLead::create(array_merge(['email' => $leadEmail], $data));
 
             ActivityLog::record(
                 'LEAD_CAPTURED',

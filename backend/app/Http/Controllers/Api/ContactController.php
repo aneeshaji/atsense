@@ -57,7 +57,7 @@ class ContactController extends Controller
         $cleanSubject = str_replace(["\r", "\n"], '', $subject);
 
         // Determine destination and sender email addresses
-        $toEmail   = env('CONTACT_MAIL_TO', env('MAIL_FROM_ADDRESS', 'support@atsense.online'));
+        $toEmail   = env('CONTACT_MAIL_TO') ?: env('MAIL_FROM_ADDRESS', 'support@atsense.online');
         $fromEmail = env('MAIL_FROM_ADDRESS', 'support@atsense.online');
         $fromName  = env('MAIL_FROM_NAME', 'ATSense Platform');
 
@@ -218,14 +218,27 @@ HTML;
 
         // 6. Record inquiry into Database (ResumeLead + ActivityLog)
         try {
-            ResumeLead::create([
-                'name'    => $cleanName,
-                'email'   => $cleanEmail,
-                'phone'   => $phone,
-                'source'  => $type === 'newsletter' ? 'newsletter_subscriber' : 'contact_inquiry',
-                'notes'   => ($subject ? "[Subject: {$subject}] " : "") . $message,
-                'status'  => 'new',
-            ]);
+            if ($type === 'newsletter') {
+                ResumeLead::updateOrCreate(
+                    ['email' => $cleanEmail],
+                    [
+                        'name'   => $cleanName !== 'ATSense Visitor' ? $cleanName : null,
+                        'source' => 'newsletter_subscriber',
+                        'status' => 'new',
+                    ]
+                );
+            } else {
+                ResumeLead::updateOrCreate(
+                    ['email' => $cleanEmail],
+                    [
+                        'name'   => $cleanName,
+                        'phone'  => $phone ?: null,
+                        'source' => 'contact_inquiry',
+                        'notes'  => ($subject ? "[Subject: {$subject}] " : "") . $message,
+                        'status' => 'new',
+                    ]
+                );
+            }
 
             ActivityLog::record(
                 'CONTACT_INQUIRY',
@@ -237,6 +250,17 @@ HTML;
         } catch (\Throwable $e) {
             // Non-blocking: DB downtime should never crash email inquiry
             Log::info('Lead record skipped: ' . $e->getMessage());
+        }
+
+        // 7. Send confirmation / welcome email back to visitor via PHPMailer
+        try {
+            if ($type === 'newsletter') {
+                $this->mailerService->sendNewsletterWelcomeEmail($cleanEmail);
+            } else {
+                $this->mailerService->sendContactConfirmationEmail($cleanName, $cleanEmail, $cleanSubject);
+            }
+        } catch (\Throwable $confirmEx) {
+            Log::warning('Visitor confirmation email skipped: ' . $confirmEx->getMessage());
         }
 
         // 7. Response

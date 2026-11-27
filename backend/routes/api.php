@@ -35,6 +35,9 @@ Route::post('/admin/login', [AdminController::class, 'login']);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/admin/logout', [AdminController::class, 'logout']);
     Route::get('/admin/leads', [AdminController::class, 'getLeads']);
+    Route::post('/admin/leads', [AdminController::class, 'createLead']);
+    Route::post('/admin/leads/bulk-status', [AdminController::class, 'bulkUpdateLeads']);
+    Route::post('/admin/leads/bulk-email', [AdminController::class, 'bulkEmailLeads']);
     Route::get('/admin/stats', [AdminController::class, 'getStats']);
     Route::put('/admin/leads/{id}', [AdminController::class, 'updateLead']);
     Route::delete('/admin/leads/{id}', [AdminController::class, 'deleteLead']);

@@ -112,34 +112,47 @@ class ExportController extends Controller
             \Illuminate\Support\Facades\Log::info('Attempting R2 upload for: ' . ($email ?? 'no-email'));
 
             if ($email || $name || $phone) {
-                $dateDir  = date('Y-m-d');
-                $safeName = \Illuminate\Support\Str::slug($name ?: 'user');
-                $fileName = "resumes/{$dateDir}/{$safeName}_" . time() . ".pdf";
+                $dateDir   = date('Y-m-d');
+                $safeName  = \Illuminate\Support\Str::slug($name ?: 'user');
+                $fileName  = "resumes/{$dateDir}/{$safeName}_" . time() . ".pdf";
+                $publicUrl = null;
 
-                $disk   = \Illuminate\Support\Facades\Storage::disk('s3');
-                $result = $disk->put($fileName, $pdfOutput, 'public');
-
-                \Illuminate\Support\Facades\Log::info('R2 Put Result: ' . ($result ? 'Success' : 'Failed'));
-
-                if ($result) {
-                    // Build the public URL for this object
-                    $publicUrl = $disk->url($fileName);
-
-                    // Save the URL back to the lead record so admin can download it
-                    $leadEmail = $email ?: 'unknown_' . uniqid();
-                    ResumeLead::updateOrCreate(
-                        ['email' => $leadEmail],
-                        [
-                            'name'        => $name,
-                            'phone'       => $phone,
-                            's3_pdf_url'  => $publicUrl,
-                            'resume_data' => json_encode($resumeData),
-                            'source'      => 'export',
-                        ]
-                    );
-
-                    \Illuminate\Support\Facades\Log::info('Lead s3_pdf_url saved: ' . $publicUrl);
+                try {
+                    $disk   = \Illuminate\Support\Facades\Storage::disk('s3');
+                    $result = $disk->put($fileName, $pdfOutput, 'public');
+                    if ($result) {
+                        $publicUrl = $disk->url($fileName);
+                    }
+                } catch (\Throwable $s3Ex) {
+                    \Illuminate\Support\Facades\Log::warning('Export S3 upload failed, using local public disk: ' . $s3Ex->getMessage());
                 }
+
+                if (!$publicUrl) {
+                    try {
+                        \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $pdfOutput);
+                        $publicUrl = url('storage/' . $fileName);
+                    } catch (\Throwable $pubEx) {
+                        \Illuminate\Support\Facades\Log::warning('Export local public disk failed: ' . $pubEx->getMessage());
+                    }
+                }
+
+                // Always update the lead's latest resume_data & PDF URL
+                $leadEmail = $email ?: 'unknown_' . uniqid();
+                $payload = [
+                    'name'        => $name,
+                    'phone'       => $phone,
+                    'skills'      => json_encode($resumeData['skills'] ?? []),
+                    'resume_data' => json_encode($resumeData),
+                    'source'      => 'export',
+                ];
+                if ($publicUrl) {
+                    $payload['s3_pdf_url'] = $publicUrl;
+                }
+
+                ResumeLead::updateOrCreate(
+                    ['email' => $leadEmail],
+                    $payload
+                );
             }
         } catch (\Exception $leadEx) {
             \Illuminate\Support\Facades\Log::error('Lead snapshot failed: ' . $leadEx->getMessage());

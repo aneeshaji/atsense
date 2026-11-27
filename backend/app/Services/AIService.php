@@ -43,8 +43,11 @@ class AIService
                 if ($json) {
                     $payload['response_format'] = ['type' => 'json_object'];
                 }
+                if (str_contains($candidateModel, 'qwen')) {
+                    $payload['reasoning_effort'] = 'none';
+                }
 
-                $response = Http::timeout(45)->withHeaders([
+                $response = Http::connectTimeout(5)->timeout(25)->withHeaders([
                     'Authorization' => 'Bearer ' . $this->apiKey,
                     'Content-Type' => 'application/json',
                 ])->post($this->baseUrl . '/chat/completions', $payload);
@@ -416,7 +419,7 @@ Return STRICT JSON matching this interface:
 You are an Expert Resume Parser. Extract ALL data from the following Resume Text into STRICT JSON.
 
 Resume Text:
-' . substr($text, 0, 15000) . '
+' . substr($text, 0, 9000) . '
 
 CRITICAL RULES:
 - Extract EVERY piece of information present in the resume.
