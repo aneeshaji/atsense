@@ -83,10 +83,12 @@ class AIController extends Controller
                     if ($name)  $leadData['name']  = $name;
                     if ($phone) $leadData['phone'] = $phone;
 
-                    ResumeLead::updateOrCreate(
-                        ['email' => $email],
-                        $leadData
-                    );
+                    $existingLead = ResumeLead::where('email', $email)->latest('id')->first();
+                    if ($existingLead) {
+                        $existingLead->update($leadData);
+                    } else {
+                        ResumeLead::create(array_merge(['email' => $email], $leadData));
+                    }
                 }
             } catch (\Exception $leadEx) {
                 Log::warning('Lead update after optimize failed: ' . $leadEx->getMessage());
@@ -146,11 +148,12 @@ class AIController extends Controller
                         $publicUrl = url('storage/' . $fileName);
                     }
 
-                    // Update Lead with the optimized file URL
+                    // Update latest Lead with the optimized file URL
                     if ($email && $publicUrl) {
-                        ResumeLead::where('email', $email)->update([
-                            's3_pdf_url' => $publicUrl,
-                        ]);
+                        $latestLead = ResumeLead::where('email', $email)->latest('id')->first();
+                        if ($latestLead) {
+                            $latestLead->update(['s3_pdf_url' => $publicUrl]);
+                        }
                     }
 
                     // Also attach public URL to the response if needed

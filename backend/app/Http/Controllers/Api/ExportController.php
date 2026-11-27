@@ -149,10 +149,12 @@ class ExportController extends Controller
                     $payload['s3_pdf_url'] = $publicUrl;
                 }
 
-                ResumeLead::updateOrCreate(
-                    ['email' => $leadEmail],
-                    $payload
-                );
+                $existingLead = $email ? ResumeLead::where('email', $leadEmail)->latest('id')->first() : null;
+                if ($existingLead) {
+                    $existingLead->update($payload);
+                } else {
+                    ResumeLead::create(array_merge(['email' => $leadEmail], $payload));
+                }
             }
         } catch (\Exception $leadEx) {
             \Illuminate\Support\Facades\Log::error('Lead snapshot failed: ' . $leadEx->getMessage());

@@ -100,8 +100,8 @@ class LeadController extends Controller
                 }
             }
 
-            // Only update existing; don't create orphan records without identity
-            $lead = ResumeLead::where('email', $email)->first();
+            // Update the most recent lead for this email; don't overwrite older duplicate rows
+            $lead = ResumeLead::where('email', $email)->latest('id')->first();
             if ($lead) {
                 $lead->update($data);
 
