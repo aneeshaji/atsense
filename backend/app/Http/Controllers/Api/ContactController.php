@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\ResumeLead;
 use App\Models\ActivityLog;
+use App\Models\SiteSetting;
 use App\Services\PHPMailerService;
 
 class ContactController extends Controller
@@ -220,12 +221,22 @@ HTML;
         // 6. Record inquiry into Database (ResumeLead + ActivityLog)
         try {
             if ($type === 'newsletter') {
+                $newsletterMode = SiteSetting::where('setting_key', 'newsletter_mode')->value('setting_value') ?: 'both';
+                $existingSub = ResumeLead::where('email', $cleanEmail)
+                    ->where('source', 'newsletter_subscriber')
+                    ->first();
+
+                $attrs = [
+                    'name'   => $cleanName !== 'ATSense Visitor' ? $cleanName : ($existingSub?->name),
+                    'status' => 'new',
+                ];
+                if (in_array($newsletterMode, ['drip', 'both'], true) && !$existingSub?->welcome_email_sent_at) {
+                    $attrs['welcome_email_sent_at'] = now();
+                }
+
                 ResumeLead::updateOrCreate(
                     ['email' => $cleanEmail, 'source' => 'newsletter_subscriber'],
-                    [
-                        'name'   => $cleanName !== 'ATSense Visitor' ? $cleanName : null,
-                        'status' => 'new',
-                    ]
+                    $attrs
                 );
             } else {
                 // Always create a new inquiry row so multiple messages and existing resume leads are preserved

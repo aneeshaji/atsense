@@ -246,6 +246,11 @@ function AdminDashboard() {
     const [enquiryStatus, setEnquiryStatus] = useState('all');
     const [runningDrip, setRunningDrip] = useState(false);
     const [dripResult, setDripResult] = useState<string | null>(null);
+    const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+    const [broadcastSubject, setBroadcastSubject] = useState('ATSense Weekly Career & Resume Tips');
+    const [broadcastBody, setBroadcastBody] = useState('Hi {name},\n\nHere are this week\'s top ATS resume tips from ATSense:\n\n1. Tailor your bullet points to match exact job description keywords.\n2. Quantify your achievements with clear metrics.\n\nTry Deep Tailor free at https://atsense.online/builder');
+    const [sendingBroadcast, setSendingBroadcast] = useState(false);
+    const [broadcastMsg, setBroadcastMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const navigate = useNavigate();
 
@@ -580,6 +585,28 @@ function AdminDashboard() {
             setDripResult(err.response?.data?.message || 'Failed to run drip emails.');
         } finally {
             setRunningDrip(false);
+        }
+    };
+
+    const handleSendBroadcast = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const token = getToken();
+        if (!token) return;
+        setSendingBroadcast(true);
+        setBroadcastMsg(null);
+        try {
+            const res = await api.post('/admin/newsletter/broadcast', {
+                subject: broadcastSubject.trim(),
+                body: broadcastBody.trim(),
+            }, { headers: { Authorization: `Bearer ${token}` } });
+            setBroadcastMsg({ type: 'success', text: res.data?.message || 'Newsletter broadcast sent!' });
+        } catch (err: any) {
+            setBroadcastMsg({
+                type: 'error',
+                text: err.response?.data?.message || 'Failed to send newsletter broadcast.',
+            });
+        } finally {
+            setSendingBroadcast(false);
         }
     };
 
@@ -1527,7 +1554,14 @@ function AdminDashboard() {
                                                 Messages submitted via Contact form and Newsletter subscriptions ({enquiries?.total ?? 0} total)
                                             </p>
                                         </div>
-                                        <div className="flex items-center gap-2 self-start sm:self-auto">
+                                        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+                                            <button
+                                                onClick={() => { setBroadcastMsg(null); setShowBroadcastModal(true); }}
+                                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs"
+                                            >
+                                                <Send size={13} />
+                                                Send Broadcast
+                                            </button>
                                             <button
                                                 onClick={exportEnquiriesCsv}
                                                 disabled={!enquiries?.data?.length}
@@ -2358,6 +2392,80 @@ function AdminDashboard() {
                 onClose={() => setPreviewLead(null)}
                 onDownload={downloadResume}
             />
+
+            {/* Newsletter Broadcast Modal */}
+            {showBroadcastModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden">
+                        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                                    <Send size={16} className="text-indigo-600" />
+                                    Send Newsletter Broadcast
+                                </h3>
+                                <p className="text-xs text-slate-400 mt-0.5">
+                                    Emails all unique Newsletter subscribers. Use <code className="text-indigo-600">{'{name}'}</code> for personalization.
+                                </p>
+                            </div>
+                            <button onClick={() => setShowBroadcastModal(false)} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">
+                                <X size={16} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSendBroadcast} className="p-6 space-y-4">
+                            {broadcastMsg && (
+                                <div className={`p-3 rounded-xl text-xs font-semibold border ${
+                                    broadcastMsg.type === 'success'
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                        : 'bg-rose-50 text-rose-700 border-rose-200'
+                                }`}>
+                                    {broadcastMsg.text}
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-700 mb-1.5">Subject</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={broadcastSubject}
+                                    onChange={(e) => setBroadcastSubject(e.target.value)}
+                                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:bg-white"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-700 mb-1.5">Message Body</label>
+                                <textarea
+                                    required
+                                    rows={7}
+                                    value={broadcastBody}
+                                    onChange={(e) => setBroadcastBody(e.target.value)}
+                                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:bg-white resize-none"
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowBroadcastModal(false)}
+                                    className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200"
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={sendingBroadcast}
+                                    className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 flex items-center gap-1.5 disabled:opacity-50"
+                                >
+                                    <Send size={13} />
+                                    {sendingBroadcast ? 'Sending Broadcast…' : 'Send to All Subscribers'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

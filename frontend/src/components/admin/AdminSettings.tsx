@@ -41,7 +41,13 @@ export default function AdminSettings() {
     };
 
     const updateSetting = (key: string, val: string) => {
-        setSettings(prev => prev.map(s => s.setting_key === key ? { ...s, setting_value: val } : s));
+        setSettings(prev => {
+            const exists = prev.some(s => s.setting_key === key);
+            if (!exists) {
+                return [...prev, { setting_key: key, setting_value: val, description: '' }];
+            }
+            return prev.map(s => s.setting_key === key ? { ...s, setting_value: val } : s);
+        });
     };
 
     const findSetting = (key: string) => settings.find(s => s.setting_key === key);
@@ -100,6 +106,43 @@ export default function AdminSettings() {
                                 </div>
                             );
                         })}
+
+                        {/* Newsletter Delivery Method */}
+                        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                            <label className="block text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">
+                                Newsletter Subscriber Method
+                            </label>
+                            <p className="text-xs text-gray-500 mb-4">
+                                Choose how emails are sent to newsletter subscribers (after the initial welcome email).
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                {[
+                                    { value: 'both', title: 'Both (Recommended)', desc: 'Auto-enroll in 3-step drip + allow manual broadcasts' },
+                                    { value: 'drip', title: 'Automated Drip Only', desc: 'Send Day 2 / 5 / 7 tips automatically; disable broadcasts' },
+                                    { value: 'broadcast', title: 'Manual Broadcasts Only', desc: 'Only send when you trigger a broadcast from Enquiries' },
+                                ].map(opt => {
+                                    const current = findSetting('newsletter_mode')?.setting_value || 'both';
+                                    const active = current === opt.value;
+                                    return (
+                                        <button
+                                            key={opt.value}
+                                            type="button"
+                                            onClick={() => updateSetting('newsletter_mode', opt.value)}
+                                            className={`text-left p-4 rounded-xl border transition-all ${
+                                                active
+                                                    ? 'bg-indigo-50 border-indigo-300 ring-2 ring-indigo-100'
+                                                    : 'bg-white border-gray-200 hover:border-gray-300'
+                                            }`}
+                                        >
+                                            <p className={`text-xs font-black ${active ? 'text-indigo-700' : 'text-gray-800'}`}>
+                                                {opt.title}
+                                            </p>
+                                            <p className="text-[11px] text-gray-500 mt-1 leading-snug">{opt.desc}</p>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
                 )}
 

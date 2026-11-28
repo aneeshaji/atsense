@@ -420,6 +420,68 @@ class AdminController extends Controller
         }
     }
 
+    public function broadcastNewsletter(Request $request)
+    {
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'body'    => 'required|string',
+        ]);
+
+        $mode = \App\Models\SiteSetting::where('setting_key', 'newsletter_mode')->value('setting_value') ?: 'both';
+        if ($mode === 'drip') {
+            return response()->json([
+                'message' => 'Manual broadcasts are disabled while Newsletter Mode is set to "Automated Drip Only". Change it in Site Settings.',
+            ], 400);
+        }
+
+        $subscribers = ResumeLead::where('source', 'newsletter_subscriber')
+            ->whereNotNull('email')
+            ->orderByDesc('created_at')
+            ->get()
+            ->unique(fn ($s) => strtolower(trim($s->email)));
+
+        if ($subscribers->isEmpty()) {
+            return response()->json(['message' => 'No newsletter subscribers found.'], 404);
+        }
+
+        $mailer = app(\App\Services\PHPMailerService::class);
+        $sent = 0;
+        $failed = 0;
+
+        foreach ($subscribers as $sub) {
+            if (!filter_var($sub->email, FILTER_VALIDATE_EMAIL)) {
+                $failed++;
+                continue;
+            }
+            $personalizedBody = str_replace('{name}', $sub->name ?: 'there', $request->body);
+            try {
+                $res = $mailer->sendLeadEmail($sub->email, $sub->name ?? 'Subscriber', $request->subject, $personalizedBody);
+                if ($res['success']) {
+                    $sent++;
+                } else {
+                    $failed++;
+                }
+            } catch (\Throwable $e) {
+                $failed++;
+            }
+        }
+
+        ActivityLog::record(
+            'NEWSLETTER_BROADCAST',
+            "Newsletter broadcast sent to {$sent} subscribers ({$failed} failed): {$request->subject}",
+            $failed > 0 ? 'warning' : 'info',
+            ['sent' => $sent, 'failed' => $failed, 'subject' => $request->subject],
+            $request,
+            $request->user()?->id
+        );
+
+        return response()->json([
+            'message' => "Broadcast sent to {$sent} subscriber(s)" . ($failed ? ", {$failed} failed." : '.'),
+            'sent'    => $sent,
+            'failed'  => $failed,
+        ]);
+    }
+
     public function getEnquiries(Request $request)
     {
         $query = ResumeLead::whereIn('source', ['contact_inquiry', 'newsletter_subscriber']);

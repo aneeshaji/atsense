@@ -41,6 +41,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/admin/leads/bulk-email', [AdminController::class, 'bulkEmailLeads']);
     Route::get('/admin/stats', [AdminController::class, 'getStats']);
     Route::post('/admin/drip/run', [AdminController::class, 'runDripNow']);
+    Route::post('/admin/newsletter/broadcast', [AdminController::class, 'broadcastNewsletter']);
     Route::put('/admin/leads/{id}', [AdminController::class, 'updateLead']);
     Route::delete('/admin/leads/{id}', [AdminController::class, 'deleteLead']);
     Route::post('/admin/leads/{id}/email', [AdminController::class, 'sendEmail']);

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\ResumeLead;
 use App\Models\ActivityLog;
+use App\Models\SiteSetting;
 use App\Services\PHPMailerService;
 use Carbon\Carbon;
 
@@ -33,15 +34,20 @@ class SendDripEmailsCommand extends Command
         }
 
         $now = Carbon::now();
-        $this->info("Starting Drip Sequence at {$now->toDateTimeString()} (Dry Run: " . ($dryRun ? 'YES' : 'NO') . ")");
+        $newsletterMode = SiteSetting::where('setting_key', 'newsletter_mode')->value('setting_value') ?: 'both';
+        $includeNewsletter = in_array($newsletterMode, ['drip', 'both'], true);
+        $this->info("Starting Drip Sequence at {$now->toDateTimeString()} (Dry Run: " . ($dryRun ? 'YES' : 'NO') . ", Newsletter Drip: " . ($includeNewsletter ? 'ON' : 'OFF') . ")");
 
         // Step 1: Day 2 (48h - 120h after lead capture) -> Cover Letter
-        $day2Candidates = ResumeLead::whereNotNull('welcome_email_sent_at')
+        $day2Query = ResumeLead::whereNotNull('welcome_email_sent_at')
             ->whereNull('drip_day2_sent_at')
             ->where('created_at', '<=', $now->copy()->subHours(48))
             ->where('created_at', '>=', $now->copy()->subHours(120))
-            ->whereNotNull('email')
-            ->orderByDesc('created_at')
+            ->whereNotNull('email');
+        if (!$includeNewsletter) {
+            $day2Query->where('source', '!=', 'newsletter_subscriber');
+        }
+        $day2Candidates = $day2Query->orderByDesc('created_at')
             ->get()
             ->unique(fn ($l) => strtolower(trim($l->email)));
 
@@ -63,12 +69,15 @@ class SendDripEmailsCommand extends Command
         }
 
         // Step 2: Day 5 (120h - 168h after lead capture) -> Interview Prep
-        $day5Candidates = ResumeLead::whereNotNull('drip_day2_sent_at')
+        $day5Query = ResumeLead::whereNotNull('drip_day2_sent_at')
             ->whereNull('drip_day5_sent_at')
             ->where('created_at', '<=', $now->copy()->subHours(120))
             ->where('created_at', '>=', $now->copy()->subHours(168))
-            ->whereNotNull('email')
-            ->orderByDesc('created_at')
+            ->whereNotNull('email');
+        if (!$includeNewsletter) {
+            $day5Query->where('source', '!=', 'newsletter_subscriber');
+        }
+        $day5Candidates = $day5Query->orderByDesc('created_at')
             ->get()
             ->unique(fn ($l) => strtolower(trim($l->email)));
 
@@ -90,11 +99,14 @@ class SendDripEmailsCommand extends Command
         }
 
         // Step 3: Day 7 (> 168h after lead capture) -> LinkedIn Optimizer
-        $day7Candidates = ResumeLead::whereNotNull('drip_day5_sent_at')
+        $day7Query = ResumeLead::whereNotNull('drip_day5_sent_at')
             ->whereNull('drip_day7_sent_at')
             ->where('created_at', '<=', $now->copy()->subHours(168))
-            ->whereNotNull('email')
-            ->orderByDesc('created_at')
+            ->whereNotNull('email');
+        if (!$includeNewsletter) {
+            $day7Query->where('source', '!=', 'newsletter_subscriber');
+        }
+        $day7Candidates = $day7Query->orderByDesc('created_at')
             ->get()
             ->unique(fn ($l) => strtolower(trim($l->email)));
 
