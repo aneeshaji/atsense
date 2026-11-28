@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { Lock, Mail, Key } from 'lucide-react';
+import { Lock, Mail, Key, ArrowRight, ShieldCheck } from 'lucide-react';
 
 function AdminLogin() {
     const [email, setEmail] = useState('');
@@ -27,42 +27,55 @@ function AdminLogin() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="flex justify-center mb-6">
-                    <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl">
-                        <Lock className="w-8 h-8" strokeWidth={2.5} />
+        <div className="min-h-screen bg-[#070A12] text-slate-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+            {/* Ambient background glow */}
+            <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[680px] h-[420px] rounded-full bg-indigo-600/20 blur-[120px]" />
+            <div className="pointer-events-none absolute bottom-0 right-1/4 w-[420px] h-[320px] rounded-full bg-violet-600/15 blur-[120px]" />
+
+            <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
+                <div className="flex justify-center mb-5">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 p-[1px] shadow-2xl shadow-indigo-500/30">
+                        <div className="w-full h-full bg-[#0B101D] rounded-2xl flex items-center justify-center">
+                            <Lock className="w-6 h-6 text-indigo-400" strokeWidth={2.2} />
+                        </div>
                     </div>
                 </div>
-                <h2 className="mt-2 text-center text-3xl font-black text-gray-900 tracking-tight">
-                    Admin Portal
-                </h2>
-                <p className="mt-2 text-center text-sm text-gray-600 font-medium">
-                    Secure access for ATSense administrators
-                </p>
+                <div className="text-center">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-[11px] font-bold tracking-widest uppercase text-indigo-300 mb-3">
+                        <ShieldCheck size={12} /> ATSense Operations
+                    </span>
+                    <h2 className="text-3xl font-black text-white tracking-tight">
+                        Admin Console
+                    </h2>
+                    <p className="mt-1.5 text-sm text-slate-400 font-medium">
+                        Sign in to manage leads, enquiries, and platform analytics
+                    </p>
+                </div>
             </div>
 
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="bg-white py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-gray-100">
-                    <form className="space-y-6" onSubmit={handleLogin}>
+            <div className="relative z-10 mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+                <div className="bg-[#0E1422]/90 backdrop-blur-xl py-8 px-6 sm:px-9 rounded-3xl border border-white/[0.08] shadow-2xl shadow-black/60">
+                    <form className="space-y-5" onSubmit={handleLogin}>
                         {error && (
-                            <div className="bg-red-50 text-red-700 p-4 rounded-xl text-sm font-semibold border border-red-100 flex items-center gap-3">
-                                <span>{error}</span>
+                            <div className="bg-rose-500/10 text-rose-300 p-3.5 rounded-xl text-xs font-semibold border border-rose-500/25">
+                                {error}
                             </div>
                         )}
 
                         <div>
-                            <label htmlFor="admin-email" className="block text-sm font-bold text-gray-700">Email Address</label>
-                            <div className="mt-2 relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Mail className="h-5 w-5 text-gray-400" />
+                            <label htmlFor="admin-email" className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                                Email Address
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                    <Mail className="h-4 w-4 text-slate-500" />
                                 </div>
                                 <input
                                     id="admin-email"
                                     type="email"
                                     required
-                                    className="pl-10 block w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-gray-900 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 font-medium transition-colors"
-                                    placeholder="admin@atsense.in"
+                                    className="pl-10 block w-full bg-[#070A12]/80 border border-white/10 rounded-xl py-3 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 font-medium transition-all"
+                                    placeholder="admin@atsense.online"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
@@ -70,16 +83,18 @@ function AdminLogin() {
                         </div>
 
                         <div>
-                            <label htmlFor="admin-password" className="block text-sm font-bold text-gray-700">Password</label>
-                            <div className="mt-2 relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Key className="h-5 w-5 text-gray-400" />
+                            <label htmlFor="admin-password" className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                                Password
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                    <Key className="h-4 w-4 text-slate-500" />
                                 </div>
                                 <input
                                     id="admin-password"
                                     type="password"
                                     required
-                                    className="pl-10 block w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-gray-900 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 font-medium transition-colors"
+                                    className="pl-10 block w-full bg-[#070A12]/80 border border-white/10 rounded-xl py-3 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 font-medium transition-all"
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -90,9 +105,10 @@ function AdminLogin() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-600/25 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0E1422] focus:ring-indigo-500 transition-all disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.99]"
                         >
-                            {loading ? 'Authenticating...' : 'Sign In to Dashboard'}
+                            <span>{loading ? 'Authenticating...' : 'Sign In to Console'}</span>
+                            {!loading && <ArrowRight size={16} />}
                         </button>
                     </form>
                 </div>

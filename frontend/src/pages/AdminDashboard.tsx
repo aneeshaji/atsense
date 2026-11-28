@@ -76,11 +76,13 @@ interface Stats {
     total_leads: number;
     leads_today: number;
     leads_this_week: number;
+    total_enquiries?: number;
+    new_enquiries?: number;
     chart_data: ChartPoint[];
     sources: SourceStat[];
 }
 
-type View = 'overview' | 'leads' | 'analytics' | 'blog' | 'templates' | 'site_settings' | 'settings' | 'activity_log';
+type View = 'overview' | 'leads' | 'enquiries' | 'analytics' | 'blog' | 'templates' | 'site_settings' | 'settings' | 'activity_log';
 type LogLevel = 'all' | 'info' | 'warning' | 'error' | 'critical';
 
 interface ActivityLogEntry {
@@ -113,8 +115,8 @@ function MiniBarChart({ data }: { data: ChartPoint[] }) {
                         {d.date}: <span className="font-bold">{d.count}</span>
                     </div>
                     <div
-                        className="w-full rounded-t-md bg-indigo-500 transition-all duration-500 group-hover:bg-indigo-600"
-                        style={{ height: `${Math.max((d.count / max) * 100, 6)}%` }}
+                        className="w-full rounded-t-lg bg-gradient-to-t from-indigo-600 to-violet-400 transition-all duration-500 group-hover:from-indigo-500 group-hover:to-cyan-400"
+                        style={{ height: `${Math.max((d.count / max) * 100, 8)}%` }}
                     />
                     <span className="text-[10px] text-slate-400 whitespace-nowrap">{d.date.split(' ')[1] || d.date}</span>
                 </div>
@@ -186,6 +188,14 @@ function AdminDashboard() {
     const [autoRefresh, setAutoRefresh] = useState(false);
     const autoRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const [expandedLog, setExpandedLog] = useState<number | null>(null);
+
+    // Contact Enquiries & Newsletter state
+    const [enquiries, setEnquiries] = useState<PaginatedLeads | null>(null);
+    const [enquiriesLoading, setEnquiriesLoading] = useState(false);
+    const [enquiryPage, setEnquiryPage] = useState(1);
+    const [enquiryType, setEnquiryType] = useState<'all' | 'contact_inquiry' | 'newsletter_subscriber'>('all');
+    const [enquirySearch, setEnquirySearch] = useState('');
+    const [enquiryStatus, setEnquiryStatus] = useState('all');
 
     const navigate = useNavigate();
 
@@ -534,9 +544,44 @@ function AdminDashboard() {
         return () => { if (autoRefreshRef.current) clearInterval(autoRefreshRef.current); };
     }, [autoRefresh, view, logPage]);
 
+    const fetchEnquiries = useCallback(async (
+        pg = enquiryPage,
+        tp = enquiryType,
+        q = enquirySearch,
+        st = enquiryStatus
+    ) => {
+        const token = getToken();
+        if (!token) return;
+        setEnquiriesLoading(true);
+        try {
+            const params = new URLSearchParams({ page: String(pg), per_page: '25', sort: 'newest' });
+            if (tp !== 'all') params.set('type', tp);
+            if (q) params.set('search', q);
+            if (st !== 'all') params.set('status', st);
+            const res = await api.get(`/admin/enquiries?${params}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setEnquiries(res.data);
+        } catch (err: any) {
+            if (err.response?.status === 401) handleLogout();
+        } finally {
+            setEnquiriesLoading(false);
+        }
+    }, [enquiryPage, enquiryType, enquirySearch, enquiryStatus]);
+
+    useEffect(() => {
+        if (view === 'enquiries') {
+            const t = setTimeout(() => {
+                fetchEnquiries(1, enquiryType, enquirySearch, enquiryStatus);
+            }, 250);
+            return () => clearTimeout(t);
+        }
+    }, [view, enquiryType, enquirySearch, enquiryStatus]);
+
     const navItems: { id: View; label: string; icon: React.ReactNode }[] = [
         { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={16} /> },
         { id: 'leads', label: 'Leads', icon: <Users size={16} /> },
+        { id: 'enquiries', label: 'Enquiries', icon: <Mail size={16} /> },
         { id: 'analytics', label: 'Analytics', icon: <BarChart2 size={16} /> },
         { id: 'blog', label: 'Blog & Content', icon: <FileText size={16} /> },
         { id: 'templates', label: 'Templates', icon: <Layout size={16} /> },
@@ -552,80 +597,102 @@ function AdminDashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="min-h-screen flex items-center justify-center bg-[#0B0F19]">
                 <div className="text-center">
-                    <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto" />
-                    <p className="text-slate-500 text-xs mt-4 font-semibold tracking-wide">Loading admin console…</p>
+                    <div className="w-11 h-11 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mx-auto" />
+                    <p className="text-slate-400 text-xs mt-4 font-semibold tracking-widest uppercase">Loading Admin Console…</p>
                 </div>
             </div>
         );
     }
 
+    const navGroups: { title: string; ids: View[] }[] = [
+        { title: 'Operations', ids: ['overview', 'leads', 'enquiries', 'analytics'] },
+        { title: 'Content & Studio', ids: ['blog', 'templates', 'site_settings'] },
+        { title: 'System', ids: ['activity_log', 'settings'] },
+    ];
+
     const renderSidebarNav = (onSelect?: () => void) => (
-        <>
-            <div className="h-16 flex items-center px-5 gap-3 border-b border-slate-100 shrink-0">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-600 to-violet-600 shadow-sm">
+        <div className="flex flex-col h-full bg-[#0B0F19] text-slate-300">
+            <div className="h-16 flex items-center px-5 gap-3 border-b border-white/[0.07] shrink-0">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 shadow-lg shadow-indigo-500/25">
                     <FileText size={16} className="text-white" />
                 </div>
                 <div>
-                    <span className="font-black text-slate-900 text-sm tracking-tight block leading-none">ATSense</span>
-                    <span className="text-[10px] text-indigo-600 font-bold tracking-widest uppercase mt-1 block">Admin Console</span>
+                    <span className="font-black text-white text-sm tracking-tight block leading-none">ATSense</span>
+                    <span className="text-[10px] text-indigo-400 font-bold tracking-widest uppercase mt-1 block">Admin Console</span>
                 </div>
             </div>
 
-            <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
-                <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Workspace</p>
-                {navItems.map(item => (
-                    <button
-                        key={item.id}
-                        onClick={() => { setView(item.id); onSelect?.(); }}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                            view === item.id
-                                ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200'
-                                : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-50'
-                        }`}
-                    >
-                        <span className={view === item.id ? 'text-white' : 'text-slate-400'}>
-                            {item.icon}
-                        </span>
-                        <span>{item.label}</span>
-                        {item.id === 'leads' && stats && stats.total_leads > 0 && (
-                            <span className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                                view === 'leads' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                            }`}>
-                                {stats.total_leads}
-                            </span>
-                        )}
-                    </button>
+            <nav className="flex-1 px-3 py-5 space-y-5 overflow-y-auto">
+                {navGroups.map(group => (
+                    <div key={group.title} className="space-y-1">
+                        <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">{group.title}</p>
+                        {group.ids.map(id => {
+                            const item = navItems.find(n => n.id === id);
+                            if (!item) return null;
+                            const active = view === item.id;
+                            return (
+                                <button
+                                    key={item.id}
+                                    onClick={() => { setView(item.id); onSelect?.(); }}
+                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all ${
+                                        active
+                                            ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-950/60'
+                                            : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
+                                    }`}
+                                >
+                                    <span className={active ? 'text-white' : 'text-slate-500'}>
+                                        {item.icon}
+                                    </span>
+                                    <span>{item.label}</span>
+                                    {item.id === 'leads' && stats && stats.total_leads > 0 && (
+                                        <span className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                                            active ? 'bg-white/20 text-white' : 'bg-white/[0.08] text-slate-300'
+                                        }`}>
+                                            {stats.total_leads}
+                                        </span>
+                                    )}
+                                    {item.id === 'enquiries' && stats && (stats.new_enquiries ?? 0) > 0 && (
+                                        <span className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                                            active ? 'bg-white/20 text-white' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                                        }`}>
+                                            {stats.new_enquiries}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
                 ))}
             </nav>
 
-            <div className="p-3 border-t border-slate-100 shrink-0">
+            <div className="p-3 border-t border-white/[0.07] shrink-0">
                 <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl text-sm font-semibold transition-all"
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl text-[13px] font-semibold transition-all"
                 >
                     <LogOut size={15} /> Sign Out
                 </button>
             </div>
-        </>
+        </div>
     );
 
     return (
-        <div className="min-h-screen flex bg-slate-50 text-slate-900 overflow-x-hidden">
+        <div className="min-h-screen flex bg-[#F4F6FB] text-slate-900 overflow-x-hidden">
             {/* Desktop Sidebar */}
-            <aside className="w-64 flex-col shrink-0 hidden md:flex bg-white border-r border-slate-200/80 z-20">
+            <aside className="w-64 flex-col shrink-0 hidden md:flex bg-[#0B0F19] border-r border-slate-900/10 z-20">
                 {renderSidebarNav()}
             </aside>
 
             {/* Mobile Sidebar Drawer */}
             {mobileMenuOpen && (
                 <div className="fixed inset-0 z-50 md:hidden flex">
-                    <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-                    <aside className="relative w-72 max-w-[85vw] bg-white h-full flex flex-col shadow-2xl z-10">
+                    <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
+                    <aside className="relative w-72 max-w-[85vw] bg-[#0B0F19] h-full flex flex-col shadow-2xl z-10">
                         <button
                             onClick={() => setMobileMenuOpen(false)}
-                            className="absolute top-4 right-3 p-2 text-slate-400 hover:text-slate-700 rounded-lg"
+                            className="absolute top-4 right-3 p-2 text-slate-400 hover:text-white rounded-lg z-20"
                         >
                             <X size={18} />
                         </button>
@@ -637,7 +704,7 @@ function AdminDashboard() {
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 {/* Top Bar */}
-                <header className="sticky top-0 h-16 bg-white/95 backdrop-blur-sm border-b border-slate-200/80 flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0 z-20 gap-3">
+                <header className="sticky top-0 h-16 bg-white/85 backdrop-blur-xl border-b border-slate-200/70 flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0 z-20 gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                         <button
                             onClick={() => setMobileMenuOpen(true)}
@@ -647,9 +714,15 @@ function AdminDashboard() {
                             <Menu size={20} />
                         </button>
                         <div className="min-w-0">
-                            <h1 className="text-base font-black text-slate-900 tracking-tight truncate">
-                                {navItems.find(n => n.id === view)?.label}
-                            </h1>
+                            <div className="flex items-center gap-2.5">
+                                <h1 className="text-base font-black text-slate-900 tracking-tight truncate">
+                                    {navItems.find(n => n.id === view)?.label}
+                                </h1>
+                                <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] font-bold text-emerald-700">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    Live
+                                </span>
+                            </div>
                             <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
                                 ATSense Lead &amp; Content Operations
                             </p>
@@ -660,7 +733,7 @@ function AdminDashboard() {
                         {(view === 'overview' || view === 'leads') && (
                             <button
                                 onClick={() => { fetchLeads(page); fetchStats(); }}
-                                className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all border border-slate-200"
+                                className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all border border-slate-200 bg-white shadow-xs"
                                 title="Refresh Data"
                             >
                                 <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
@@ -670,14 +743,14 @@ function AdminDashboard() {
                             <>
                                 <button
                                     onClick={() => setShowAddLead(true)}
-                                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-all"
+                                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all"
                                 >
-                                    <UserPlus size={14} />
+                                    <UserPlus size={14} className="text-indigo-600" />
                                     <span className="hidden sm:inline">Add Lead</span>
                                 </button>
                                 <button
                                     onClick={() => exportCsv(false)}
-                                    className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm active:scale-95 transition-all"
+                                    className="flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-md shadow-indigo-500/20 active:scale-95 transition-all"
                                 >
                                     <Download size={14} />
                                     <span className="hidden sm:inline">Export CSV</span>
@@ -687,35 +760,55 @@ function AdminDashboard() {
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-24 md:pb-6 space-y-6">
+                <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-8 space-y-6">
 
                     {/* ===== OVERVIEW ===== */}
                     {view === 'overview' && (
                         <>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
-                                <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
+                                <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow">
                                     <div className="flex items-center justify-between mb-3">
-                                        <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
                                             <Users size={18} />
                                         </div>
-                                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">All Time</span>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-full">All Time</span>
                                     </div>
-                                    <p className="text-3xl font-black text-slate-900">{stats?.total_leads ?? 0}</p>
+                                    <p className="text-3xl font-black text-slate-900 tracking-tight">{stats?.total_leads ?? 0}</p>
                                     <p className="text-xs font-semibold text-slate-500 mt-1">Total Leads Captured</p>
                                 </div>
 
-                                <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-sm">
+                                <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow">
                                     <div className="flex items-center justify-between mb-3">
-                                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
                                             <Zap size={18} />
                                         </div>
-                                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Today</span>
+                                        <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded-full">Today</span>
                                     </div>
-                                    <p className="text-3xl font-black text-slate-900">{stats?.leads_today ?? 0}</p>
+                                    <p className="text-3xl font-black text-slate-900 tracking-tight">{stats?.leads_today ?? 0}</p>
                                     <p className="text-xs font-semibold text-slate-500 mt-1">New Leads Today</p>
                                 </div>
 
-                                <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-sm">
+                                <div
+                                    onClick={() => setView('enquiries')}
+                                    className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all cursor-pointer"
+                                >
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20">
+                                            <Mail size={18} />
+                                        </div>
+                                        {(stats?.new_enquiries ?? 0) > 0 ? (
+                                            <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider bg-indigo-50 px-2 py-0.5 rounded-full">
+                                                {stats?.new_enquiries} New
+                                            </span>
+                                        ) : (
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-full">Inbox</span>
+                                        )}
+                                    </div>
+                                    <p className="text-3xl font-black text-slate-900 tracking-tight">{stats?.total_enquiries ?? 0}</p>
+                                    <p className="text-xs font-semibold text-slate-500 mt-1">Contact &amp; Newsletter</p>
+                                </div>
+
+                                <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow">
                                     <div className="flex items-center justify-between mb-1">
                                         <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">7-Day Trend</span>
                                         <TrendingUp size={15} className="text-indigo-500" />
@@ -865,6 +958,8 @@ function AdminDashboard() {
                                             <option value="breakdown_gate">Breakdown Gate</option>
                                             <option value="exit_intent">Exit Intent</option>
                                             <option value="grader">Free Grader</option>
+                                            <option value="contact_inquiry">Contact Enquiry</option>
+                                            <option value="newsletter_subscriber">Newsletter</option>
                                             <option value="manual">Manual Entry</option>
                                         </select>
 
@@ -1194,6 +1289,189 @@ function AdminDashboard() {
                         </div>
                     )}
 
+                    {/* ===== ENQUIRIES ===== */}
+                    {view === 'enquiries' && (
+                        <div className="space-y-4">
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                                <div className="p-4 sm:p-5 border-b border-slate-100 space-y-3">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div>
+                                            <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                                                <Mail size={18} className="text-indigo-600" />
+                                                Contact Enquiries &amp; Newsletter
+                                            </h3>
+                                            <p className="text-xs text-slate-400 mt-0.5">
+                                                Messages submitted via Contact form and Newsletter subscriptions ({enquiries?.total ?? 0} total)
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => fetchEnquiries(enquiryPage)}
+                                            className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                                        >
+                                            <RefreshCw size={13} className={enquiriesLoading ? 'animate-spin' : ''} />
+                                            Refresh
+                                        </button>
+                                    </div>
+
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {[
+                                                { id: 'all', label: 'All' },
+                                                { id: 'contact_inquiry', label: 'Contact Messages' },
+                                                { id: 'newsletter_subscriber', label: 'Newsletter' },
+                                            ].map(tab => (
+                                                <button
+                                                    key={tab.id}
+                                                    onClick={() => { setEnquiryPage(1); setEnquiryType(tab.id as any); }}
+                                                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
+                                                        enquiryType === tab.id
+                                                            ? 'bg-indigo-600 text-white border-indigo-600'
+                                                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-indigo-200'
+                                                    }`}
+                                                >
+                                                    {tab.label}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className="relative flex-1 min-w-[200px]">
+                                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                            <input
+                                                type="text"
+                                                value={enquirySearch}
+                                                onChange={e => { setEnquiryPage(1); setEnquirySearch(e.target.value); }}
+                                                placeholder="Search name, email, or message..."
+                                                className="w-full pl-9 pr-3 py-2 text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:bg-white"
+                                            />
+                                        </div>
+
+                                        <select
+                                            value={enquiryStatus}
+                                            onChange={e => { setEnquiryPage(1); setEnquiryStatus(e.target.value); }}
+                                            className="text-xs font-bold border border-slate-200 rounded-xl px-3 py-2 bg-white text-slate-700 cursor-pointer focus:outline-none"
+                                        >
+                                            <option value="all">All Statuses</option>
+                                            {STATUS_OPTIONS.map(opt => (
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {enquiriesLoading ? (
+                                    <div className="py-16 text-center text-xs text-slate-400 font-semibold">Loading enquiries…</div>
+                                ) : !enquiries || enquiries.data.length === 0 ? (
+                                    <div className="py-16 text-center">
+                                        <Mail size={32} className="mx-auto text-slate-300 mb-2" />
+                                        <p className="text-sm font-bold text-slate-600">No enquiries found</p>
+                                        <p className="text-xs text-slate-400 mt-1">Contact form submissions and newsletter signups will appear here.</p>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y divide-slate-100">
+                                        {enquiries.data.map(item => (
+                                            <div
+                                                key={item.id}
+                                                onClick={() => setSelectedLead(item)}
+                                                className="p-4 sm:px-6 hover:bg-slate-50/80 cursor-pointer transition-colors flex flex-col sm:flex-row sm:items-start justify-between gap-3"
+                                            >
+                                                <div className="flex items-start gap-3 min-w-0 flex-1">
+                                                    <div
+                                                        className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5"
+                                                        style={{ background: getAvatarColor(item.name || item.email) }}
+                                                    >
+                                                        {(item.name || item.email || 'U')[0].toUpperCase()}
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <p className="text-sm font-bold text-slate-900">{item.name || 'Visitor'}</p>
+                                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                                                item.source === 'newsletter_subscriber'
+                                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                                    : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                                                            }`}>
+                                                                {item.source === 'newsletter_subscriber' ? 'Newsletter' : 'Contact'}
+                                                            </span>
+                                                            <span className="text-[11px] text-slate-400">
+                                                                {new Date(item.created_at).toLocaleString('en-GB', {
+                                                                    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                                                                })}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-xs font-medium text-indigo-600 truncate mt-0.5">
+                                                            {item.email}
+                                                            {item.phone ? <span className="text-slate-400 ml-2">• {item.phone}</span> : null}
+                                                        </p>
+                                                        {item.notes && (
+                                                            <p className="text-xs text-slate-600 mt-2 bg-slate-50 border border-slate-200/70 rounded-xl px-3 py-2 whitespace-pre-wrap break-words">
+                                                                {item.notes}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                                    <select
+                                                        value={item.status || 'new'}
+                                                        onChange={async e => {
+                                                            await updateLeadDetails(item.id, { status: e.target.value });
+                                                            fetchEnquiries(enquiryPage);
+                                                            fetchStats();
+                                                        }}
+                                                        className={`px-2.5 py-1.5 rounded-full text-[11px] font-bold border cursor-pointer focus:outline-none ${getStatusCfg(item.status).color}`}
+                                                    >
+                                                        {STATUS_OPTIONS.map(opt => (
+                                                            <option key={opt.value} value={opt.value} className="bg-white text-slate-800">{opt.label}</option>
+                                                        ))}
+                                                    </select>
+                                                    <button
+                                                        onClick={() => setSelectedLead(item)}
+                                                        title="Reply via Email"
+                                                        className="p-2 rounded-xl border border-slate-200 text-indigo-600 hover:bg-indigo-50"
+                                                    >
+                                                        <Mail size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            await deleteLead(item.id);
+                                                            fetchEnquiries(enquiryPage);
+                                                            fetchStats();
+                                                        }}
+                                                        title="Delete"
+                                                        className="p-2 rounded-xl border border-slate-200 text-rose-500 hover:bg-rose-50"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {enquiries && enquiries.last_page > 1 && (
+                                    <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                                        <span>Page {enquiries.current_page} of {enquiries.last_page}</span>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                disabled={enquiries.current_page <= 1}
+                                                onClick={() => { const p = enquiries.current_page - 1; setEnquiryPage(p); fetchEnquiries(p); }}
+                                                className="px-3 py-1.5 rounded-lg border border-slate-200 font-semibold disabled:opacity-40"
+                                            >
+                                                Previous
+                                            </button>
+                                            <button
+                                                disabled={enquiries.current_page >= enquiries.last_page}
+                                                onClick={() => { const p = enquiries.current_page + 1; setEnquiryPage(p); fetchEnquiries(p); }}
+                                                className="px-3 py-1.5 rounded-lg border border-slate-200 font-semibold disabled:opacity-40"
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* ===== ANALYTICS ===== */}
                     {view === 'analytics' && (
                         <div className="space-y-5">
@@ -1433,21 +1711,21 @@ function AdminDashboard() {
                     <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" onClick={() => setSelectedLead(null)} />
                     <div className="relative w-full sm:w-[420px] bg-white shadow-2xl flex flex-col h-full border-l border-slate-200 z-10">
                         {/* Drawer Header */}
-                        <div className="px-5 py-5 bg-white border-b border-slate-100 flex items-center gap-3.5 shrink-0">
-                            <div className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold shrink-0"
+                        <div className="px-5 py-5 bg-gradient-to-br from-[#0B0F19] via-[#131B2E] to-[#1E1B4B] text-white flex items-center gap-3.5 shrink-0">
+                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold shrink-0 ring-2 ring-white/15 shadow-lg"
                                 style={{ background: getAvatarColor(selectedLead.name) }}>
                                 {(selectedLead.name || 'U')[0].toUpperCase()}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <h3 className="font-black text-base text-slate-900 truncate">{selectedLead.name || 'Unnamed Lead'}</h3>
-                                <p className="text-xs text-slate-400">
+                                <h3 className="font-black text-base text-white truncate">{selectedLead.name || 'Unnamed Lead'}</h3>
+                                <p className="text-xs text-slate-300 mt-0.5">
                                     Added {new Date(selectedLead.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                     {' · '}
-                                    <span className="capitalize text-indigo-600 font-semibold">{selectedLead.source || 'direct'}</span>
+                                    <span className="capitalize text-indigo-300 font-semibold">{selectedLead.source || 'direct'}</span>
                                 </p>
                             </div>
                             <button onClick={() => setSelectedLead(null)}
-                                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl">
+                                className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
                                 <X size={18} />
                             </button>
                         </div>
@@ -1702,7 +1980,7 @@ function AdminDashboard() {
                 {[
                     { id: 'overview' as View, label: 'Overview', icon: <LayoutDashboard size={18} /> },
                     { id: 'leads' as View, label: 'Leads', icon: <Users size={18} /> },
-                    { id: 'analytics' as View, label: 'Analytics', icon: <BarChart2 size={18} /> },
+                    { id: 'enquiries' as View, label: 'Enquiries', icon: <Mail size={18} /> },
                 ].map(tab => (
                     <button
                         key={tab.id}
