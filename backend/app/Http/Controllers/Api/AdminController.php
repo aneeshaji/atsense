@@ -336,13 +336,59 @@ class AdminController extends Controller
             ->groupBy('source')
             ->get();
 
+        $totalEnquiries = ResumeLead::whereIn('source', ['contact_inquiry', 'newsletter_subscriber'])->count();
+        $newEnquiries = ResumeLead::whereIn('source', ['contact_inquiry', 'newsletter_subscriber'])
+            ->where(function ($q) {
+                $q->where('status', 'new')->orWhereNull('status');
+            })
+            ->count();
+
         return response()->json([
             'total_leads' => $totalLeads,
             'leads_today' => $leadsToday,
             'leads_this_week' => $leadsThisWeek,
+            'total_enquiries' => $totalEnquiries,
+            'new_enquiries' => $newEnquiries,
             'chart_data' => $chartData,
             'sources' => $sources,
         ]);
+    }
+
+    public function getEnquiries(Request $request)
+    {
+        $query = ResumeLead::whereIn('source', ['contact_inquiry', 'newsletter_subscriber']);
+
+        $sort = $request->input('sort', 'newest');
+        if ($sort === 'oldest') {
+            $query->orderBy('created_at', 'asc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        if ($request->filled('type') && $request->type !== 'all') {
+            $query->where('source', $request->type);
+        }
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            if ($request->status === 'new') {
+                $query->where(function ($q) {
+                    $q->where('status', 'new')->orWhereNull('status');
+                });
+            } else {
+                $query->where('status', $request->status);
+            }
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('notes', 'like', "%{$search}%");
+            });
+        }
+
+        return response()->json($query->paginate($request->input('per_page', 25)));
     }
 
     public function changePassword(Request $request)

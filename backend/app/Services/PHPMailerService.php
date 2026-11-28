@@ -17,12 +17,15 @@ class PHPMailerService
         $mail = new PHPMailer($exceptions);
         $mail->CharSet = 'UTF-8';
 
-        $driver = env('MAIL_MAILER', 'smtp');
-        $host   = env('MAIL_HOST', '');
-        $user   = env('MAIL_USERNAME', '');
-        $pass   = env('MAIL_PASSWORD', '');
-        $port   = (int) env('MAIL_PORT', 465);
-        $enc    = strtolower((string) env('MAIL_ENCRYPTION', 'ssl'));
+        $driver = config('mail.default') ?: env('MAIL_MAILER', 'smtp');
+        if ($driver === 'log' && env('MAIL_HOST')) {
+            $driver = env('MAIL_MAILER', 'smtp');
+        }
+        $host   = config('mail.mailers.smtp.host') ?: env('MAIL_HOST', '');
+        $user   = config('mail.mailers.smtp.username') ?: env('MAIL_USERNAME', '');
+        $pass   = config('mail.mailers.smtp.password') ?: env('MAIL_PASSWORD', '');
+        $port   = (int) (config('mail.mailers.smtp.port') ?: env('MAIL_PORT', 465));
+        $enc    = strtolower((string) (config('mail.mailers.smtp.encryption') ?: env('MAIL_ENCRYPTION', 'ssl')));
 
         if ($driver === 'smtp' && !empty($host)) {
             $mail->isSMTP();
@@ -64,8 +67,8 @@ class PHPMailerService
             $mail->isMail();
         }
 
-        $fromAddress = env('MAIL_FROM_ADDRESS', 'support@atsense.online');
-        $fromName    = env('MAIL_FROM_NAME', 'ATSense Platform');
+        $fromAddress = config('mail.from.address') ?: env('MAIL_FROM_ADDRESS', 'support@atsense.online');
+        $fromName    = config('mail.from.name') ?: env('MAIL_FROM_NAME', 'ATSense Platform');
 
         try {
             $mail->setFrom($fromAddress, $fromName);
@@ -114,8 +117,16 @@ class PHPMailerService
                 return ['success' => false, 'message' => 'No valid recipients specified.'];
             }
 
-            if (!empty($options['replyTo']) && filter_var($options['replyTo'], FILTER_VALIDATE_EMAIL)) {
-                $mail->addReplyTo($options['replyTo'], $options['replyToName'] ?? '');
+            if (!empty($options['replyTo'])) {
+                if (is_array($options['replyTo'])) {
+                    $rtEmail = $options['replyTo']['email'] ?? '';
+                    $rtName  = $options['replyTo']['name'] ?? ($options['replyToName'] ?? '');
+                    if (filter_var($rtEmail, FILTER_VALIDATE_EMAIL)) {
+                        $mail->addReplyTo($rtEmail, $rtName);
+                    }
+                } elseif (filter_var($options['replyTo'], FILTER_VALIDATE_EMAIL)) {
+                    $mail->addReplyTo($options['replyTo'], $options['replyToName'] ?? '');
+                }
             }
 
             $mail->isHTML(true);

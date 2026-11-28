@@ -57,9 +57,9 @@ class ContactController extends Controller
         $cleanSubject = str_replace(["\r", "\n"], '', $subject);
 
         // Determine destination and sender email addresses
-        $toEmail   = env('CONTACT_MAIL_TO') ?: env('MAIL_FROM_ADDRESS', 'support@atsense.online');
-        $fromEmail = env('MAIL_FROM_ADDRESS', 'support@atsense.online');
-        $fromName  = env('MAIL_FROM_NAME', 'ATSense Platform');
+        $toEmail   = config('mail.contact_to') ?: env('CONTACT_MAIL_TO') ?: config('mail.from.address') ?: env('MAIL_FROM_ADDRESS', 'support@atsense.online');
+        $fromEmail = config('mail.from.address') ?: env('MAIL_FROM_ADDRESS', 'support@atsense.online');
+        $fromName  = config('mail.from.name') ?: env('MAIL_FROM_NAME', 'ATSense Platform');
 
         if ($type === 'newsletter') {
             $mailSubject = "New Newsletter Subscriber: {$cleanEmail}";
@@ -177,14 +177,15 @@ HTML;
         // 5. Primary Sending Mechanism: PHPMailer Service (Authenticated SMTP with failover)
         try {
             $mailResult = $this->mailerService->send($toEmail, $mailSubject, $body, '', [
-                'replyTo' => ['email' => $cleanEmail, 'name' => $cleanName],
+                'replyTo'     => $cleanEmail,
+                'replyToName' => $cleanName,
             ]);
             $sent = $mailResult['success'];
             if (!$sent) {
-                Log::warning('PHPMailer send failed, attempting native fallback: ' . ($mailResult['error'] ?? 'unknown'));
+                Log::warning("PHPMailer send to {$toEmail} failed, attempting native fallback: " . ($mailResult['error'] ?? 'unknown'));
             }
         } catch (\Throwable $pmEx) {
-            Log::warning('PHPMailer execution threw exception: ' . $pmEx->getMessage());
+            Log::warning("PHPMailer execution to {$toEmail} threw exception: " . $pmEx->getMessage());
         }
 
         // Secondary Fallback: PHP native mail() function with envelope sender
@@ -220,24 +221,22 @@ HTML;
         try {
             if ($type === 'newsletter') {
                 ResumeLead::updateOrCreate(
-                    ['email' => $cleanEmail],
+                    ['email' => $cleanEmail, 'source' => 'newsletter_subscriber'],
                     [
                         'name'   => $cleanName !== 'ATSense Visitor' ? $cleanName : null,
-                        'source' => 'newsletter_subscriber',
                         'status' => 'new',
                     ]
                 );
             } else {
-                ResumeLead::updateOrCreate(
-                    ['email' => $cleanEmail],
-                    [
-                        'name'   => $cleanName,
-                        'phone'  => $phone ?: null,
-                        'source' => 'contact_inquiry',
-                        'notes'  => ($subject ? "[Subject: {$subject}] " : "") . $message,
-                        'status' => 'new',
-                    ]
-                );
+                // Always create a new inquiry row so multiple messages and existing resume leads are preserved
+                ResumeLead::create([
+                    'email'  => $cleanEmail,
+                    'name'   => $cleanName,
+                    'phone'  => $phone ?: null,
+                    'source' => 'contact_inquiry',
+                    'notes'  => ($subject ? "[Subject: {$subject}] " : "") . $message,
+                    'status' => 'new',
+                ]);
             }
 
             ActivityLog::record(

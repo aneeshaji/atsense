@@ -193,23 +193,18 @@ class ResumeController extends Controller
                     Log::warning('Background activity log skipped: ' . $actEx->getMessage());
                 }
 
-                // Background welcome & nudge email (Deep Tailor showcase)
+                // Background welcome & nudge email (Deep Tailor showcase) — send on every upload/retry
                 if ($email) {
                     try {
-                        // Check if we already sent a welcome to this email (any lead row)
-                        $alreadySent = false;
-                        if ($email && $hasWelcomeCol) {
-                            $alreadySent = ResumeLead::where('email', $email)
-                                ->whereNotNull('welcome_email_sent_at')
-                                ->exists();
-                        }
-                        if (!$alreadySent || app()->environment('local')) {
-                            $mailer = app(PHPMailerService::class);
-                            $result = $mailer->sendWelcomeAndNudgeEmail($name ?: 'there', $email);
-                            if ($result['success'] && $leadId && $hasWelcomeCol) {
+                        $mailer = app(PHPMailerService::class);
+                        $result = $mailer->sendWelcomeAndNudgeEmail($name ?: 'there', $email);
+                        if ($result['success']) {
+                            if ($leadId && $hasWelcomeCol) {
                                 ResumeLead::where('id', $leadId)->update(['welcome_email_sent_at' => now()]);
-                                Log::info("Welcome email sent successfully to {$email}");
                             }
+                            Log::info("Welcome email sent successfully to {$email} (lead #{$leadId})");
+                        } else {
+                            Log::warning("Welcome email failed for {$email}: " . ($result['error'] ?? $result['message'] ?? 'unknown'));
                         }
                     } catch (\Throwable $mailEx) {
                         Log::warning('Background welcome email skipped: ' . $mailEx->getMessage());
