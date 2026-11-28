@@ -128,6 +128,7 @@ function MiniBarChart({ data }: { data: ChartPoint[] }) {
 function AdminDashboard() {
     const [view, setView] = useState<View>('overview');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [leads, setLeads] = useState<PaginatedLeads | null>(null);
     const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
@@ -597,10 +598,10 @@ function AdminDashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#0B0F19]">
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
                 <div className="text-center">
-                    <div className="w-11 h-11 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mx-auto" />
-                    <p className="text-slate-400 text-xs mt-4 font-semibold tracking-widest uppercase">Loading Admin Console…</p>
+                    <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto" />
+                    <p className="text-slate-500 text-xs mt-4 font-semibold tracking-wide">Loading admin console…</p>
                 </div>
             </div>
         );
@@ -608,26 +609,34 @@ function AdminDashboard() {
 
     const navGroups: { title: string; ids: View[] }[] = [
         { title: 'Operations', ids: ['overview', 'leads', 'enquiries', 'analytics'] },
-        { title: 'Content & Studio', ids: ['blog', 'templates', 'site_settings'] },
+        { title: 'Content', ids: ['blog', 'templates', 'site_settings'] },
         { title: 'System', ids: ['activity_log', 'settings'] },
     ];
 
-    const renderSidebarNav = (onSelect?: () => void) => (
-        <div className="flex flex-col h-full bg-[#0B0F19] text-slate-300">
-            <div className="h-16 flex items-center px-5 gap-3 border-b border-white/[0.07] shrink-0">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 shadow-lg shadow-indigo-500/25">
+    const renderSidebarContent = (collapsed: boolean, onSelect?: () => void) => (
+        <div className="flex flex-col h-full bg-white border-r border-slate-200/80">
+            {/* Logo */}
+            <div className={`h-16 flex items-center border-b border-slate-100 shrink-0 ${collapsed ? 'justify-center px-3' : 'px-5 gap-3'}`}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-indigo-600 shadow-sm shadow-indigo-600/25 shrink-0">
                     <FileText size={16} className="text-white" />
                 </div>
-                <div>
-                    <span className="font-black text-white text-sm tracking-tight block leading-none">ATSense</span>
-                    <span className="text-[10px] text-indigo-400 font-bold tracking-widest uppercase mt-1 block">Admin Console</span>
-                </div>
+                {!collapsed && (
+                    <div className="min-w-0">
+                        <span className="font-black text-slate-900 text-sm tracking-tight block leading-none">ATSense</span>
+                        <span className="text-[10px] text-indigo-600 font-bold tracking-widest uppercase mt-0.5 block">Admin Console</span>
+                    </div>
+                )}
             </div>
 
-            <nav className="flex-1 px-3 py-5 space-y-5 overflow-y-auto">
+            {/* Nav groups */}
+            <nav className="flex-1 px-2 py-4 space-y-5 overflow-y-auto">
                 {navGroups.map(group => (
-                    <div key={group.title} className="space-y-1">
-                        <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">{group.title}</p>
+                    <div key={group.title} className="space-y-0.5">
+                        {!collapsed && (
+                            <p className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                                {group.title}
+                            </p>
+                        )}
                         {group.ids.map(id => {
                             const item = navItems.find(n => n.id === id);
                             if (!item) return null;
@@ -636,67 +645,78 @@ function AdminDashboard() {
                                 <button
                                     key={item.id}
                                     onClick={() => { setView(item.id); onSelect?.(); }}
-                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all ${
+                                    title={collapsed ? item.label : undefined}
+                                    className={`w-full flex items-center rounded-xl text-[13px] font-semibold transition-all group ${
+                                        collapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'
+                                    } ${
                                         active
-                                            ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-950/60'
-                                            : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
+                                            ? 'bg-indigo-600 text-white shadow-sm'
+                                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                                     }`}
                                 >
-                                    <span className={active ? 'text-white' : 'text-slate-500'}>
+                                    <span className={`shrink-0 ${active ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`}>
                                         {item.icon}
                                     </span>
-                                    <span>{item.label}</span>
-                                    {item.id === 'leads' && stats && stats.total_leads > 0 && (
-                                        <span className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                                            active ? 'bg-white/20 text-white' : 'bg-white/[0.08] text-slate-300'
+                                    {!collapsed && <span className="truncate">{item.label}</span>}
+                                    {!collapsed && item.id === 'leads' && stats && stats.total_leads > 0 && (
+                                        <span className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                                            active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                                         }`}>
                                             {stats.total_leads}
                                         </span>
                                     )}
-                                    {item.id === 'enquiries' && stats && (stats.new_enquiries ?? 0) > 0 && (
-                                        <span className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                                            active ? 'bg-white/20 text-white' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                                    {!collapsed && item.id === 'enquiries' && (stats?.new_enquiries ?? 0) > 0 && (
+                                        <span className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                                            active ? 'bg-white/20 text-white' : 'bg-indigo-50 text-indigo-600'
                                         }`}>
-                                            {stats.new_enquiries}
+                                            {stats?.new_enquiries}
                                         </span>
                                     )}
                                 </button>
                             );
                         })}
+                        {collapsed && group.title !== 'System' && (
+                            <div className="border-b border-slate-100 mt-2 pt-1" />
+                        )}
                     </div>
                 ))}
             </nav>
 
-            <div className="p-3 border-t border-white/[0.07] shrink-0">
+            {/* Sign out */}
+            <div className="p-2 border-t border-slate-100 shrink-0">
                 <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl text-[13px] font-semibold transition-all"
+                    title={collapsed ? 'Sign Out' : undefined}
+                    className={`w-full flex items-center rounded-xl text-[13px] font-semibold text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-all ${
+                        collapsed ? 'justify-center p-2.5' : 'gap-2.5 px-3 py-2.5'
+                    }`}
                 >
-                    <LogOut size={15} /> Sign Out
+                    <LogOut size={15} />
+                    {!collapsed && 'Sign Out'}
                 </button>
             </div>
         </div>
     );
 
     return (
-        <div className="min-h-screen flex bg-[#F4F6FB] text-slate-900 overflow-x-hidden">
+        <div className="min-h-screen flex bg-slate-50 text-slate-900 overflow-x-hidden">
             {/* Desktop Sidebar */}
-            <aside className="w-64 flex-col shrink-0 hidden md:flex bg-[#0B0F19] border-r border-slate-900/10 z-20">
-                {renderSidebarNav()}
+            <aside className={`hidden md:flex flex-col shrink-0 transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
+                {renderSidebarContent(sidebarCollapsed)}
             </aside>
 
             {/* Mobile Sidebar Drawer */}
             {mobileMenuOpen && (
                 <div className="fixed inset-0 z-50 md:hidden flex">
-                    <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-                    <aside className="relative w-72 max-w-[85vw] bg-[#0B0F19] h-full flex flex-col shadow-2xl z-10">
+                    <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
+                    <aside className="relative w-72 max-w-[85vw] h-full flex flex-col shadow-2xl z-10">
                         <button
                             onClick={() => setMobileMenuOpen(false)}
-                            className="absolute top-4 right-3 p-2 text-slate-400 hover:text-white rounded-lg z-20"
+                            className="absolute top-4 right-3 p-2 text-slate-400 hover:text-slate-700 rounded-lg z-20"
                         >
                             <X size={18} />
                         </button>
-                        {renderSidebarNav(() => setMobileMenuOpen(false))}
+                        {renderSidebarContent(false, () => setMobileMenuOpen(false))}
                     </aside>
                 </div>
             )}
@@ -704,27 +724,30 @@ function AdminDashboard() {
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 {/* Top Bar */}
-                <header className="sticky top-0 h-16 bg-white/85 backdrop-blur-xl border-b border-slate-200/70 flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0 z-20 gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
+                <header className="sticky top-0 h-14 bg-white border-b border-slate-200/80 flex items-center justify-between px-4 sm:px-5 shrink-0 z-20 gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                        {/* Mobile hamburger */}
                         <button
                             onClick={() => setMobileMenuOpen(true)}
-                            className="md:hidden p-2 -ml-1 rounded-xl text-slate-600 hover:bg-slate-100"
-                            aria-label="Open menu"
+                            className="md:hidden p-2 -ml-1 rounded-xl text-slate-500 hover:bg-slate-100"
                         >
-                            <Menu size={20} />
+                            <Menu size={19} />
                         </button>
+                        {/* Desktop sidebar toggle */}
+                        <button
+                            onClick={() => setSidebarCollapsed(v => !v)}
+                            className="hidden md:flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
+                            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                        >
+                            {sidebarCollapsed ? <ChevronRight size={17} /> : <ChevronLeft size={17} />}
+                        </button>
+                        <div className="h-5 w-px bg-slate-200 hidden md:block" />
                         <div className="min-w-0">
-                            <div className="flex items-center gap-2.5">
-                                <h1 className="text-base font-black text-slate-900 tracking-tight truncate">
-                                    {navItems.find(n => n.id === view)?.label}
-                                </h1>
-                                <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] font-bold text-emerald-700">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    Live
-                                </span>
-                            </div>
-                            <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
-                                ATSense Lead &amp; Content Operations
+                            <h1 className="text-sm font-black text-slate-900 tracking-tight truncate leading-none">
+                                {navItems.find(n => n.id === view)?.label ?? 'Dashboard'}
+                            </h1>
+                            <p className="text-[11px] text-slate-400 font-medium mt-0.5 hidden sm:block">
+                                ATSense Operations
                             </p>
                         </div>
                     </div>
@@ -733,85 +756,84 @@ function AdminDashboard() {
                         {(view === 'overview' || view === 'leads') && (
                             <button
                                 onClick={() => { fetchLeads(page); fetchStats(); }}
-                                className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all border border-slate-200 bg-white shadow-xs"
-                                title="Refresh Data"
+                                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl border border-slate-200 bg-white transition-all"
+                                title="Refresh"
                             >
-                                <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
+                                <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
                             </button>
                         )}
                         {view === 'leads' && (
                             <>
                                 <button
                                     onClick={() => setShowAddLead(true)}
-                                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all"
+                                    className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all"
                                 >
-                                    <UserPlus size={14} className="text-indigo-600" />
-                                    <span className="hidden sm:inline">Add Lead</span>
+                                    <UserPlus size={13} className="text-indigo-500" /> Add Lead
                                 </button>
                                 <button
                                     onClick={() => exportCsv(false)}
-                                    className="flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-md shadow-indigo-500/20 active:scale-95 transition-all"
+                                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 transition-all"
                                 >
-                                    <Download size={14} />
-                                    <span className="hidden sm:inline">Export CSV</span>
+                                    <Download size={13} /> <span className="hidden sm:inline">Export CSV</span>
                                 </button>
                             </>
                         )}
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-8 space-y-6">
+                <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-24 md:pb-6 space-y-5">
 
                     {/* ===== OVERVIEW ===== */}
                     {view === 'overview' && (
                         <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5">
-                                <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-                                            <Users size={18} />
+                            <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+                                {/* Total Leads */}
+                                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm col-span-1">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                            <Users size={17} />
                                         </div>
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-full">All Time</span>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">All Time</span>
                                     </div>
                                     <p className="text-3xl font-black text-slate-900 tracking-tight">{stats?.total_leads ?? 0}</p>
-                                    <p className="text-xs font-semibold text-slate-500 mt-1">Total Leads Captured</p>
+                                    <p className="text-xs font-semibold text-slate-500 mt-1">Total Leads</p>
                                 </div>
 
-                                <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-                                            <Zap size={18} />
+                                {/* Today */}
+                                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm col-span-1">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                                            <Zap size={17} />
                                         </div>
-                                        <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded-full">Today</span>
+                                        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Today</span>
                                     </div>
                                     <p className="text-3xl font-black text-slate-900 tracking-tight">{stats?.leads_today ?? 0}</p>
-                                    <p className="text-xs font-semibold text-slate-500 mt-1">New Leads Today</p>
+                                    <p className="text-xs font-semibold text-slate-500 mt-1">New Leads</p>
                                 </div>
 
+                                {/* Enquiries */}
                                 <div
                                     onClick={() => setView('enquiries')}
-                                    className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all cursor-pointer"
+                                    className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm col-span-1 cursor-pointer hover:border-indigo-300 hover:shadow-md transition-all"
                                 >
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20">
-                                            <Mail size={18} />
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                                            <Mail size={17} />
                                         </div>
-                                        {(stats?.new_enquiries ?? 0) > 0 ? (
-                                            <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider bg-indigo-50 px-2 py-0.5 rounded-full">
-                                                {stats?.new_enquiries} New
-                                            </span>
-                                        ) : (
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-full">Inbox</span>
-                                        )}
+                                        {(stats?.new_enquiries ?? 0) > 0
+                                            ? <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">{stats?.new_enquiries} New</span>
+                                            : <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inbox</span>
+                                        }
                                     </div>
                                     <p className="text-3xl font-black text-slate-900 tracking-tight">{stats?.total_enquiries ?? 0}</p>
-                                    <p className="text-xs font-semibold text-slate-500 mt-1">Contact &amp; Newsletter</p>
+                                    <p className="text-xs font-semibold text-slate-500 mt-1">Enquiries</p>
                                 </div>
 
-                                <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow">
+                                {/* Trend chart */}
+                                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm col-span-2 xl:col-span-1">
                                     <div className="flex items-center justify-between mb-1">
-                                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">7-Day Trend</span>
-                                        <TrendingUp size={15} className="text-indigo-500" />
+                                        <span className="text-xs font-bold text-slate-500">7-Day Trend</span>
+                                        <TrendingUp size={14} className="text-indigo-500" />
                                     </div>
                                     {stats?.chart_data && <MiniBarChart data={stats.chart_data} />}
                                 </div>

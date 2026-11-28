@@ -9,6 +9,11 @@ concurrency:
   group: production
   cancel-in-progress: true
 
+# Force all JS actions (checkout, upload-artifact, etc.) to run on Node 24
+# so the "Node.js 20 is deprecated" annotation disappears.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   # ──────────────────────────────────────────────────────────────────────────
   # JOB 1 — Build the React frontend
@@ -18,12 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -45,7 +50,7 @@ jobs:
         run: ls -la frontend/dist/
 
       - name: Upload dist artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: frontend-dist
           path: frontend/dist/
@@ -60,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup PHP 8.2
         uses: shivammathur/setup-php@v2
@@ -83,7 +88,7 @@ jobs:
         run: ls -la backend/.htaccess backend/index.php
 
       - name: Upload backend artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: backend-build
           path: backend/
@@ -101,13 +106,13 @@ jobs:
 
     steps:
       - name: Download frontend dist
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: frontend-dist
           path: ./frontend-dist/
 
       - name: Download backend build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: backend-build
           path: ./backend-build/

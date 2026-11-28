@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { Lock, Mail, Key, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 
 function AdminLogin() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPw, setShowPw] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -14,104 +15,91 @@ function AdminLogin() {
         e.preventDefault();
         setError('');
         setLoading(true);
-
         try {
             const res = await api.post('/admin/login', { email, password });
             localStorage.setItem('admin_token', res.data.token);
             navigate('/admin/dashboard');
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+            setError(err.response?.data?.message || 'Login failed. Check your credentials.');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-[#070A12] text-slate-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-            {/* Ambient background glow */}
-            <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[680px] h-[420px] rounded-full bg-indigo-600/20 blur-[120px]" />
-            <div className="pointer-events-none absolute bottom-0 right-1/4 w-[420px] h-[320px] rounded-full bg-violet-600/15 blur-[120px]" />
-
-            <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="flex justify-center mb-5">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 p-[1px] shadow-2xl shadow-indigo-500/30">
-                        <div className="w-full h-full bg-[#0B101D] rounded-2xl flex items-center justify-center">
-                            <Lock className="w-6 h-6 text-indigo-400" strokeWidth={2.2} />
-                        </div>
-                    </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex flex-col justify-center py-12 px-4 sm:px-6">
+            {/* Top brand bar */}
+            <div className="sm:mx-auto sm:w-full sm:max-w-sm text-center mb-8">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-600/30 mb-5">
+                    <Lock className="w-6 h-6 text-white" strokeWidth={2.5} />
                 </div>
-                <div className="text-center">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-[11px] font-bold tracking-widest uppercase text-indigo-300 mb-3">
-                        <ShieldCheck size={12} /> ATSense Operations
-                    </span>
-                    <h2 className="text-3xl font-black text-white tracking-tight">
-                        Admin Console
-                    </h2>
-                    <p className="mt-1.5 text-sm text-slate-400 font-medium">
-                        Sign in to manage leads, enquiries, and platform analytics
-                    </p>
-                </div>
+                <h1 className="text-2xl font-black text-slate-900 tracking-tight">ATSense Admin</h1>
+                <p className="mt-1 text-sm text-slate-500">Sign in to your operations console</p>
             </div>
 
-            <div className="relative z-10 mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="bg-[#0E1422]/90 backdrop-blur-xl py-8 px-6 sm:px-9 rounded-3xl border border-white/[0.08] shadow-2xl shadow-black/60">
+            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+                <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/80 border border-slate-100 p-8">
                     <form className="space-y-5" onSubmit={handleLogin}>
                         {error && (
-                            <div className="bg-rose-500/10 text-rose-300 p-3.5 rounded-xl text-xs font-semibold border border-rose-500/25">
+                            <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-medium">
                                 {error}
                             </div>
                         )}
 
                         <div>
-                            <label htmlFor="admin-email" className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
                                 Email Address
                             </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                    <Mail className="h-4 w-4 text-slate-500" />
-                                </div>
+                                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                 <input
-                                    id="admin-email"
                                     type="email"
                                     required
-                                    className="pl-10 block w-full bg-[#070A12]/80 border border-white/10 rounded-xl py-3 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 font-medium transition-all"
+                                    className="w-full pl-10 pr-4 py-3 text-sm font-medium bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all"
                                     placeholder="admin@atsense.online"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={e => setEmail(e.target.value)}
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label htmlFor="admin-password" className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
                                 Password
                             </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                    <Key className="h-4 w-4 text-slate-500" />
-                                </div>
+                                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                 <input
-                                    id="admin-password"
-                                    type="password"
+                                    type={showPw ? 'text' : 'password'}
                                     required
-                                    className="pl-10 block w-full bg-[#070A12]/80 border border-white/10 rounded-xl py-3 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 font-medium transition-all"
+                                    className="w-full pl-10 pr-11 py-3 text-sm font-medium bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white transition-all"
                                     placeholder="••••••••"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={e => setPassword(e.target.value)}
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPw(v => !v)}
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                                >
+                                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
                             </div>
                         </div>
 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-600/25 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0E1422] focus:ring-indigo-500 transition-all disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.99]"
+                            className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-md shadow-indigo-600/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.99]"
                         >
-                            <span>{loading ? 'Authenticating...' : 'Sign In to Console'}</span>
-                            {!loading && <ArrowRight size={16} />}
+                            {loading ? 'Signing in…' : 'Sign In to Console'}
                         </button>
                     </form>
                 </div>
+
+                <p className="text-center text-xs text-slate-400 mt-5">
+                    ATSense Operations Console · Secure access only
+                </p>
             </div>
         </div>
     );
