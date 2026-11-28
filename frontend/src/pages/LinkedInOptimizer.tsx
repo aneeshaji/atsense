@@ -6,6 +6,7 @@ import {
     Briefcase, FileText, ArrowRight, Zap, Target, Layers 
 } from 'lucide-react';
 import SEO from '../components/SEO';
+import LeadCaptureGate from '../components/LeadCaptureGate';
 import type { Resume } from '../types';
 
 interface LinkedInData {
@@ -248,6 +249,12 @@ const LinkedInOptimizer = () => {
 
                 {/* Results View */}
                 {result && (
+                    <LeadCaptureGate
+                        source="linkedin_optimizer"
+                        title="Unlock Your LinkedIn Profile Rewrite"
+                        subtitle="Enter your email to view and copy your viral headlines, About summary, and skill keywords."
+                        buttonLabel="Unlock LinkedIn Assets"
+                    >
                     <div className="space-y-8 animate-fade-in">
                         
                         {/* Headlines */}
@@ -372,6 +379,7 @@ const LinkedInOptimizer = () => {
                         </div>
 
                     </div>
+                    </LeadCaptureGate>
                 )}
 
             </div>

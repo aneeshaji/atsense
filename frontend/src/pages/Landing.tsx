@@ -1346,6 +1346,23 @@ const Landing = () => {
                     </div>
                 </div>
             </section>
+            {/* Sticky Mobile Bottom CTA Bar */}
+            <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2.5 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] flex items-center gap-2.5">
+                <Link
+                    to="/resume-grader"
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-extrabold text-xs text-center flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20"
+                >
+                    <Target size={14} />
+                    <span>Free ATS Score</span>
+                </Link>
+                <Link
+                    to="/builder"
+                    className="py-2.5 px-3.5 rounded-xl bg-slate-900 text-white font-bold text-xs flex items-center justify-center gap-1"
+                >
+                    <span>Studio</span>
+                    <ArrowRight size={13} />
+                </Link>
+            </div>
         </main>
         </>
     );

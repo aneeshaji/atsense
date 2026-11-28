@@ -7,6 +7,7 @@ import {
     CheckCircle2, XCircle, Loader2, Search, ArrowRight, Zap, Target, Layers 
 } from 'lucide-react';
 import SEO from '../components/SEO';
+import LeadCaptureGate from '../components/LeadCaptureGate';
 import type { Resume, JobMatchResult } from '../types';
 
 function JobMatcher() {
@@ -269,6 +270,12 @@ function JobMatcher() {
                                 </div>
 
                                 {/* Missing Keywords (Red Flag) */}
+                                <LeadCaptureGate
+                                    source="job_matcher"
+                                    title="Unlock Missing ATS Keywords"
+                                    subtitle="Enter your email to reveal every missing keyword and tailored match fix."
+                                    buttonLabel="Unlock Keyword Report"
+                                >
                                 <div className="p-6 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-rose-500/20 shadow-xl">
                                     <div className="flex items-center gap-2 mb-4">
                                         <XCircle size={18} className="text-rose-400" />
@@ -323,6 +330,7 @@ function JobMatcher() {
                                         )}
                                     </div>
                                 </div>
+                                </LeadCaptureGate>
 
                             </div>
                         )}

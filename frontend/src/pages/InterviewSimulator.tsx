@@ -16,6 +16,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+import LeadCaptureGate from '../components/LeadCaptureGate';
 
 interface Question {
   question: string;
@@ -465,6 +466,12 @@ const InterviewSimulator: React.FC = () => {
                                     </button>
                                 ) : (
                                     <div className="animate-in zoom-in-95 duration-300 relative z-10">
+                                        <LeadCaptureGate
+                                            source="interview_prep"
+                                            title="Unlock AI Interview Feedback"
+                                            subtitle="Enter your email to see your score, strengths, improvements, and golden sample answer."
+                                            buttonLabel="Unlock Feedback"
+                                        >
                                         <div className="bg-[#0b1f3b] text-white rounded-[2rem] p-8 mb-6 relative overflow-hidden shadow-2xl">
                                             {/* Score Badge */}
                                             <div className="absolute top-6 right-8 text-center bg-white/5 backdrop-blur-md p-3 rounded-2xl border border-white/10">
@@ -512,6 +519,7 @@ const InterviewSimulator: React.FC = () => {
                                                 <p className="text-sm text-blue-100 italic leading-loose">"{feedback.sampleBetterAnswer}"</p>
                                             </div>
                                         </div>
+                                        </LeadCaptureGate>
 
                                         <button 
                                             onClick={nextQuestion}

@@ -18,13 +18,37 @@ class SitemapController extends Controller
             ['loc' => $baseUrl . '/', 'changefreq' => 'daily', 'priority' => '1.0'],
             ['loc' => $baseUrl . '/builder', 'changefreq' => 'weekly', 'priority' => '0.9'],
             ['loc' => $baseUrl . '/resume-grader', 'changefreq' => 'weekly', 'priority' => '0.9'],
-            ['loc' => $baseUrl . '/interview-simulator', 'changefreq' => 'weekly', 'priority' => '0.8'],
+            ['loc' => $baseUrl . '/job-matcher', 'changefreq' => 'weekly', 'priority' => '0.8'],
+            ['loc' => $baseUrl . '/interview-prep', 'changefreq' => 'weekly', 'priority' => '0.8'],
             ['loc' => $baseUrl . '/linkedin-optimizer', 'changefreq' => 'weekly', 'priority' => '0.8'],
-            ['loc' => $baseUrl . '/cover-letter-generator', 'changefreq' => 'weekly', 'priority' => '0.7'],
+            ['loc' => $baseUrl . '/cover-letters', 'changefreq' => 'weekly', 'priority' => '0.8'],
+            ['loc' => $baseUrl . '/templates', 'changefreq' => 'weekly', 'priority' => '0.8'],
             ['loc' => $baseUrl . '/blog', 'changefreq' => 'daily', 'priority' => '0.7'],
             ['loc' => $baseUrl . '/about', 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['loc' => $baseUrl . '/contact', 'changefreq' => 'monthly', 'priority' => '0.5'],
         ];
+
+        // Company & role tailor landing pages
+        $tailorSlugs = [
+            'google', 'amazon', 'microsoft', 'meta',
+            'deloitte', 'goldman-sachs', 'software-engineer', 'product-manager',
+        ];
+        foreach ($tailorSlugs as $slug) {
+            $urls[] = [
+                'loc' => $baseUrl . '/tailor/' . $slug,
+                'changefreq' => 'weekly',
+                'priority' => '0.9',
+            ];
+        }
+
+        // Competitor comparison pages
+        foreach (['jobscan', 'resumeworded', 'enhancv'] as $competitor) {
+            $urls[] = [
+                'loc' => $baseUrl . '/vs/' . $competitor,
+                'changefreq' => 'monthly',
+                'priority' => '0.8',
+            ];
+        }
 
         // Add Posts
         $posts = Post::where('is_published', true)->orderBy('updated_at', 'desc')->get();

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Share2, Download, Check, Copy, Linkedin, Twitter, Sparkles, X, Award, ShieldCheck, Zap } from 'lucide-react';
+import { Share2, Download, Check, Copy, Linkedin, Twitter, MessageCircle, Sparkles, X, Award, ShieldCheck, Zap } from 'lucide-react';
 
 interface ShareableScoreCardProps {
     score: number;
@@ -58,6 +58,11 @@ If you are job hunting, check your score for free here: ${shareUrl}
         const text = `Just audited my resume with ATSense and got an ATS score of ${safeScore}/100! Beat ${percentile}% of applicant bots 🚀 Check yours free:`;
         const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
         window.open(twitterUrl, '_blank', 'width=600,height=500');
+    };
+
+    const handleShareWhatsApp = () => {
+        const text = `I just checked my resume on ATSense and scored ${safeScore}/100 (beating ${percentile}% of ATS bots)! 🚀 Scan yours free here: ${shareUrl}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
     };
 
     const generateAndDownloadImage = () => {
@@ -245,23 +250,32 @@ If you are job hunting, check your score for free here: ${shareUrl}
 
                 {/* Viral Sharing Buttons */}
                 <div className="space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {/* LinkedIn */}
                         <button
                             onClick={handleShareLinkedIn}
-                            className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl bg-[#0a66c2] hover:bg-[#004182] text-white text-sm font-bold shadow-lg transition-all duration-150 hover:-translate-y-0.5"
+                            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#0a66c2] hover:bg-[#004182] text-white text-sm font-bold shadow-lg transition-all duration-150 hover:-translate-y-0.5"
                         >
-                            <Linkedin size={18} fill="currentColor" />
-                            <span>Share to LinkedIn</span>
+                            <Linkedin size={17} fill="currentColor" />
+                            <span>LinkedIn</span>
+                        </button>
+
+                        {/* WhatsApp */}
+                        <button
+                            onClick={handleShareWhatsApp}
+                            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#25D366] hover:bg-[#1ebe57] text-white text-sm font-bold shadow-lg transition-all duration-150 hover:-translate-y-0.5"
+                        >
+                            <MessageCircle size={17} />
+                            <span>WhatsApp</span>
                         </button>
 
                         {/* Twitter / X */}
                         <button
                             onClick={handleShareTwitter}
-                            className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold border border-slate-700 transition-all duration-150 hover:-translate-y-0.5"
+                            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold border border-slate-700 transition-all duration-150 hover:-translate-y-0.5"
                         >
-                            <Twitter size={18} fill="currentColor" />
-                            <span>Post on X (Twitter)</span>
+                            <Twitter size={17} fill="currentColor" />
+                            <span>Post on X</span>
                         </button>
                     </div>
 

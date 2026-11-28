@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import api from '../services/api';
 import { Sparkles, FileText, Briefcase, Building2, Copy, ArrowLeft, Loader2, Check } from 'lucide-react';
 import { useModal } from '../context/ModalContext';
+import LeadCaptureGate from '../components/LeadCaptureGate';
 
 function CoverLetterGenerator() {
     const { id } = useParams();
@@ -343,11 +344,18 @@ function CoverLetterGenerator() {
 
                         {generatedContent ? (
                             <div className="flex-1 p-8 overflow-y-auto relative z-10">
-                                <textarea
-                                    className="w-full h-full min-h-[400px] focus:outline-none font-sans text-[15px] leading-loose text-gray-700 bg-transparent resize-none scrollbar-hide"
-                                    value={generatedContent}
-                                    readOnly={true} 
-                                />
+                                <LeadCaptureGate
+                                    source="cover_letter"
+                                    title="Unlock Your Tailored Cover Letter"
+                                    subtitle="Enter your email to view and copy your full AI-generated cover letter."
+                                    buttonLabel="Unlock Cover Letter"
+                                >
+                                    <textarea
+                                        className="w-full h-full min-h-[400px] focus:outline-none font-sans text-[15px] leading-loose text-gray-700 bg-transparent resize-none scrollbar-hide"
+                                        value={generatedContent}
+                                        readOnly={true} 
+                                    />
+                                </LeadCaptureGate>
                             </div>
                         ) : (
                             <div className="flex-1 flex flex-col items-center justify-center text-gray-400 p-8 relative z-10">
