@@ -627,9 +627,9 @@ const Landing = () => {
                 schemas={[faqSchema]}
             />
 
-            {/* HERO SECTION - Dark Immersive Power Canvas */}
+            {/* HERO SECTION - Clean Light SaaS Canvas */}
             <section 
-                className="relative min-h-[92vh] flex items-center bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 overflow-hidden"
+                className="relative flex items-center bg-gradient-to-b from-white via-indigo-50/40 to-slate-50 overflow-hidden border-b border-slate-200/70"
                 onDragEnter={handleDrag}
             >
                 {/* Full-Page Drag and Drop Active Overlay */}
@@ -639,67 +639,51 @@ const Landing = () => {
                         onDragLeave={handleDrag} 
                         onDragOver={handleDrag} 
                         onDrop={handleDrop}
-                        className="fixed inset-0 z-50 bg-indigo-950/90 backdrop-blur-xl flex flex-col items-center justify-center border-4 border-dashed border-cyan-400/50 p-8"
+                        className="fixed inset-0 z-50 bg-indigo-950/90 backdrop-blur-xl flex flex-col items-center justify-center border-4 border-dashed border-indigo-400 p-8"
                     >
-                        <Upload size={64} className="text-cyan-400 animate-bounce mb-4" />
+                        <Upload size={64} className="text-indigo-300 animate-bounce mb-4" />
                         <h3 className="text-3xl font-black text-white mb-2">Drop Your Resume Here</h3>
-                        <p className="text-slate-300">We'll auto-extract your content and run the ATS compliance scan instantly.</p>
+                        <p className="text-slate-200">We'll auto-extract your content and run the ATS compliance scan instantly.</p>
                     </div>
                 )}
 
-                {/* Ambient Floating Mesh Gradient Orbs */}
+                {/* Subtle Ambient Background Glow */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute top-20 left-[10%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] animate-float"></div>
-                    <div className="absolute top-40 right-[5%] w-[400px] h-[400px] bg-violet-500/8 rounded-full blur-[100px] animate-float-slow"></div>
-                    <div className="absolute bottom-10 left-[30%] w-[600px] h-[300px] bg-cyan-500/5 rounded-full blur-[130px] animate-float"></div>
+                    <div className="absolute -top-24 left-[8%] w-[480px] h-[480px] bg-indigo-200/35 rounded-full blur-[120px]" />
+                    <div className="absolute top-20 right-[6%] w-[420px] h-[420px] bg-violet-200/30 rounded-full blur-[120px]" />
                 </div>
 
-                {/* Subtle Grid Overlay */}
-                <div className="absolute inset-0 tech-grid-dark opacity-30 pointer-events-none"></div>
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full py-16 md:py-20">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-14 lg:gap-10 items-center">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full py-12 md:py-16 lg:py-20">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
                         
                         {/* Left Column: Hero Copy & Upload */}
-                        <div className="lg:col-span-6 space-y-7 text-center lg:text-left">
+                        <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
                             
                             {/* Pill Badge */}
-                            <FadeInSection delay={0} className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm text-sm font-semibold text-indigo-300">
+                            <FadeInSection delay={0} className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/80 text-xs font-bold text-indigo-700 shadow-xs">
                                 <span className="flex h-2 w-2 relative">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                 </span>
-                                <span>ATSense 3.0 — Resume Intelligence Engine</span>
+                                <span>ATSense 3.0 · Free AI Resume &amp; ATS Suite</span>
                             </FadeInSection>
 
                             {/* Main Headline */}
                             <FadeInSection delay={100}>
-                                <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-black leading-[1.1] tracking-tight text-white">
-                                    Your Resume Keeps Getting{' '}
-                                    <span className="relative inline-block">
-                                        <span className="gradient-text-animated">Rejected by Bots.</span>
-                                        <svg className="absolute -bottom-1.5 left-0 w-full" viewBox="0 0 300 8" fill="none">
-                                            <path d="M1 5.5C50 2 100 2 150 4C200 6 250 3 299 5.5" stroke="url(#underline-grad)" strokeWidth="2.5" strokeLinecap="round">
-                                                <animate attributeName="stroke-dashoffset" values="600;0" dur="1.5s" fill="freeze" />
-                                                <animate attributeName="stroke-dasharray" values="0,600;600,0" dur="1.5s" fill="freeze" />
-                                            </path>
-                                            <defs>
-                                                <linearGradient id="underline-grad" x1="0" y1="0" x2="300" y2="0">
-                                                    <stop stopColor="#6366f1" />
-                                                    <stop offset="1" stopColor="#a855f7" />
-                                                </linearGradient>
-                                            </defs>
-                                        </svg>
+                                <h1 className="text-4xl sm:text-5xl lg:text-[3.35rem] font-black leading-[1.08] tracking-tight text-slate-900">
+                                    Stop Getting{' '}
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600">
+                                        Rejected by Bots.
                                     </span>
                                     <br />
-                                    <span className="text-slate-400 font-extrabold">We Fix That.</span>
+                                    <span className="text-slate-700">Land More Interviews.</span>
                                 </h1>
                             </FadeInSection>
 
                             {/* Subtitle */}
                             <FadeInSection delay={200}>
-                                <p className="text-base sm:text-lg text-slate-400 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                                    75% of resumes are auto-rejected by Workday, Taleo & Greenhouse before a human sees them. ATSense reverse-engineers these filters to optimize your resume in seconds.
+                                <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                                    75% of resumes are filtered out by Workday, Taleo &amp; Greenhouse before a recruiter ever sees them. Upload yours to audit, match keywords, and tailor in seconds.
                                 </p>
                             </FadeInSection>
 
@@ -707,29 +691,27 @@ const Landing = () => {
                             <FadeInSection delay={300} className="pt-1">
                                 <div 
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="group relative p-5 rounded-2xl bg-white/[0.04] border border-white/[0.08] hover:border-indigo-500/40 backdrop-blur-sm transition-all duration-300 cursor-pointer flex flex-col sm:flex-row items-center gap-4 hover:bg-white/[0.07]"
+                                    className="group relative p-4 sm:p-5 rounded-2xl bg-white border-2 border-dashed border-indigo-200 hover:border-indigo-500 shadow-lg shadow-indigo-500/5 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-200 cursor-pointer flex flex-col sm:flex-row items-center gap-4"
                                 >
-                                    {/* Hover glow */}
-                                    <div className="absolute inset-0 rounded-2xl bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                                    
-                                    <div className="w-12 h-12 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 relative z-10">
+                                    <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-200">
                                         {importing ? (
                                             <RefreshCw size={22} className="animate-spin" />
                                         ) : (
                                             <Upload size={22} />
                                         )}
                                     </div>
-                                    <div className="flex-1 text-center sm:text-left relative z-10">
-                                        <p className="font-bold text-white text-sm sm:text-base group-hover:text-indigo-300 transition-colors">
-                                            {importing ? 'Analyzing with AI...' : 'Upload & Audit Your Resume Free'}
+                                    <div className="flex-1 text-center sm:text-left">
+                                        <p className="font-extrabold text-slate-900 text-sm sm:text-base group-hover:text-indigo-700 transition-colors">
+                                            {importing ? 'Analyzing your resume with AI…' : 'Upload & Audit Your Resume Free'}
                                         </p>
                                         <p className="text-xs text-slate-500 mt-0.5">
-                                            Drop PDF / DOCX here, or click to browse
+                                            Drop PDF or DOCX here, or click to browse
                                         </p>
                                     </div>
                                     <button 
+                                        type="button"
                                         disabled={importing}
-                                        className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs tracking-wide shrink-0 shadow-lg shadow-indigo-500/20 transition-all relative z-10"
+                                        className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs tracking-wide shrink-0 shadow-md shadow-indigo-600/20 transition-all"
                                     >
                                         Browse File
                                     </button>
@@ -746,112 +728,102 @@ const Landing = () => {
                                 />
                             </FadeInSection>
 
-                            {/* Secondary Links */}
-                            <FadeInSection delay={400} className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-sm">
+                            {/* Secondary Links & Trust */}
+                            <FadeInSection delay={400} className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-xs sm:text-sm">
                                 <Link
                                     to="/resume-grader"
-                                    className="inline-flex items-center gap-1.5 text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                                    className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-bold transition-colors"
                                 >
-                                    <Target size={14} /> Free Resume Grader →
+                                    <Target size={15} /> Free ATS Grader →
                                 </Link>
-                                <span className="text-slate-700">•</span>
                                 <Link
                                     to="/builder"
-                                    className="inline-flex items-center gap-1.5 text-slate-500 hover:text-indigo-400 font-semibold transition-colors"
+                                    className="inline-flex items-center gap-1.5 text-slate-600 hover:text-slate-900 font-semibold transition-colors"
                                 >
                                     Start from Scratch
                                 </Link>
-                            </FadeInSection>
-
-                            {/* Trust Markers */}
-                            <FadeInSection delay={500} className="flex flex-wrap items-center justify-center lg:justify-start gap-5 text-xs text-slate-500 font-medium">
-                                <span className="flex items-center gap-1.5">
-                                    <CheckCircle size={14} className="text-emerald-500" /> Free to build & export
+                                <span className="hidden sm:inline text-slate-300">|</span>
+                                <span className="flex items-center gap-1.5 text-slate-500 font-medium text-xs">
+                                    <CheckCircle size={14} className="text-emerald-500" /> Free &amp; No Credit Card
                                 </span>
-                                <span className="flex items-center gap-1.5">
-                                    <CheckCircle size={14} className="text-emerald-500" /> No credit card
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <Lock size={14} className="text-indigo-400" /> 100% Encrypted
+                                <span className="flex items-center gap-1.5 text-slate-500 font-medium text-xs">
+                                    <Lock size={14} className="text-indigo-500" /> Encrypted
                                 </span>
                             </FadeInSection>
 
                             {/* Social Proof */}
-                            <FadeInSection delay={600} className="flex items-center justify-center lg:justify-start gap-3">
+                            <FadeInSection delay={500} className="flex items-center justify-center lg:justify-start gap-3 pt-1">
                                 <div className="flex -space-x-2 overflow-hidden">
-                                    <div className="inline-flex h-7 w-7 rounded-full ring-2 ring-slate-900 bg-gradient-to-tr from-indigo-500 to-purple-500 text-[9px] font-bold text-white items-center justify-center">AK</div>
-                                    <div className="inline-flex h-7 w-7 rounded-full ring-2 ring-slate-900 bg-gradient-to-tr from-cyan-500 to-blue-500 text-[9px] font-bold text-white items-center justify-center">MS</div>
-                                    <div className="inline-flex h-7 w-7 rounded-full ring-2 ring-slate-900 bg-gradient-to-tr from-emerald-500 to-teal-500 text-[9px] font-bold text-white items-center justify-center">JD</div>
-                                    <div className="inline-flex h-7 w-7 rounded-full ring-2 ring-slate-900 bg-gradient-to-tr from-rose-500 to-pink-500 text-[9px] font-bold text-white items-center justify-center">SL</div>
-                                    <div className="inline-flex h-7 w-7 rounded-full ring-2 ring-slate-900 bg-gradient-to-tr from-amber-500 to-orange-500 text-[9px] font-bold text-white items-center justify-center">VT</div>
+                                    <div className="inline-flex h-7 w-7 rounded-full ring-2 ring-white bg-gradient-to-tr from-indigo-500 to-purple-500 text-[9px] font-bold text-white items-center justify-center">AK</div>
+                                    <div className="inline-flex h-7 w-7 rounded-full ring-2 ring-white bg-gradient-to-tr from-cyan-500 to-blue-500 text-[9px] font-bold text-white items-center justify-center">MS</div>
+                                    <div className="inline-flex h-7 w-7 rounded-full ring-2 ring-white bg-gradient-to-tr from-emerald-500 to-teal-500 text-[9px] font-bold text-white items-center justify-center">JD</div>
+                                    <div className="inline-flex h-7 w-7 rounded-full ring-2 ring-white bg-gradient-to-tr from-rose-500 to-pink-500 text-[9px] font-bold text-white items-center justify-center">SL</div>
+                                    <div className="inline-flex h-7 w-7 rounded-full ring-2 ring-white bg-gradient-to-tr from-amber-500 to-orange-500 text-[9px] font-bold text-white items-center justify-center">VT</div>
                                 </div>
-                                <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
+                                <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
                                     <div className="flex text-amber-400">
                                         {[...Array(5)].map((_, i) => (
                                             <Star key={i} size={13} className="fill-current" />
                                         ))}
                                     </div>
-                                    <span className="font-bold text-slate-300">4.9/5</span>
-                                    <span className="text-slate-500">from 42K+ users</span>
+                                    <span className="font-bold text-slate-800">4.9/5</span>
+                                    <span>trusted by 42,000+ job seekers</span>
                                 </div>
                             </FadeInSection>
                         </div>
 
                         {/* Right Column: Live Interactive ATS Simulator */}
-                        <FadeInSection delay={250} className="lg:col-span-6">
+                        <FadeInSection delay={200} className="lg:col-span-6">
                             <InteractiveHeroSimulator />
                         </FadeInSection>
                     </div>
                 </div>
-                
-                {/* Bottom fade into next section */}
-                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-slate-50 to-transparent pointer-events-none"></div>
             </section>
 
 
             {/* FULL-WIDTH METRIC STATS TICKER */}
-            <section className="py-8 bg-slate-900 text-white border-y border-slate-800">
+            <section className="py-8 bg-white border-b border-slate-200/80">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                        <div>
-                            <div className="text-2xl sm:text-3xl font-black text-cyan-400 font-mono">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-slate-100">
+                        <div className="pt-2 md:pt-0">
+                            <div className="text-2xl sm:text-3xl font-black text-indigo-600 tabular-nums">
                                 <AnimatedCounter end={45000} suffix="+" />
                             </div>
-                            <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">Resumes Optimized</p>
+                            <p className="text-xs sm:text-sm text-slate-500 mt-1 font-semibold">Resumes Optimized</p>
                         </div>
-                        <div>
-                            <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
+                        <div className="pt-2 md:pt-0">
+                            <div className="text-2xl sm:text-3xl font-black text-emerald-600 tabular-nums">
                                 98.2%
                             </div>
-                            <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">ATS Pass Rate</p>
+                            <p className="text-xs sm:text-sm text-slate-500 mt-1 font-semibold">ATS Pass Rate</p>
                         </div>
-                        <div>
-                            <div className="text-2xl sm:text-3xl font-black text-purple-400 font-mono">
+                        <div className="pt-4 md:pt-0">
+                            <div className="text-2xl sm:text-3xl font-black text-violet-600 tabular-nums">
                                 3.4x
                             </div>
-                            <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">More Interview Invites</p>
+                            <p className="text-xs sm:text-sm text-slate-500 mt-1 font-semibold">More Interview Invites</p>
                         </div>
-                        <div>
-                            <div className="text-2xl sm:text-3xl font-black text-amber-400 font-mono">
+                        <div className="pt-4 md:pt-0">
+                            <div className="text-2xl sm:text-3xl font-black text-amber-600 tabular-nums">
                                 $32,000
                             </div>
-                            <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">Avg. Salary Bump</p>
+                            <p className="text-xs sm:text-sm text-slate-500 mt-1 font-semibold">Avg. Salary Bump</p>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* COMPANY LOGOS RIBBON */}
-            <section className="py-8 bg-white border-b border-slate-200/80">
+            <section className="py-7 bg-slate-50 border-b border-slate-200/80">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <p className="text-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-                        Candidates successfully hired at world-class organizations
+                    <p className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">
+                        Candidates hired at world-class organizations
                     </p>
-                    <div className="flex flex-wrap items-center justify-center gap-8 md:gap-14 opacity-75">
+                    <div className="flex flex-wrap items-center justify-center gap-8 md:gap-14 opacity-80">
                         {companyLogos.map((company, index) => (
                             <span 
                                 key={index} 
-                                className="text-slate-500 hover:text-slate-900 font-black text-lg md:text-xl tracking-tight transition-colors duration-200 cursor-default"
+                                className="text-slate-400 hover:text-slate-800 font-black text-lg md:text-xl tracking-tight transition-colors duration-200 cursor-default"
                             >
                                 {company}
                             </span>
