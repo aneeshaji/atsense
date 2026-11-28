@@ -49,6 +49,13 @@
     
     # 7. Permissions Policy
     Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+
+    # 8. Never cache index.html so new Vite JS/CSS hashes load immediately after deploy
+    <FilesMatch "^index\.html$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
 </IfModule>
 
 
