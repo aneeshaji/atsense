@@ -80,28 +80,27 @@ function JobMatcher() {
 
     if (initialLoading) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 text-white">
-                <Activity className="animate-spin text-cyan-400 mb-4" size={32} />
-                <h2 className="text-lg font-bold text-slate-300">Synchronizing AI Telemetry...</h2>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-900">
+                <Activity className="animate-spin text-indigo-600 mb-4" size={32} />
+                <h2 className="text-lg font-bold text-slate-600">Synchronizing AI Telemetry...</h2>
             </div>
         );
     }
 
     if (!hasResume) {
         return (
-            <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
-                <div className="absolute inset-0 tech-grid-dark opacity-30"></div>
-                <div className="max-w-md text-center relative z-10 p-8 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl">
-                    <div className="w-16 h-16 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-400">
+            <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col items-center justify-center p-6">
+                <div className="max-w-md text-center p-8 rounded-3xl bg-white border border-slate-200 shadow-lg">
+                    <div className="w-16 h-16 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-6 text-indigo-600">
                         <FileText size={32} />
                     </div>
-                    <h2 className="text-2xl font-black text-white mb-2">Resume Required First</h2>
-                    <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                    <h2 className="text-2xl font-black text-slate-900 mb-2">Resume Required First</h2>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-6">
                         The Smart Matcher compares a specific job description against your active resume. Build or upload your resume in the Cockpit to continue.
                     </p>
                     <Link
                         to="/builder"
-                        className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-extrabold text-sm uppercase tracking-wider shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                        className="w-full py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm uppercase tracking-wider shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2"
                     >
                         <span>Open Resume Cockpit</span>
                         <ArrowRight size={16} />
@@ -112,37 +111,29 @@ function JobMatcher() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-900 text-slate-100 font-sans relative overflow-hidden">
+        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
             <SEO 
                 title="Smart ATS Job Matcher — Cross-Reference Resume to JD" 
                 description="Compare your resume against any job description. Instant keyword gap analysis, semantic match score, and tailored recommendations." 
             />
 
-            {/* Ambient Background Aura */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute -top-40 left-1/3 w-[800px] h-[500px] bg-indigo-600/15 rounded-full blur-[140px]"></div>
-                <div className="absolute top-[35%] -right-40 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[140px]"></div>
-                <div className="absolute bottom-10 -left-40 w-[600px] h-[500px] bg-cyan-500/10 rounded-full blur-[150px]"></div>
-                <div className="absolute inset-0 tech-grid-dark opacity-30"></div>
-            </div>
-
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-24">
                 
                 {/* Header */}
                 <div className="text-center max-w-3xl mx-auto mb-10">
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 font-semibold text-xs uppercase tracking-wider mb-4 backdrop-blur-md">
-                        <Target size={13} className="text-cyan-400" />
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold text-xs uppercase tracking-wider mb-4">
+                        <Target size={13} className="text-indigo-600" />
                         <span>Semantic ATS Match Engine</span>
                     </div>
 
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-3">
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-3">
                         Targeted Job Fit &{' '}
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-violet-300 to-cyan-300">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
                             Keyword Gap Audit
                         </span>
                     </h1>
 
-                    <p className="text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
                         Cross-reference your active resume directly against recruiter job specs. Identify missing hard skills before submitting.
                     </p>
                 </div>
@@ -151,43 +142,43 @@ function JobMatcher() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                     
                     {/* Left Panel: Input & Active Resume Info */}
-                    <div className="bg-slate-950/80 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col">
+                    <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col">
                         
                         {/* Active Source Chip */}
-                        <div className="mb-6 p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                        <div className="mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-cyan-400">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
                                     <Briefcase size={18} />
                                 </div>
                                 <div>
                                     <span className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Active Workspace Resume</span>
-                                    <span className="block text-sm font-bold text-white">
+                                    <span className="block text-sm font-bold text-slate-900">
                                         {resume?.personalInfo?.fullName ? `${resume.personalInfo.fullName}'s Document` : 'Active Resume Loaded'}
                                     </span>
                                 </div>
                             </div>
-                            <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-extrabold uppercase tracking-wider">
+                            <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-extrabold uppercase tracking-wider">
                                 Connected
                             </span>
                         </div>
 
                         {/* Textarea Header */}
                         <div className="flex items-center justify-between mb-3">
-                            <label className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
+                            <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
                                 Job Description or Link
                             </label>
                             <button
                                 onClick={handleExtract}
                                 disabled={extracting || !jobDescription || loading}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-400/30 text-indigo-300 text-xs font-bold transition-all disabled:opacity-40"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-bold transition-all disabled:opacity-40"
                             >
-                                {extracting ? <Loader2 size={13} className="animate-spin text-cyan-400" /> : <Sparkles size={13} className="text-cyan-400" />}
+                                {extracting ? <Loader2 size={13} className="animate-spin text-indigo-600" /> : <Sparkles size={13} className="text-indigo-600" />}
                                 <span>{extracting ? 'Extracting Clean Text...' : 'Clean / Extract from URL'}</span>
                             </button>
                         </div>
 
                         <textarea
-                            className="w-full p-4 bg-slate-900/90 border border-slate-800 rounded-2xl focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 outline-none text-slate-200 text-sm leading-relaxed placeholder:text-slate-600 resize-none min-h-[380px] font-mono"
+                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:bg-white outline-none text-slate-800 text-sm leading-relaxed placeholder:text-slate-400 resize-none min-h-[380px] font-mono"
                             value={jobDescription}
                             onChange={(e) => setJobDescription(e.target.value)}
                             placeholder="Paste full job description text or posting URL (e.g. LinkedIn, Greenhouse, Lever, Workday)..."
@@ -198,10 +189,10 @@ function JobMatcher() {
                             <button
                                 onClick={handleAnalyze}
                                 disabled={loading || !jobDescription}
-                                className={`w-full py-4 px-6 rounded-2xl font-extrabold text-sm uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2.5 shadow-xl ${
+                                className={`w-full py-4 px-6 rounded-2xl font-extrabold text-sm uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md ${
                                     loading || !jobDescription
-                                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                                        : 'bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 text-white hover:shadow-indigo-500/25 hover:scale-[1.01] active:scale-[0.99]'
+                                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                        : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-indigo-500/25 hover:scale-[1.01] active:scale-[0.99]'
                                 }`}
                             >
                                 {loading ? (
@@ -223,11 +214,11 @@ function JobMatcher() {
                     {/* Right Panel: Telemetry & Gaps */}
                     <div className="space-y-6">
                         {!result ? (
-                            <div className="h-full min-h-[500px] flex flex-col items-center justify-center text-center p-8 bg-slate-950/60 border-2 border-dashed border-slate-800/80 rounded-3xl">
-                                <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600 mb-4">
+                            <div className="h-full min-h-[500px] flex flex-col items-center justify-center text-center p-8 bg-white border-2 border-dashed border-slate-200 rounded-3xl">
+                                <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 mb-4">
                                     <Search size={32} />
                                 </div>
-                                <h3 className="text-lg font-bold text-slate-300 mb-1">Awaiting Job Specifications</h3>
+                                <h3 className="text-lg font-bold text-slate-800 mb-1">Awaiting Job Specifications</h3>
                                 <p className="text-slate-500 text-xs max-w-sm leading-relaxed">
                                     Paste a job description on the left and run analysis to unlock compatibility scores, keyword flags, and tailored fixes.
                                 </p>
@@ -236,7 +227,7 @@ function JobMatcher() {
                             <div className="space-y-6 animate-fade-in">
                                 
                                 {/* Score Banner */}
-                                <div className="p-8 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl relative overflow-hidden">
+                                <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm relative overflow-hidden">
                                     <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
                                         <div>
                                             <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">
@@ -244,11 +235,11 @@ function JobMatcher() {
                                             </span>
                                             <div className="flex items-baseline gap-3">
                                                 <span className={`text-6xl font-black tracking-tight ${
-                                                    result.score >= 75 ? 'text-emerald-400' : result.score >= 55 ? 'text-amber-400' : 'text-rose-400'
+                                                    result.score >= 75 ? 'text-emerald-600' : result.score >= 55 ? 'text-amber-600' : 'text-rose-600'
                                                 }`}>
                                                     {result.score}%
                                                 </span>
-                                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                                                     {result.score >= 75 ? 'High Interview Fit' : result.score >= 55 ? 'Moderate Match' : 'High Rejection Risk'}
                                                 </span>
                                             </div>
@@ -256,7 +247,7 @@ function JobMatcher() {
 
                                         <Link
                                             to="/builder"
-                                            className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-extrabold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shrink-0"
+                                            className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shrink-0"
                                         >
                                             <span>Tailor in Builder</span>
                                             <ChevronRight size={14} />
@@ -264,7 +255,7 @@ function JobMatcher() {
                                     </div>
 
                                     {/* AI Summary */}
-                                    <div className="mt-6 p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-300 text-xs leading-relaxed font-medium">
+                                    <div className="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs leading-relaxed font-medium">
                                         {result.summary}
                                     </div>
                                 </div>
@@ -276,13 +267,13 @@ function JobMatcher() {
                                     subtitle="Enter your email to reveal every missing keyword and tailored match fix."
                                     buttonLabel="Unlock Keyword Report"
                                 >
-                                <div className="p-6 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-rose-500/20 shadow-xl">
+                                <div className="p-6 rounded-3xl bg-white border border-rose-200 shadow-sm">
                                     <div className="flex items-center gap-2 mb-4">
-                                        <XCircle size={18} className="text-rose-400" />
-                                        <h3 className="font-extrabold text-white text-sm uppercase tracking-wider">
+                                        <XCircle size={18} className="text-rose-500" />
+                                        <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wider">
                                             Missing ATS Keywords
                                         </h3>
-                                        <span className="ml-auto text-[11px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">
+                                        <span className="ml-auto text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">
                                             {result.missingKeywords?.length || 0} gaps
                                         </span>
                                     </div>
@@ -291,13 +282,13 @@ function JobMatcher() {
                                         {result.missingKeywords?.map((k: string) => (
                                             <span 
                                                 key={k} 
-                                                className="px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-bold"
+                                                className="px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold"
                                             >
                                                 + {k}
                                             </span>
                                         ))}
                                         {(!result.missingKeywords || result.missingKeywords.length === 0) && (
-                                            <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl text-xs font-bold w-full text-center">
+                                            <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl text-xs font-bold w-full text-center">
                                                 Zero critical keyword gaps detected!
                                             </span>
                                         )}
@@ -305,13 +296,13 @@ function JobMatcher() {
                                 </div>
 
                                 {/* Matching Keywords (Strengths) */}
-                                <div className="p-6 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-emerald-500/20 shadow-xl">
+                                <div className="p-6 rounded-3xl bg-white border border-emerald-200 shadow-sm mt-6">
                                     <div className="flex items-center gap-2 mb-4">
-                                        <CheckCircle2 size={18} className="text-emerald-400" />
-                                        <h3 className="font-extrabold text-white text-sm uppercase tracking-wider">
+                                        <CheckCircle2 size={18} className="text-emerald-600" />
+                                        <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wider">
                                             Matched Core Keywords
                                         </h3>
-                                        <span className="ml-auto text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                                        <span className="ml-auto text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                                             {result.matchingKeywords?.length || 0} matched
                                         </span>
                                     </div>
@@ -320,7 +311,7 @@ function JobMatcher() {
                                         {result.matchingKeywords?.map((k: string) => (
                                             <span 
                                                 key={k} 
-                                                className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-bold"
+                                                className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold"
                                             >
                                                 ✓ {k}
                                             </span>

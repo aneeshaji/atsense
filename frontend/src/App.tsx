@@ -1,35 +1,43 @@
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import Builder from './pages/Builder';
-import Preview from './pages/Preview';
-import CoverLetterList from './pages/CoverLetterList';
-import CoverLetterGenerator from './pages/CoverLetterGenerator';
-import JobMatcher from './pages/JobMatcher';
-import LinkedInOptimizer from './pages/LinkedInOptimizer';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Privacy from './pages/Privacy';
-import Terms from './pages/Terms';
-import Security from './pages/Security';
-import Blog from './pages/Blog';
-import BlogDetails from './pages/BlogDetails';
-import Landing from './pages/Landing';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
-import Templates from './pages/Templates';
-import TemplateDetail from './pages/TemplateDetail';
-import TemplateBuilder from './pages/TemplateBuilder';
-import InterviewSimulator from './pages/InterviewSimulator';
-import ResumeGrader from './pages/ResumeGrader';
-import GuideDetail from './pages/GuideDetail';
-import SharedSpace from './pages/SharedSpace';
-import CompanyTailorPage from './pages/CompanyTailorPage';
-import ComparisonPage from './pages/ComparisonPage';
 import { ModalProvider } from './context/ModalContext';
 import Layout from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
 import AnalyticsManager from './components/AnalyticsManager';
 import { SettingsProvider } from './context/SettingsContext';
+
+const Builder = lazy(() => import('./pages/Builder'));
+const Preview = lazy(() => import('./pages/Preview'));
+const CoverLetterList = lazy(() => import('./pages/CoverLetterList'));
+const CoverLetterGenerator = lazy(() => import('./pages/CoverLetterGenerator'));
+const JobMatcher = lazy(() => import('./pages/JobMatcher'));
+const LinkedInOptimizer = lazy(() => import('./pages/LinkedInOptimizer'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Security = lazy(() => import('./pages/Security'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogDetails = lazy(() => import('./pages/BlogDetails'));
+const Landing = lazy(() => import('./pages/Landing'));
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const Templates = lazy(() => import('./pages/Templates'));
+const TemplateDetail = lazy(() => import('./pages/TemplateDetail'));
+const TemplateBuilder = lazy(() => import('./pages/TemplateBuilder'));
+const InterviewSimulator = lazy(() => import('./pages/InterviewSimulator'));
+const ResumeGrader = lazy(() => import('./pages/ResumeGrader'));
+const GuideDetail = lazy(() => import('./pages/GuideDetail'));
+const SharedSpace = lazy(() => import('./pages/SharedSpace'));
+const CompanyTailorPage = lazy(() => import('./pages/CompanyTailorPage'));
+const ComparisonPage = lazy(() => import('./pages/ComparisonPage'));
+
+const PageLoader = () => (
+    <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
+    </div>
+);
 
 export default function App() {
     return (
@@ -40,6 +48,7 @@ export default function App() {
                         <ScrollToTop />
                         <AnalyticsManager />
 
+                        <Suspense fallback={<PageLoader />}>
                         <Routes>
                             {/* Admin Routes ALWAYS Available */}
                             <Route path="/admin/login" element={<AdminLogin />} />
@@ -84,6 +93,7 @@ export default function App() {
                             {/* 404 Fallback */}
                             <Route path="*" element={<Navigate to="/builder" replace />} />
                         </Routes>
+                        </Suspense>
                     </BrowserRouter>
                 </ModalProvider>
             </SettingsProvider>

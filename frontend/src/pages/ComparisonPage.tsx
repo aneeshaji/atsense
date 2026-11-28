@@ -63,7 +63,7 @@ export default function ComparisonPage() {
     const data = COMPETITORS[key] || COMPETITORS.jobscan;
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 pb-24">
+        <div className="min-h-screen bg-slate-50 text-slate-900 pb-24">
             <SEO
                 title={`${data.tagline} | ATSense`}
                 description={data.description}
@@ -72,19 +72,19 @@ export default function ComparisonPage() {
 
             <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20 space-y-12">
                 <div className="text-center space-y-4">
-                    <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-bold text-indigo-300 uppercase tracking-wider">
+                    <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-xs font-bold text-indigo-700 uppercase tracking-wider">
                         <ShieldCheck size={14} /> {data.priceComparison}
                     </span>
-                    <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                    <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
                         ATSense vs {data.name}
                     </h1>
-                    <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
                         {data.description}
                     </p>
                     <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
                         <Link
                             to="/resume-grader"
-                            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-sm shadow-xl shadow-indigo-600/25 flex items-center justify-center gap-2"
+                            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-sm shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
                         >
                             <Target size={17} />
                             <span>Scan Your Resume Free</span>
@@ -92,32 +92,32 @@ export default function ComparisonPage() {
                         </Link>
                         <Link
                             to="/builder"
-                            className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold text-sm flex items-center justify-center gap-2"
+                            className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-sm flex items-center justify-center gap-2 shadow-xs"
                         >
-                            <Sparkles size={16} className="text-indigo-400" />
+                            <Sparkles size={16} className="text-indigo-600" />
                             <span>Open Resume Studio</span>
                         </Link>
                     </div>
                 </div>
 
                 {/* Comparison Table */}
-                <div className="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
-                    <div className="grid grid-cols-3 bg-slate-900 px-6 py-4 border-b border-slate-800 text-xs font-black uppercase tracking-wider">
-                        <div className="text-slate-400">Feature</div>
-                        <div className="text-indigo-400 text-center">ATSense</div>
-                        <div className="text-slate-400 text-center">{data.name}</div>
+                <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+                    <div className="grid grid-cols-3 bg-slate-50 px-6 py-4 border-b border-slate-200 text-xs font-black uppercase tracking-wider">
+                        <div className="text-slate-500">Feature</div>
+                        <div className="text-indigo-600 text-center">ATSense</div>
+                        <div className="text-slate-500 text-center">{data.name}</div>
                     </div>
-                    <div className="divide-y divide-slate-800/80">
+                    <div className="divide-y divide-slate-100">
                         {data.rows.map((r, i) => (
                             <div key={i} className="grid grid-cols-3 px-6 py-4 items-center text-xs sm:text-sm gap-3">
-                                <div className="font-bold text-white">{r.feature}</div>
+                                <div className="font-bold text-slate-900">{r.feature}</div>
                                 <div className="text-center">
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold text-xs">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs">
                                         <Check size={13} /> {r.atsense}
                                     </span>
                                 </div>
-                                <div className="text-center text-slate-400 font-medium flex items-center justify-center gap-1.5">
-                                    <X size={13} className="text-rose-400 shrink-0 hidden sm:inline" />
+                                <div className="text-center text-slate-500 font-medium flex items-center justify-center gap-1.5">
+                                    <X size={13} className="text-rose-500 shrink-0 hidden sm:inline" />
                                     <span>{r.competitor}</span>
                                 </div>
                             </div>
@@ -126,19 +126,19 @@ export default function ComparisonPage() {
                 </div>
 
                 {/* Switch CTA */}
-                <div className="p-8 rounded-3xl bg-gradient-to-br from-indigo-950/80 to-slate-900 border border-indigo-500/20 text-center space-y-4">
-                    <div className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-300 uppercase tracking-wider">
+                <div className="p-8 rounded-3xl bg-gradient-to-br from-indigo-50 via-white to-purple-50 border border-indigo-200 text-center space-y-4 shadow-sm">
+                    <div className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 uppercase tracking-wider">
                         <Zap size={14} /> Ready in 10 Seconds
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-white">
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
                         Why Pay Monthly When ATSense Does More for Free?
                     </h2>
-                    <p className="text-sm text-slate-300 max-w-xl mx-auto">
+                    <p className="text-sm text-slate-600 max-w-xl mx-auto">
                         Upload your existing PDF or DOCX resume to get an instant ATS diagnostic score and 1-click Deep Tailoring.
                     </p>
                     <Link
                         to="/builder"
-                        className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-white text-slate-900 font-black text-sm hover:bg-slate-100 transition-colors"
+                        className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-slate-900 text-white font-black text-sm hover:bg-slate-800 transition-colors"
                     >
                         <span>Try ATSense Studio Free</span>
                         <ArrowRight size={16} />

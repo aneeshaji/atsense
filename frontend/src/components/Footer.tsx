@@ -29,7 +29,7 @@ const Footer = () => {
     };
 
     return (
-        <footer className="relative bg-slate-50 border-t border-slate-200 mt-auto overflow-hidden">
+        <footer className="relative bg-slate-50 border-t border-slate-200 mt-auto overflow-hidden pb-16 md:pb-0">
             {/* Subtle background pattern */}
             <div className="absolute inset-0 overflow-hidden opacity-20">
                 <div className="absolute -top-40 -left-40 w-96 h-96 bg-indigo-100 rounded-full blur-[100px]"></div>
@@ -125,29 +125,33 @@ const Footer = () => {
                         <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider underline decoration-indigo-200 decoration-2 underline-offset-4">Solutions</h3>
                         <ul className="space-y-3 text-sm text-gray-600 font-medium">
                             <li><Link to="/builder" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">AI Resume Builder</Link></li>
-                            <li><Link to="/builder" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">ATS Resume Checker</Link></li>
-                            <li><Link to="/builder" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Resume Optimization</Link></li>
+                            <li><Link to="/resume-grader" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Free ATS Grader</Link></li>
+                            <li><Link to="/job-matcher" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Smart Job Matcher</Link></li>
+                            <li><Link to="/interview-prep" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Interview Simulator</Link></li>
                             <li><Link to="/templates" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">CV Templates</Link></li>
                         </ul>
                     </div>
 
-                    {/* Company Links */}
+                    {/* ATS Guides & Compare */}
                     <div className="group">
-                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider underline decoration-purple-200 decoration-2 underline-offset-4">Company</h3>
+                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider underline decoration-purple-200 decoration-2 underline-offset-4">Guides &amp; Compare</h3>
                         <ul className="space-y-3 text-sm text-gray-600 font-medium">
-                            <li><Link to="/about" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">About Us</Link></li>
-                            <li><Link to="/blog" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Editorial Policy</Link></li>
-                            <li><Link to="/blog" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Expert Bylines</Link></li>
-                            <li><Link to="/contact" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Contact</Link></li>
+                            <li><Link to="/tailor/google" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Google ATS Tailor</Link></li>
+                            <li><Link to="/tailor/amazon" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Amazon ATS Tailor</Link></li>
+                            <li><Link to="/tailor/microsoft" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">Microsoft ATS Tailor</Link></li>
+                            <li><Link to="/vs/jobscan" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">ATSense vs Jobscan</Link></li>
+                            <li><Link to="/vs/resumeworded" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">ATSense vs Resume Worded</Link></li>
+                            <li><Link to="/vs/enhancv" className="hover:text-purple-600 transition-all hover:translate-x-1 inline-block">ATSense vs Enhancv</Link></li>
                         </ul>
                     </div>
 
-
-
-                    {/* Legal Links */}
+                    {/* Legal & Company Links */}
                     <div className="group">
-                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider underline decoration-indigo-200 decoration-2 underline-offset-4">Legal</h3>
+                        <h3 className="font-black text-gray-900 mb-6 text-sm uppercase tracking-wider underline decoration-indigo-200 decoration-2 underline-offset-4">Company &amp; Legal</h3>
                         <ul className="space-y-3 text-sm text-gray-600 font-medium">
+                            <li><Link to="/about" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">About Us</Link></li>
+                            <li><Link to="/blog" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Blog &amp; Insights</Link></li>
+                            <li><Link to="/contact" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Contact</Link></li>
                             <li><Link to="/privacy" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Privacy Policy</Link></li>
                             <li><Link to="/terms" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Terms of Service</Link></li>
                             <li><Link to="/security" className="hover:text-indigo-600 transition-all hover:translate-x-1 inline-block">Data Security</Link></li>

@@ -105,28 +105,27 @@ const LinkedInOptimizer = () => {
 
     if (initialLoading) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 text-white">
-                <Loader2 className="animate-spin text-cyan-400 mb-4" size={32} />
-                <h2 className="text-lg font-bold text-slate-300">Calibrating Profile Intelligence...</h2>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-900">
+                <Loader2 className="animate-spin text-indigo-600 mb-4" size={32} />
+                <h2 className="text-lg font-bold text-slate-600">Calibrating Profile Intelligence...</h2>
             </div>
         );
     }
 
     if (!hasResume) {
         return (
-            <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
-                <div className="absolute inset-0 tech-grid-dark opacity-30"></div>
-                <div className="max-w-md text-center relative z-10 p-8 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl">
-                    <div className="w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-400">
+            <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col items-center justify-center p-6">
+                <div className="max-w-md text-center p-8 rounded-3xl bg-white border border-slate-200 shadow-lg">
+                    <div className="w-16 h-16 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-600">
                         <Linkedin size={32} />
                     </div>
-                    <h2 className="text-2xl font-black text-white mb-2">Resume Required First</h2>
-                    <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                    <h2 className="text-2xl font-black text-slate-900 mb-2">Resume Required First</h2>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-6">
                         The LinkedIn Optimizer extracts experience, metrics, and skill clusters from your active workspace resume.
                     </p>
                     <Link
                         to="/builder"
-                        className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-extrabold text-sm uppercase tracking-wider shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                        className="w-full py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm uppercase tracking-wider shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2"
                     >
                         <span>Open Resume Cockpit</span>
                         <ArrowRight size={16} />
@@ -137,58 +136,50 @@ const LinkedInOptimizer = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-900 text-slate-100 font-sans relative overflow-hidden">
+        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
             <SEO 
                 title="LinkedIn Profile Optimizer & Headline Generator — ATSense" 
                 description="Transform your resume into a recruiter-magnet LinkedIn profile. AI viral headlines, persuasive About section, and optimized skills." 
             />
 
-            {/* Ambient Background Aura */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute -top-40 left-1/3 w-[800px] h-[500px] bg-indigo-600/15 rounded-full blur-[140px]"></div>
-                <div className="absolute top-[35%] -right-40 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[140px]"></div>
-                <div className="absolute bottom-10 -left-40 w-[600px] h-[500px] bg-cyan-500/10 rounded-full blur-[150px]"></div>
-                <div className="absolute inset-0 tech-grid-dark opacity-30"></div>
-            </div>
-
-            <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-24">
                 
                 {/* Header */}
                 <div className="text-center max-w-3xl mx-auto mb-10">
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 font-semibold text-xs uppercase tracking-wider mb-4 backdrop-blur-md">
-                        <Linkedin size={13} className="text-blue-400" />
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 font-semibold text-xs uppercase tracking-wider mb-4">
+                        <Linkedin size={13} className="text-blue-600" />
                         <span>Recruiter Magnet AI Engine</span>
                     </div>
 
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-3">
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-3">
                         Transform Your Resume into a{' '}
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
                             High-Converting Profile
                         </span>
                     </h1>
 
-                    <p className="text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
                         Convert your raw resume bullet points into algorithmic LinkedIn headlines, an executive summary, and high-visibility recruiter keywords.
                     </p>
                 </div>
 
                 {/* Input Card */}
-                <div className="bg-slate-950/80 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl mb-8">
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm mb-8">
                     
                     {/* Active Source Banner */}
-                    <div className="mb-6 p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+                    <div className="mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
                                 <Briefcase size={18} />
                             </div>
                             <div>
                                 <span className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Active Resume Source</span>
-                                <span className="block text-sm font-bold text-white">
+                                <span className="block text-sm font-bold text-slate-900">
                                     {resume?.personalInfo?.fullName ? `${resume.personalInfo.fullName}'s Document` : 'Connected'}
                                 </span>
                             </div>
                         </div>
-                        <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-extrabold uppercase tracking-wider">
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-extrabold uppercase tracking-wider">
                             Ready
                         </span>
                     </div>
@@ -196,15 +187,15 @@ const LinkedInOptimizer = () => {
                     {/* Role Input */}
                     <div className="space-y-2 mb-6">
                         <div className="flex items-center justify-between">
-                            <label className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
+                            <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
                                 Target Role or Job URL (Optional)
                             </label>
                             <button
                                 onClick={handleExtract}
                                 disabled={extracting || !targetRole}
-                                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/30 text-blue-300 text-xs font-bold transition-all disabled:opacity-40"
+                                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold transition-all disabled:opacity-40"
                             >
-                                {extracting ? <Loader2 size={13} className="animate-spin text-cyan-400" /> : <Sparkles size={13} className="text-cyan-400" />}
+                                {extracting ? <Loader2 size={13} className="animate-spin text-blue-600" /> : <Sparkles size={13} className="text-blue-600" />}
                                 <span>{extracting ? 'Extracting...' : 'Clean Job URL'}</span>
                             </button>
                         </div>
@@ -214,17 +205,17 @@ const LinkedInOptimizer = () => {
                             onChange={(e) => setTargetRole(e.target.value)}
                             disabled={extracting}
                             placeholder="e.g. Senior Product Designer, Lead Software Architect, or paste a LinkedIn job URL"
-                            className="w-full p-4 bg-slate-900 border border-slate-800 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 text-sm font-medium"
+                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:bg-white text-sm font-medium"
                         />
                     </div>
 
                     <button
                         onClick={handleOptimize}
                         disabled={loading || !hasResume}
-                        className={`w-full py-4 px-6 rounded-2xl font-extrabold text-sm uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2.5 shadow-xl ${
+                        className={`w-full py-4 px-6 rounded-2xl font-extrabold text-sm uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md ${
                             loading || !hasResume
-                                ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 text-white hover:shadow-blue-500/25 hover:scale-[1.01] active:scale-[0.99]'
+                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-indigo-500/25 hover:scale-[1.01] active:scale-[0.99]'
                         }`}
                     >
                         {loading ? (
@@ -241,7 +232,7 @@ const LinkedInOptimizer = () => {
                     </button>
 
                     {error && (
-                        <div className="mt-4 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-bold flex items-center gap-2">
+                        <div className="mt-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-2">
                             <span>{error}</span>
                         </div>
                     )}
@@ -258,14 +249,14 @@ const LinkedInOptimizer = () => {
                     <div className="space-y-8 animate-fade-in">
                         
                         {/* Headlines */}
-                        <div className="p-6 sm:p-8 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl">
-                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800">
-                                <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm">
+                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                                <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
                                     <User size={18} />
                                 </div>
                                 <div>
-                                    <h3 className="font-extrabold text-white text-base">Viral Recruiter Headlines</h3>
-                                    <p className="text-slate-400 text-xs">A/B test these formats to boost profile click-through rates.</p>
+                                    <h3 className="font-extrabold text-slate-900 text-base">Viral Recruiter Headlines</h3>
+                                    <p className="text-slate-500 text-xs">A/B test these formats to boost profile click-through rates.</p>
                                 </div>
                             </div>
 
@@ -273,19 +264,19 @@ const LinkedInOptimizer = () => {
                                 {(result.headlines || []).map((headline, idx) => (
                                     <div 
                                         key={idx}
-                                        className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-4 hover:border-slate-700 transition-colors"
+                                        className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4 hover:border-indigo-200 transition-colors"
                                     >
-                                        <p className="text-sm text-slate-200 font-medium leading-relaxed flex-1">
+                                        <p className="text-sm text-slate-800 font-medium leading-relaxed flex-1">
                                             {headline}
                                         </p>
                                         <button
                                             onClick={() => copyToClipboard(headline, `hl-${idx}`)}
-                                            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 shrink-0"
+                                            className="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 shrink-0"
                                         >
                                             {copiedSection === `hl-${idx}` ? (
                                                 <>
-                                                    <CheckCircle2 size={14} className="text-emerald-400" />
-                                                    <span className="text-emerald-400">Copied</span>
+                                                    <CheckCircle2 size={14} className="text-emerald-600" />
+                                                    <span className="text-emerald-600">Copied</span>
                                                 </>
                                             ) : (
                                                 <>
@@ -300,26 +291,26 @@ const LinkedInOptimizer = () => {
                         </div>
 
                         {/* About Me Section */}
-                        <div className="p-6 sm:p-8 rounded-3xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl">
-                            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+                        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm">
+                            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+                                    <div className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center text-violet-600">
                                         <FileText size={18} />
                                     </div>
                                     <div>
-                                        <h3 className="font-extrabold text-white text-base">Persuasive About Summary</h3>
-                                        <p className="text-slate-400 text-xs">Optimized for first-line preview before the "see more" cutoff.</p>
+                                        <h3 className="font-extrabold text-slate-900 text-base">Persuasive About Summary</h3>
+                                        <p className="text-slate-500 text-xs">Optimized for first-line preview before the "see more" cutoff.</p>
                                     </div>
                                 </div>
 
                                 <button
                                     onClick={() => copyToClipboard(result.about, 'about')}
-                                    className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5"
+                                    className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5"
                                 >
                                     {copiedSection === 'about' ? (
                                         <>
-                                            <CheckCircle2 size={14} className="text-emerald-400" />
-                                            <span className="text-emerald-400">Copied</span>
+                                            <CheckCircle2 size={14} className="text-emerald-600" />
+                                            <span className="text-emerald-600">Copied</span>
                                         </>
                                     ) : (
                                         <>
@@ -330,7 +321,7 @@ const LinkedInOptimizer = () => {
                                 </button>
                             </div>
 
-                            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap font-sans">
+                            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 text-sm leading-relaxed whitespace-pre-wrap font-sans">
                                 {result.about}
                             </div>
                         </div>

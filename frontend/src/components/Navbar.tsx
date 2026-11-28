@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Menu, X, LayoutDashboard, FileText, Briefcase, Linkedin, LayoutTemplate, Sparkles, ChevronRight } from 'lucide-react';
+import { Menu, X, LayoutDashboard, FileText, Briefcase, Linkedin, LayoutTemplate, Sparkles, ChevronRight, MessageSquare } from 'lucide-react';
 import Logo from './Logo';
 
 const Navbar = () => {
@@ -87,6 +87,11 @@ const Navbar = () => {
                             LinkedIn
                         </Link>
 
+                        <Link to="/interview-prep" className={getLinkClass('/interview-prep')}>
+                            <MessageSquare size={14} />
+                            Interview
+                        </Link>
+
                         <Link to="/templates" className={getLinkClass('/templates')}>
                             <LayoutTemplate size={14} />
                             Templates
@@ -141,6 +146,9 @@ const Navbar = () => {
                     </Link>
                     <Link to="/linkedin-optimizer" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50">
                         <Linkedin size={16} /> LinkedIn
+                    </Link>
+                    <Link to="/interview-prep" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                        <MessageSquare size={16} /> Interview Prep
                     </Link>
                     <Link to="/templates" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 p-3 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50">
                         <LayoutTemplate size={16} /> Templates
