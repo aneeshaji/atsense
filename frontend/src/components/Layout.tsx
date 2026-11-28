@@ -1,9 +1,18 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import { useSettings } from '../context/SettingsContext';
+import Maintenance from '../pages/Maintenance';
 
 const Layout = () => {
     const location = useLocation();
+    const { settings, loading } = useSettings();
+    const isMaintenance = String(settings?.maintenance_mode || '').toLowerCase() === 'true';
+    const isAdminSession = Boolean(localStorage.getItem('admin_token'));
+
+    if (!loading && isMaintenance && !isAdminSession) {
+        return <Maintenance />;
+    }
     
     // App/Workspace routes — inner max-w-7xl container, no footer
     const isAppTools = [
@@ -60,6 +69,11 @@ const Layout = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
+            {isMaintenance && isAdminSession && (
+                <div className="bg-amber-500 text-slate-950 text-xs font-bold text-center py-1.5 px-4 z-[60]">
+                    Maintenance Mode is ACTIVE — Public visitors see the maintenance page (visible to you because you are logged in as Admin).
+                </div>
+            )}
             {/* Navbar is always visible at the top */}
             <Navbar />
 

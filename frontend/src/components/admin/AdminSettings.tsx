@@ -84,7 +84,9 @@ export default function AdminSettings() {
                         </div>
                         
                         {['site_title', 'maintenance_mode'].map(key => {
-                            const s = findSetting(key);
+                            const s = findSetting(key) || (key === 'maintenance_mode'
+                                ? { setting_key: 'maintenance_mode', setting_value: 'false', description: 'When Locked (ON), public visitors see the Maintenance page while /admin remains accessible.' }
+                                : null);
                             if (!s) return null;
                             return (
                                 <div key={key} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
