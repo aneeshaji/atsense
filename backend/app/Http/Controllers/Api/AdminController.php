@@ -123,6 +123,17 @@ class AdminController extends Controller
             });
         }
 
+        // Only leads whose email appears more than once
+        if ($request->boolean('duplicates_only')) {
+            $query->whereIn('email', function ($sub) {
+                $sub->select('email')
+                    ->from('resume_leads')
+                    ->whereNotNull('email')
+                    ->groupBy('email')
+                    ->havingRaw('COUNT(*) > 1');
+            });
+        }
+
         $leads = $query->paginate($request->input('per_page', 25));
 
         // Flag duplicate emails: collect all emails in this result set that appear
@@ -343,6 +354,40 @@ class AdminController extends Controller
             })
             ->count();
 
+        // Pipeline status breakdown
+        $rawStatuses = ResumeLead::select(
+            DB::raw("COALESCE(NULLIF(status, ''), 'new') as status_key"),
+            DB::raw('count(*) as count')
+        )->groupBy('status_key')->pluck('count', 'status_key')->toArray();
+
+        $pipeline = [
+            'new' => (int) ($rawStatuses['new'] ?? 0),
+            'reviewed' => (int) ($rawStatuses['reviewed'] ?? 0),
+            'contacted' => (int) ($rawStatuses['contacted'] ?? 0),
+            'interviewing' => (int) ($rawStatuses['interviewing'] ?? 0),
+            'hired' => (int) ($rawStatuses['hired'] ?? 0),
+            'rejected' => (int) ($rawStatuses['rejected'] ?? 0),
+        ];
+
+        // Unique vs Duplicate email stats
+        $uniqueEmails = ResumeLead::whereNotNull('email')->distinct('email')->count('email');
+        $duplicateEmailsCount = DB::table('resume_leads')
+            ->select('email')
+            ->whereNotNull('email')
+            ->groupBy('email')
+            ->havingRaw('COUNT(*) > 1')
+            ->get()
+            ->count();
+
+        // Email drip stats & last cron run
+        $dripStats = [
+            'welcome_sent' => ResumeLead::whereNotNull('welcome_email_sent_at')->count(),
+            'day2_sent' => ResumeLead::whereNotNull('drip_day2_sent_at')->count(),
+            'day5_sent' => ResumeLead::whereNotNull('drip_day5_sent_at')->count(),
+            'day7_sent' => ResumeLead::whereNotNull('drip_day7_sent_at')->count(),
+            'last_run_at' => ActivityLog::where('action', 'DRIP_CRON_RUN')->latest()->value('created_at'),
+        ];
+
         return response()->json([
             'total_leads' => $totalLeads,
             'leads_today' => $leadsToday,
@@ -351,7 +396,28 @@ class AdminController extends Controller
             'new_enquiries' => $newEnquiries,
             'chart_data' => $chartData,
             'sources' => $sources,
+            'pipeline' => $pipeline,
+            'unique_emails' => $uniqueEmails,
+            'duplicate_emails_count' => $duplicateEmailsCount,
+            'drip_stats' => $dripStats,
         ]);
+    }
+
+    public function runDripNow(Request $request)
+    {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('drip:send');
+            $output = trim(\Illuminate\Support\Facades\Artisan::output());
+
+            return response()->json([
+                'message' => 'Drip email sequence executed.',
+                'output' => $output,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Failed to run drip emails: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function getEnquiries(Request $request)

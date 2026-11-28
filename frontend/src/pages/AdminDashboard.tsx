@@ -80,6 +80,16 @@ interface Stats {
     new_enquiries?: number;
     chart_data: ChartPoint[];
     sources: SourceStat[];
+    pipeline?: Record<string, number>;
+    unique_emails?: number;
+    duplicate_emails_count?: number;
+    drip_stats?: {
+        welcome_sent: number;
+        day2_sent: number;
+        day5_sent: number;
+        day7_sent: number;
+        last_run_at: string | null;
+    };
 }
 
 type View = 'overview' | 'leads' | 'enquiries' | 'analytics' | 'blog' | 'templates' | 'site_settings' | 'settings' | 'activity_log';
@@ -176,6 +186,7 @@ function AdminDashboard() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [sortBy, setSortBy] = useState('newest');
     const [hasResumeOnly, setHasResumeOnly] = useState(false);
+    const [duplicatesOnly, setDuplicatesOnly] = useState(false);
     const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
@@ -233,6 +244,8 @@ function AdminDashboard() {
     const [enquiryType, setEnquiryType] = useState<'all' | 'contact_inquiry' | 'newsletter_subscriber'>('all');
     const [enquirySearch, setEnquirySearch] = useState('');
     const [enquiryStatus, setEnquiryStatus] = useState('all');
+    const [runningDrip, setRunningDrip] = useState(false);
+    const [dripResult, setDripResult] = useState<string | null>(null);
 
     const navigate = useNavigate();
 
@@ -270,7 +283,8 @@ function AdminDashboard() {
         df = dateFrom,
         dt = dateTo,
         srt = sortBy,
-        hr = hasResumeOnly
+        hr = hasResumeOnly,
+        dup = duplicatesOnly
     ) => {
         const token = getToken();
         if (!token) return;
@@ -283,6 +297,7 @@ function AdminDashboard() {
             if (df) params.set('date_from', df);
             if (dt) params.set('date_to', dt);
             if (hr) params.set('has_resume', '1');
+            if (dup) params.set('duplicates_only', '1');
             const res = await api.get(`/admin/leads?${params}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -293,7 +308,7 @@ function AdminDashboard() {
         } finally {
             setRefreshing(false);
         }
-    }, [search, source, statusFilter, dateFrom, dateTo, sortBy, hasResumeOnly]);
+    }, [search, source, statusFilter, dateFrom, dateTo, sortBy, hasResumeOnly, duplicatesOnly]);
 
     const fetchStats = useCallback(async () => {
         const token = getToken();
@@ -318,11 +333,11 @@ function AdminDashboard() {
         if (view === 'leads') {
             const t = setTimeout(() => {
                 setPage(1);
-                fetchLeads(1, search, source, statusFilter, dateFrom, dateTo, sortBy, hasResumeOnly);
+                fetchLeads(1, search, source, statusFilter, dateFrom, dateTo, sortBy, hasResumeOnly, duplicatesOnly);
             }, 350);
             return () => clearTimeout(t);
         }
-    }, [search, source, statusFilter, dateFrom, dateTo, sortBy, hasResumeOnly]);
+    }, [search, source, statusFilter, dateFrom, dateTo, sortBy, hasResumeOnly, duplicatesOnly]);
 
     const handlePageChange = (p: number) => { setPage(p); fetchLeads(p); };
 
@@ -525,8 +540,47 @@ function AdminDashboard() {
         setStatusFilter('all');
         setSortBy('newest');
         setHasResumeOnly(false);
+        setDuplicatesOnly(false);
         setDateFrom('');
         setDateTo('');
+    };
+
+    const exportEnquiriesCsv = () => {
+        const list = enquiries?.data || [];
+        if (!list.length) return;
+        const headers = ['Date', 'Type', 'Name', 'Email', 'Phone', 'Status', 'Message'];
+        const rows = [headers.join(',')];
+        for (const item of list) {
+            rows.push([
+                new Date(item.created_at).toLocaleDateString(),
+                item.source === 'newsletter_subscriber' ? 'Newsletter' : 'Contact',
+                `"${(item.name || '').replace(/"/g, '""')}"`,
+                item.email || '',
+                item.phone || '',
+                item.status || 'new',
+                `"${(item.notes || '').replace(/"/g, '""')}"`,
+            ].join(','));
+        }
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type: 'text/csv' }));
+        a.download = `atsense_enquiries_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+    };
+
+    const handleRunDrip = async () => {
+        const token = getToken();
+        if (!token) return;
+        setRunningDrip(true);
+        setDripResult(null);
+        try {
+            const res = await api.post('/admin/drip/run', {}, { headers: { Authorization: `Bearer ${token}` } });
+            setDripResult(res.data?.output || res.data?.message || 'Drip sequence completed.');
+            await fetchStats();
+        } catch (err: any) {
+            setDripResult(err.response?.data?.message || 'Failed to run drip emails.');
+        } finally {
+            setRunningDrip(false);
+        }
     };
 
     const fetchLogs = useCallback(async (pg = 1, level = logLevel, q = logSearch, df = logDateFrom, dt = logDateTo) => {
@@ -1142,6 +1196,18 @@ function AdminDashboard() {
                                             Has Resume
                                         </button>
 
+                                        <button
+                                            type="button"
+                                            onClick={() => setDuplicatesOnly(v => !v)}
+                                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
+                                                duplicatesOnly
+                                                    ? 'bg-amber-600 text-white border-amber-600'
+                                                    : 'bg-white text-slate-600 border-slate-200 hover:border-amber-200'
+                                            }`}
+                                        >
+                                            Duplicates Only
+                                        </button>
+
                                         <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 w-full sm:w-auto">
                                             <Calendar size={13} className="text-slate-400 shrink-0" />
                                             <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
@@ -1151,7 +1217,7 @@ function AdminDashboard() {
                                                 className="text-xs font-medium text-slate-600 bg-transparent focus:outline-none flex-1 sm:w-28 min-w-0" />
                                         </div>
 
-                                        {(search || source !== 'all' || statusFilter !== 'all' || sortBy !== 'newest' || hasResumeOnly || dateFrom || dateTo) && (
+                                        {(search || source !== 'all' || statusFilter !== 'all' || sortBy !== 'newest' || hasResumeOnly || duplicatesOnly || dateFrom || dateTo) && (
                                             <button onClick={clearFilters}
                                                 className="flex items-center gap-1 text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2 hover:bg-rose-100">
                                                 <X size={13} /> Clear
@@ -1461,13 +1527,23 @@ function AdminDashboard() {
                                                 Messages submitted via Contact form and Newsletter subscriptions ({enquiries?.total ?? 0} total)
                                             </p>
                                         </div>
-                                        <button
-                                            onClick={() => fetchEnquiries(enquiryPage)}
-                                            className="self-start sm:self-auto flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                                        >
-                                            <RefreshCw size={13} className={enquiriesLoading ? 'animate-spin' : ''} />
-                                            Refresh
-                                        </button>
+                                        <div className="flex items-center gap-2 self-start sm:self-auto">
+                                            <button
+                                                onClick={exportEnquiriesCsv}
+                                                disabled={!enquiries?.data?.length}
+                                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                                            >
+                                                <Download size={13} />
+                                                Export CSV
+                                            </button>
+                                            <button
+                                                onClick={() => fetchEnquiries(enquiryPage)}
+                                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                                            >
+                                                <RefreshCw size={13} className={enquiriesLoading ? 'animate-spin' : ''} />
+                                                Refresh
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -1632,37 +1708,37 @@ function AdminDashboard() {
                     {/* ===== ANALYTICS ===== */}
                     {view === 'analytics' && (
                         <div className="space-y-5">
-                            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/80">
-                                <h3 className="text-sm font-bold text-slate-900 mb-1">Daily Activity — Last 7 Days</h3>
-                                <p className="text-xs text-slate-400 mb-4">Hover over bars for details</p>
-                                {stats?.chart_data && <MiniBarChart data={stats.chart_data} />}
-                                <div className="grid grid-cols-7 gap-2 mt-5 pt-4 border-t border-slate-100">
-                                    {stats?.chart_data?.map((d, i) => (
-                                        <div key={i} className="text-center">
-                                            <p className="text-base sm:text-lg font-bold text-slate-900">{d.count}</p>
-                                            <p className="text-[10px] text-slate-400 mt-0.5 truncate">{d.date}</p>
-                                        </div>
-                                    ))}
+                            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-xs border border-slate-200/80">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-900">Daily Activity — Last 7 Days</h3>
+                                        <p className="text-xs text-slate-400">Hover over bars for exact counts</p>
+                                    </div>
+                                    <span className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full">
+                                        {stats?.leads_this_week ?? 0} this week
+                                    </span>
                                 </div>
+                                {stats?.chart_data && <MiniBarChart data={stats.chart_data} heightClass="h-44" showValues />}
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                                {/* Source Breakdown */}
+                                <div className="bg-white rounded-2xl p-6 shadow-xs border border-slate-200/80">
                                     <h3 className="text-sm font-bold text-slate-900 mb-5">Source Breakdown</h3>
                                     <div className="space-y-4">
                                         {stats?.sources?.length ? stats.sources.map((s, i) => {
                                             const total = stats.total_leads || 1;
                                             const pct = Math.round((s.count / total) * 100);
-                                            const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#10b981'];
+                                            const colors = ['#6366f1', '#10b981', '#0ea5e9', '#f59e0b', '#ec4899'];
                                             return (
                                                 <div key={i}>
-                                                    <div className="flex justify-between text-sm mb-2">
-                                                        <span className="capitalize font-semibold text-slate-700">{s.source}</span>
-                                                        <span className="text-slate-500 font-medium">{s.count} · {pct}%</span>
+                                                    <div className="flex justify-between text-xs mb-1.5">
+                                                        <span className="font-semibold text-slate-700">{formatSourceLabel(s.source)}</span>
+                                                        <span className="text-slate-500 font-bold tabular-nums">{s.count} · {pct}%</span>
                                                     </div>
                                                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                                         <div className="h-full rounded-full transition-all duration-700"
-                                                            style={{ width: `${pct}%`, background: colors[i % colors.length] }} />
+                                                            style={{ width: `${Math.max(pct, s.count > 0 ? 3 : 0)}%`, background: colors[i % colors.length] }} />
                                                     </div>
                                                 </div>
                                             );
@@ -1670,21 +1746,101 @@ function AdminDashboard() {
                                     </div>
                                 </div>
 
-                                <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm">
-                                    <h3 className="text-sm font-bold text-slate-800 mb-5">Summary Metrics</h3>
-                                    <div className="space-y-3">
+                                {/* Pipeline Status Breakdown */}
+                                <div className="bg-white rounded-2xl p-6 shadow-xs border border-slate-200/80">
+                                    <h3 className="text-sm font-bold text-slate-900 mb-5">Pipeline Status Breakdown</h3>
+                                    <div className="space-y-3.5">
+                                        {STATUS_OPTIONS.map((opt) => {
+                                            const count = stats?.pipeline?.[opt.value] ?? 0;
+                                            const pct = Math.round((count / (stats?.total_leads || 1)) * 100);
+                                            return (
+                                                <div key={opt.value}>
+                                                    <div className="flex items-center justify-between text-xs mb-1.5">
+                                                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold border ${opt.color}`}>
+                                                            {opt.label}
+                                                        </span>
+                                                        <span className="font-bold text-slate-600 tabular-nums">{count} ({pct}%)</span>
+                                                    </div>
+                                                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                                        <div className="h-full rounded-full bg-indigo-500 transition-all duration-700"
+                                                            style={{ width: `${Math.max(pct, count > 0 ? 3 : 0)}%` }} />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                                {/* Unique vs Duplicate Leads */}
+                                <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs">
+                                    <h3 className="text-sm font-bold text-slate-900 mb-4">Lead Volume &amp; Deduplication</h3>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div className="p-4 rounded-xl bg-indigo-50/70 border border-indigo-100">
+                                            <p className="text-xs font-semibold text-indigo-700">Total Rows</p>
+                                            <p className="text-2xl font-black text-indigo-900 mt-1">{stats?.total_leads ?? 0}</p>
+                                        </div>
+                                        <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-100">
+                                            <p className="text-xs font-semibold text-emerald-700">Unique Emails</p>
+                                            <p className="text-2xl font-black text-emerald-900 mt-1">{stats?.unique_emails ?? 0}</p>
+                                        </div>
+                                        <div
+                                            onClick={() => { setDuplicatesOnly(true); setView('leads'); }}
+                                            className="p-4 rounded-xl bg-amber-50/70 border border-amber-100 cursor-pointer hover:border-amber-300 transition-colors"
+                                        >
+                                            <p className="text-xs font-semibold text-amber-700">Repeat Emails</p>
+                                            <p className="text-2xl font-black text-amber-900 mt-1">{stats?.duplicate_emails_count ?? 0}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Email Drip & Cron Status */}
+                                <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <div>
+                                            <h3 className="text-sm font-bold text-slate-900">Automated Drip &amp; Cron Status</h3>
+                                            <p className="text-xs text-slate-400 mt-0.5">
+                                                Last cron run:{' '}
+                                                {stats?.drip_stats?.last_run_at ? (
+                                                    <span className="font-semibold text-emerald-600">
+                                                        {new Date(stats.drip_stats.last_run_at).toLocaleString('en-GB', {
+                                                            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                                                        })}
+                                                    </span>
+                                                ) : (
+                                                    <span className="font-semibold text-amber-600">Not recorded yet</span>
+                                                )}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={handleRunDrip}
+                                            disabled={runningDrip}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                                        >
+                                            <Zap size={13} /> {runningDrip ? 'Running…' : 'Run Drip Now'}
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-4 gap-2 text-center">
                                         {[
-                                            { label: 'Total Leads', value: stats?.total_leads ?? 0, color: '#4f46e5', bg: '#f5f7ff' },
-                                            { label: 'Captured Today', value: stats?.leads_today ?? 0, color: '#0ea5e9', bg: '#f0f9ff' },
-                                            { label: 'Last 7 Days', value: stats?.leads_this_week ?? 0, color: '#10b981', bg: '#f0fdf4' },
-                                        ].map((row, i) => (
-                                            <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-slate-100"
-                                                style={{ background: row.bg }}>
-                                                <span className="text-xs font-bold text-slate-600">{row.label}</span>
-                                                <span className="text-2xl font-black" style={{ color: row.color }}>{row.value}</span>
+                                            { label: 'Welcome', count: stats?.drip_stats?.welcome_sent ?? 0 },
+                                            { label: 'Day 2', count: stats?.drip_stats?.day2_sent ?? 0 },
+                                            { label: 'Day 5', count: stats?.drip_stats?.day5_sent ?? 0 },
+                                            { label: 'Day 7', count: stats?.drip_stats?.day7_sent ?? 0 },
+                                        ].map(d => (
+                                            <div key={d.label} className="p-3 rounded-xl bg-slate-50 border border-slate-200/70">
+                                                <p className="text-[11px] font-bold text-slate-500">{d.label}</p>
+                                                <p className="text-lg font-black text-slate-900 mt-0.5">{d.count}</p>
                                             </div>
                                         ))}
                                     </div>
+
+                                    {dripResult && (
+                                        <pre className="text-[11px] bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-700 whitespace-pre-wrap font-mono">
+                                            {dripResult}
+                                        </pre>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -1868,21 +2024,28 @@ function AdminDashboard() {
                     <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" onClick={() => setSelectedLead(null)} />
                     <div className="relative w-full sm:w-[420px] bg-white shadow-2xl flex flex-col h-full border-l border-slate-200 z-10">
                         {/* Drawer Header */}
-                        <div className="px-5 py-5 bg-gradient-to-br from-[#0B0F19] via-[#131B2E] to-[#1E1B4B] text-white flex items-center gap-3.5 shrink-0">
-                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold shrink-0 ring-2 ring-white/15 shadow-lg"
+                        <div className="px-5 py-5 bg-slate-50 border-b border-slate-200 flex items-center gap-3.5 shrink-0">
+                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg font-bold shrink-0 shadow-sm"
                                 style={{ background: getAvatarColor(selectedLead.name) }}>
                                 {(selectedLead.name || 'U')[0].toUpperCase()}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <h3 className="font-black text-base text-white truncate">{selectedLead.name || 'Unnamed Lead'}</h3>
-                                <p className="text-xs text-slate-300 mt-0.5">
+                                <div className="flex items-center gap-2">
+                                    <h3 className="font-black text-base text-slate-900 truncate">{selectedLead.name || 'Unnamed Lead'}</h3>
+                                    {selectedLead.is_duplicate && (
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                                            Duplicate
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-xs text-slate-500 mt-0.5">
                                     Added {new Date(selectedLead.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                     {' · '}
-                                    <span className="capitalize text-indigo-300 font-semibold">{selectedLead.source || 'direct'}</span>
+                                    <span className="text-indigo-600 font-semibold">{formatSourceLabel(selectedLead.source)}</span>
                                 </p>
                             </div>
                             <button onClick={() => setSelectedLead(null)}
-                                className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
+                                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-xl transition-colors">
                                 <X size={18} />
                             </button>
                         </div>
@@ -2069,16 +2232,31 @@ function AdminDashboard() {
                                 </p>
                             </div>
 
+                            {selectedLead.is_duplicate && selectedLead.email && (
+                                <button
+                                    onClick={() => {
+                                        const email = selectedLead.email;
+                                        setSelectedLead(null);
+                                        setSearch(email);
+                                        setDuplicatesOnly(false);
+                                        setView('leads');
+                                    }}
+                                    className="w-full py-2 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                                >
+                                    <Search size={13} /> View all submissions for {selectedLead.email}
+                                </button>
+                            )}
+
                             {/* Editable Email Composer */}
-                            <div className="bg-slate-900 rounded-2xl p-4 text-white space-y-3">
+                            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                                    <span className="text-xs font-bold text-indigo-700 flex items-center gap-1.5">
                                         <Send size={13} /> Send Direct Email
                                     </span>
                                     <select
                                         value={selectedTemplateId}
                                         onChange={(e) => setSelectedTemplateId(e.target.value)}
-                                        className="bg-slate-800 border border-slate-700 text-white rounded-lg px-2.5 py-1 text-xs font-semibold focus:outline-none"
+                                        className="bg-white border border-slate-200 text-slate-700 rounded-lg px-2.5 py-1 text-xs font-semibold focus:outline-none"
                                     >
                                         {EMAIL_TEMPLATES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
                                     </select>
@@ -2089,19 +2267,19 @@ function AdminDashboard() {
                                     value={emailSubject}
                                     onChange={e => setEmailSubject(e.target.value)}
                                     placeholder="Subject"
-                                    className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+                                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500"
                                 />
                                 <textarea
                                     value={emailBody}
                                     onChange={e => setEmailBody(e.target.value)}
                                     rows={4}
                                     placeholder="Write your message…"
-                                    className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 resize-none"
+                                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 resize-none"
                                 />
                                 <button
                                     onClick={() => handleSendEmail(selectedLead)}
                                     disabled={sendingEmail || !selectedLead.email}
-                                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
                                     <Send size={13} /> {sendingEmail ? 'Sending…' : 'Send Email'}
                                 </button>

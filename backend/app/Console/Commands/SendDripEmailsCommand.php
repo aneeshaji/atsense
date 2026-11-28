@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\ResumeLead;
+use App\Models\ActivityLog;
 use App\Services\PHPMailerService;
 use Carbon\Carbon;
 
@@ -40,14 +41,18 @@ class SendDripEmailsCommand extends Command
             ->where('created_at', '<=', $now->copy()->subHours(48))
             ->where('created_at', '>=', $now->copy()->subHours(120))
             ->whereNotNull('email')
-            ->get();
+            ->orderByDesc('created_at')
+            ->get()
+            ->unique(fn ($l) => strtolower(trim($l->email)));
 
+        $day2Sent = 0;
         $this->info("Found {$day2Candidates->count()} leads eligible for Day 2 Cover Letter drip.");
         foreach ($day2Candidates as $lead) {
             if (!$dryRun) {
                 $result = $mailer->sendCoverLetterNudgeEmail($lead->name ?: 'there', $lead->email);
                 if ($result['success']) {
                     $lead->update(['drip_day2_sent_at' => now()]);
+                    $day2Sent++;
                     $this->info("  ✓ Day 2 sent to: {$lead->email}");
                 } else {
                     $this->warn("  ✗ Day 2 failed for: {$lead->email}");
@@ -63,14 +68,18 @@ class SendDripEmailsCommand extends Command
             ->where('created_at', '<=', $now->copy()->subHours(120))
             ->where('created_at', '>=', $now->copy()->subHours(168))
             ->whereNotNull('email')
-            ->get();
+            ->orderByDesc('created_at')
+            ->get()
+            ->unique(fn ($l) => strtolower(trim($l->email)));
 
+        $day5Sent = 0;
         $this->info("Found {$day5Candidates->count()} leads eligible for Day 5 Interview Prep drip.");
         foreach ($day5Candidates as $lead) {
             if (!$dryRun) {
                 $result = $mailer->sendInterviewPrepNudgeEmail($lead->name ?: 'there', $lead->email);
                 if ($result['success']) {
                     $lead->update(['drip_day5_sent_at' => now()]);
+                    $day5Sent++;
                     $this->info("  ✓ Day 5 sent to: {$lead->email}");
                 } else {
                     $this->warn("  ✗ Day 5 failed for: {$lead->email}");
@@ -85,14 +94,18 @@ class SendDripEmailsCommand extends Command
             ->whereNull('drip_day7_sent_at')
             ->where('created_at', '<=', $now->copy()->subHours(168))
             ->whereNotNull('email')
-            ->get();
+            ->orderByDesc('created_at')
+            ->get()
+            ->unique(fn ($l) => strtolower(trim($l->email)));
 
+        $day7Sent = 0;
         $this->info("Found {$day7Candidates->count()} leads eligible for Day 7 LinkedIn drip.");
         foreach ($day7Candidates as $lead) {
             if (!$dryRun) {
                 $result = $mailer->sendLinkedInNudgeEmail($lead->name ?: 'there', $lead->email);
                 if ($result['success']) {
                     $lead->update(['drip_day7_sent_at' => now()]);
+                    $day7Sent++;
                     $this->info("  ✓ Day 7 sent to: {$lead->email}");
                 } else {
                     $this->warn("  ✗ Day 7 failed for: {$lead->email}");
@@ -100,6 +113,15 @@ class SendDripEmailsCommand extends Command
             } else {
                 $this->line("  [DRY-RUN] Would send Day 7 to: {$lead->email}");
             }
+        }
+
+        if (!$dryRun) {
+            ActivityLog::record(
+                'DRIP_CRON_RUN',
+                "Drip sequence completed: Day2={$day2Sent}, Day5={$day5Sent}, Day7={$day7Sent}.",
+                'info',
+                ['day2_sent' => $day2Sent, 'day5_sent' => $day5Sent, 'day7_sent' => $day7Sent]
+            );
         }
 
         $this->info("Drip email run completed.");
