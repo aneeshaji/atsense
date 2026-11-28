@@ -105,22 +105,58 @@ interface PaginatedLogs {
     to: number;
 }
 
-function MiniBarChart({ data }: { data: ChartPoint[] }) {
+const SOURCE_LABELS: Record<string, string> = {
+    import: 'Resume Import',
+    optimized: 'AI Optimized',
+    builder: 'Resume Builder',
+    export: 'PDF Export',
+    analysis: 'ATS Analysis',
+    breakdown_gate: 'Breakdown Gate',
+    exit_intent: 'Exit Intent',
+    grader: 'Free Grader',
+    contact_inquiry: 'Contact Enquiry',
+    newsletter_subscriber: 'Newsletter',
+    manual: 'Manual Entry',
+};
+
+const formatSourceLabel = (src?: string) => {
+    if (!src) return 'Direct';
+    const key = src.toLowerCase();
+    return SOURCE_LABELS[key] || src.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+};
+
+function MiniBarChart({ data, heightClass = 'h-24', showValues = false }: { data: ChartPoint[]; heightClass?: string; showValues?: boolean }) {
     const max = Math.max(...data.map(d => d.count), 1);
     return (
-        <div className="flex items-end gap-1.5 h-24 mt-2">
-            {data.map((d, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
-                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 shadow-lg">
-                        {d.date}: <span className="font-bold">{d.count}</span>
+        <div className={`flex items-end gap-2 ${heightClass} mt-2`}>
+            {data.map((d, i) => {
+                const pct = d.count === 0 ? 6 : Math.max(Math.round((d.count / max) * 100), 14);
+                return (
+                    <div key={i} className="flex-1 h-full flex flex-col items-center justify-end gap-1.5 group relative">
+                        <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 shadow-lg pointer-events-none">
+                            {d.date}: <span className="font-bold">{d.count}</span>
+                        </div>
+                        {showValues && (
+                            <span className={`text-[10px] font-bold leading-none ${d.count > 0 ? 'text-slate-700' : 'text-slate-300'}`}>
+                                {d.count}
+                            </span>
+                        )}
+                        <div className="w-full flex-1 flex items-end">
+                            <div
+                                className={`w-full rounded-t-md transition-all duration-500 ${
+                                    d.count > 0
+                                        ? 'bg-gradient-to-t from-indigo-600 to-indigo-400 group-hover:from-indigo-500 group-hover:to-violet-400 shadow-sm shadow-indigo-500/20'
+                                        : 'bg-slate-100 group-hover:bg-slate-200'
+                                }`}
+                                style={{ height: `${pct}%` }}
+                            />
+                        </div>
+                        <span className="text-[10px] font-medium text-slate-400 whitespace-nowrap leading-none">
+                            {d.date.split(' ')[1] || d.date}
+                        </span>
                     </div>
-                    <div
-                        className="w-full rounded-t-lg bg-gradient-to-t from-indigo-600 to-violet-400 transition-all duration-500 group-hover:from-indigo-500 group-hover:to-cyan-400"
-                        style={{ height: `${Math.max((d.count / max) * 100, 8)}%` }}
-                    />
-                    <span className="text-[10px] text-slate-400 whitespace-nowrap">{d.date.split(' ')[1] || d.date}</span>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }
@@ -785,123 +821,222 @@ function AdminDashboard() {
 
                     {/* ===== OVERVIEW ===== */}
                     {view === 'overview' && (
-                        <>
+                        <div className="space-y-5">
+                            {/* Top KPI Cards */}
                             <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
                                 {/* Total Leads */}
-                                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm col-span-1">
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                                            <Users size={17} />
+                                <div
+                                    onClick={() => setView('leads')}
+                                    className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group"
+                                >
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                            <Users size={18} />
                                         </div>
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">All Time</span>
+                                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
+                                            All Time
+                                        </span>
                                     </div>
-                                    <p className="text-3xl font-black text-slate-900 tracking-tight">{stats?.total_leads ?? 0}</p>
-                                    <p className="text-xs font-semibold text-slate-500 mt-1">Total Leads</p>
+                                    <p className="text-3xl font-black text-slate-900 tracking-tight leading-none">
+                                        {(stats?.total_leads ?? 0).toLocaleString()}
+                                    </p>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <p className="text-xs font-semibold text-slate-500">Total Leads</p>
+                                        <ArrowUpRight size={14} className="text-slate-300 group-hover:text-indigo-500 transition-colors" />
+                                    </div>
                                 </div>
 
-                                {/* Today */}
-                                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm col-span-1">
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                                            <Zap size={17} />
+                                {/* New Today */}
+                                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+                                            <Zap size={18} />
                                         </div>
-                                        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Today</span>
+                                        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                            Today
+                                        </span>
                                     </div>
-                                    <p className="text-3xl font-black text-slate-900 tracking-tight">{stats?.leads_today ?? 0}</p>
-                                    <p className="text-xs font-semibold text-slate-500 mt-1">New Leads</p>
+                                    <p className="text-3xl font-black text-slate-900 tracking-tight leading-none">
+                                        {stats?.leads_today ?? 0}
+                                    </p>
+                                    <p className="text-xs font-semibold text-slate-500 mt-2">Captured Today</p>
+                                </div>
+
+                                {/* Last 7 Days */}
+                                <div
+                                    onClick={() => setView('analytics')}
+                                    className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:border-violet-300 hover:shadow-md transition-all cursor-pointer group"
+                                >
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center text-violet-600 group-hover:bg-violet-600 group-hover:text-white transition-colors">
+                                            <TrendingUp size={18} />
+                                        </div>
+                                        <span className="text-[11px] font-bold text-violet-600 bg-violet-50 px-2.5 py-1 rounded-full">
+                                            7 Days
+                                        </span>
+                                    </div>
+                                    <p className="text-3xl font-black text-slate-900 tracking-tight leading-none">
+                                        {stats?.leads_this_week ?? 0}
+                                    </p>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <p className="text-xs font-semibold text-slate-500">Weekly Velocity</p>
+                                        <ArrowUpRight size={14} className="text-slate-300 group-hover:text-violet-500 transition-colors" />
+                                    </div>
                                 </div>
 
                                 {/* Enquiries */}
                                 <div
                                     onClick={() => setView('enquiries')}
-                                    className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm col-span-1 cursor-pointer hover:border-indigo-300 hover:shadow-md transition-all"
+                                    className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:border-sky-300 hover:shadow-md transition-all cursor-pointer group"
                                 >
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-                                            <Mail size={17} />
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 group-hover:bg-sky-600 group-hover:text-white transition-colors">
+                                            <Mail size={18} />
                                         </div>
-                                        {(stats?.new_enquiries ?? 0) > 0
-                                            ? <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">{stats?.new_enquiries} New</span>
-                                            : <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inbox</span>
-                                        }
+                                        {(stats?.new_enquiries ?? 0) > 0 ? (
+                                            <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
+                                                {stats?.new_enquiries} New
+                                            </span>
+                                        ) : (
+                                            <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
+                                                Inbox
+                                            </span>
+                                        )}
                                     </div>
-                                    <p className="text-3xl font-black text-slate-900 tracking-tight">{stats?.total_enquiries ?? 0}</p>
-                                    <p className="text-xs font-semibold text-slate-500 mt-1">Enquiries</p>
-                                </div>
-
-                                {/* Trend chart */}
-                                <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm col-span-2 xl:col-span-1">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className="text-xs font-bold text-slate-500">7-Day Trend</span>
-                                        <TrendingUp size={14} className="text-indigo-500" />
+                                    <p className="text-3xl font-black text-slate-900 tracking-tight leading-none">
+                                        {stats?.total_enquiries ?? 0}
+                                    </p>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <p className="text-xs font-semibold text-slate-500">Enquiries & Newsletter</p>
+                                        <ArrowUpRight size={14} className="text-slate-300 group-hover:text-sky-500 transition-colors" />
                                     </div>
-                                    {stats?.chart_data && <MiniBarChart data={stats.chart_data} />}
                                 </div>
                             </div>
 
+                            {/* Middle Row: 7-Day Activity Chart + Lead Sources */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                                <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-sm">
-                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Lead Sources</h3>
+                                <div className="lg:col-span-2 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div>
+                                            <h3 className="text-sm font-bold text-slate-900">7-Day Lead Activity</h3>
+                                            <p className="text-xs text-slate-400 mt-0.5">Daily captures across all channels</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full">
+                                                {stats?.leads_this_week ?? 0} this week
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {stats?.chart_data && (
+                                        <MiniBarChart data={stats.chart_data} heightClass="h-44" showValues />
+                                    )}
+                                </div>
+
+                                <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs">
+                                    <div className="flex items-center justify-between mb-5">
+                                        <div>
+                                            <h3 className="text-sm font-bold text-slate-900">Lead Sources</h3>
+                                            <p className="text-xs text-slate-400 mt-0.5">Distribution by channel</p>
+                                        </div>
+                                        <BarChart2 size={16} className="text-slate-300" />
+                                    </div>
                                     <div className="space-y-4">
                                         {stats?.sources?.length ? stats.sources.map((s, i) => {
                                             const pct = Math.round((s.count / (stats.total_leads || 1)) * 100);
-                                            const colors = ['#6366f1', '#10b981', '#f59e0b', '#ec4899'];
+                                            const colors = ['#6366f1', '#10b981', '#0ea5e9', '#f59e0b', '#ec4899'];
                                             return (
                                                 <div key={i}>
-                                                    <div className="flex justify-between text-xs mb-1.5 font-bold">
-                                                        <span className="capitalize text-slate-700">{s.source || 'Direct'}</span>
-                                                        <span className="text-slate-500">{s.count} ({pct}%)</span>
+                                                    <div className="flex items-center justify-between text-xs mb-1.5">
+                                                        <span className="font-semibold text-slate-700">{formatSourceLabel(s.source)}</span>
+                                                        <span className="font-bold text-slate-500 tabular-nums">
+                                                            {s.count} <span className="text-slate-400 font-medium">({pct}%)</span>
+                                                        </span>
                                                     </div>
                                                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                                                        <div className="h-full rounded-full transition-all duration-700"
-                                                            style={{ width: `${pct}%`, backgroundColor: colors[i % colors.length] }} />
+                                                        <div
+                                                            className="h-full rounded-full transition-all duration-700"
+                                                            style={{ width: `${Math.max(pct, s.count > 0 ? 3 : 0)}%`, backgroundColor: colors[i % colors.length] }}
+                                                        />
                                                     </div>
                                                 </div>
                                             );
                                         }) : <p className="text-xs text-slate-400">No source data yet.</p>}
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="lg:col-span-2 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-sm">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Recent Leads</h3>
-                                        <button onClick={() => setView('leads')}
-                                            className="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1">
+                            {/* Bottom Row: Recent Leads */}
+                            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                                <div className="px-5 sm:px-6 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-900">Recent Leads</h3>
+                                        <p className="text-xs text-slate-400 mt-0.5">Latest candidate uploads and enquiries</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setShowAddLead(true)}
+                                            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors"
+                                        >
+                                            <UserPlus size={13} className="text-indigo-600" /> Add Lead
+                                        </button>
+                                        <button
+                                            onClick={() => setView('leads')}
+                                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                                        >
                                             Manage All Leads <ArrowUpRight size={13} />
                                         </button>
                                     </div>
-                                    <div className="divide-y divide-slate-100">
-                                        {leads?.data?.slice(0, 6).map((l) => (
-                                            <div key={l.id}
-                                                className="flex items-center gap-3 py-3 hover:bg-slate-50 -mx-2 px-2 rounded-xl transition-colors cursor-pointer"
-                                                onClick={() => { setView('leads'); setSelectedLead(l); }}>
-                                                <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                                                    style={{ background: getAvatarColor(l.name) }}>
-                                                    {(l.name || 'U')[0].toUpperCase()}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-bold text-slate-900 truncate">{l.name || 'Unnamed Lead'}</p>
-                                                    <p className="text-xs text-slate-500 truncate">{l.email || l.phone || '—'}</p>
-                                                </div>
-                                                <span className={`hidden sm:inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getStatusCfg(l.status).color}`}>
-                                                    {getStatusCfg(l.status).label}
-                                                </span>
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); setPreviewLead(l); }}
-                                                    className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg shrink-0"
-                                                    title="Preview Resume"
-                                                >
-                                                    <Eye size={15} />
-                                                </button>
+                                </div>
+
+                                <div className="divide-y divide-slate-100">
+                                    {leads?.data?.slice(0, 6).map((l) => (
+                                        <div
+                                            key={l.id}
+                                            className="flex items-center gap-3.5 px-5 sm:px-6 py-3.5 hover:bg-slate-50/80 transition-colors cursor-pointer"
+                                            onClick={() => { setView('leads'); setSelectedLead(l); }}
+                                        >
+                                            <div
+                                                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs"
+                                                style={{ background: getAvatarColor(l.name) }}
+                                            >
+                                                {(l.name || 'U')[0].toUpperCase()}
                                             </div>
-                                        ))}
-                                        {!leads?.data?.length && (
-                                            <p className="text-center py-8 text-xs text-slate-400">No leads captured yet.</p>
-                                        )}
-                                    </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-sm font-bold text-slate-900 truncate">{l.name || 'Unnamed Lead'}</p>
+                                                    {l.is_duplicate && (
+                                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                                                            Duplicate
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-slate-500 truncate">{l.email || l.phone || '—'}</p>
+                                            </div>
+                                            <span className="hidden md:inline-flex px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 text-slate-600 shrink-0">
+                                                {formatSourceLabel(l.source)}
+                                            </span>
+                                            <span className="hidden lg:inline-block text-xs text-slate-400 font-medium whitespace-nowrap shrink-0">
+                                                {new Date(l.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                                            </span>
+                                            <span className={`hidden sm:inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-bold border shrink-0 ${getStatusCfg(l.status).color}`}>
+                                                {getStatusCfg(l.status).label}
+                                            </span>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setPreviewLead(l); }}
+                                                className="p-2 text-indigo-600 bg-indigo-50/60 hover:bg-indigo-100 rounded-lg shrink-0 transition-colors"
+                                                title="Preview Resume"
+                                            >
+                                                <Eye size={15} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {!leads?.data?.length && (
+                                        <p className="text-center py-10 text-xs text-slate-400">No leads captured yet.</p>
+                                    )}
                                 </div>
                             </div>
-                        </>
+                        </div>
                     )}
 
                     {/* ===== LEADS ===== */}
